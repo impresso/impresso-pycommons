@@ -1,5 +1,7 @@
 ## How to use olive_boxes.py
 
+`from impresso_commons.images import olive_boxes as boxes`
+
 1) For each page, call the `get_scale_factor`     
 2) For each box of the page, call the function `compute_box`
 
