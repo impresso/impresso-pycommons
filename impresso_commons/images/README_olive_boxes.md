@@ -280,7 +280,7 @@ What's present in the folder:
 
 `<Primitive BOX="12 453 1378 519" ID="Ar0010000" SEQ_NO="0" TOC_ENTRY_ID="1" DEPTH_LEVEL="1">` => `12 453 1366 66`
 
-`http://dhlabsrv17.epfl.ch/iiif_impresso/LCE-1868-08-02-a-p0001/12 453 1366 66/full/0/default.jpg`
+`http://dhlabsrv17.epfl.ch/iiif_impresso/LCE-1868-08-02-a-p0001/12,453,1366,66/full/0/default.jpg`
 
 => looks all ok
 

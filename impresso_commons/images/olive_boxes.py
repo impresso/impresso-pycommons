@@ -76,24 +76,24 @@ def compute_box(scale_factor, input_box):
     return " ".join([str(x), str(y), str(w), str(h)])
 
 
-def convert_box(box):
+def convert_box(input_box):
     """
     Convert a box with [x y x y] coordinates to [x y w h]
 
-    :param box  : box with 4 coordinates, x and y upper left and lower right
-    :type box   : str
+    :param input_box  : box with 4 coordinates, x and y upper left and lower right
+    :type input_box   : str
     :return     : box with 4 coordinates, x and y upper left, width and height
     :rtype:     : str
     """
     try:
-        elems = box.split(" ")
+        elems = input_box.split(" ")
     except ValueError:
         logger.info(f'Invalid box format: {input_box}')
         return
 
-    w = (elems[2] - elems[0])
-    h = (elems[3] - elems[1])
-    return elems[0].join(elems[1], w, h)
+    w = (int(elems[2]) - int(elems[0]))
+    h = (int(elems[3]) - int(elems[1]))
+    return ",".join([elems[0], elems[1], str(w), str(h)])
 
 
 def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source_name):
@@ -239,4 +239,6 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    # test()
+    box = "1096 454 1200 470"
+    print(convert_box(box))
