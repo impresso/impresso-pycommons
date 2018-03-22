@@ -13,7 +13,7 @@ With `pip`:
 
 With `pipenv`:
 
-    pipenv install install https://<github_user>:<github_pwd>@github.com/impresso/impresso-pycommons/archive/master.zip
+    pipenv install -e git+ssh://git@github.com/impresso/impresso-pycommons.git#egg=impresso_commons
 
 
 ## Usage
