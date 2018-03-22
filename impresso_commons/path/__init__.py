@@ -112,3 +112,106 @@ def detect_issues(base_dir):
                         )
 
     return detected_issues
+
+
+def detect_canonical_issues(base_dir, newspapers):
+    """Parse a directory structure and detect newspaper issues to be imported.
+
+    NB: invalid directories are skipped, and a warning message is logged.
+
+    :param base_dir     : the root of the directory structure
+    :type base_dir      : IssueDir
+    :param newspapers   : the list of newspapers to consider (acronym blank separated)
+    :type newspapers    : str
+    :return             : list of `IssueDir` instances
+    :rtype              : list
+    """
+    detected_issues = []
+    dir_path, dirs, files = next(os.walk(base_dir))
+
+    # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
+    journal_dirs = [d for d in dirs if d.split("_")[-1] in newspapers]
+
+    for journal in journal_dirs:
+        journal_path = os.path.join(base_dir, journal)
+        journal = journal.split("_")[-1] if "_" in journal else journal
+        dir_path, year_dirs, files = next(os.walk(journal_path))
+        # year_dirs = [d for d in dirs if len(d) == 4]
+
+        for year in year_dirs:
+            year_path = os.path.join(journal_path, year)
+            dir_path, month_dirs, files = next(os.walk(year_path))
+
+            for month in month_dirs:
+                month_path = os.path.join(year_path, month)
+                dir_path, day_dirs, files = next(os.walk(month_path))
+
+                for day in day_dirs:
+                    day_path = os.path.join(month_path, day)
+                    dir_path, edition_dirs, files = next(os.walk(day_path))
+
+                    for edition in edition_dirs:
+                        edition_path = os.path.join(day_path, edition)
+                        try:
+                            detected_issue = IssueDir(
+                                journal,
+                                date(int(year), int(month), int(day)),
+                                edition,
+                                edition_path
+                            )
+                            logger.debug("Found an issue: {}".format(
+                                str(detected_issue))
+                            )
+                            detected_issues.append(detected_issue)
+                        except ValueError:
+                            logger.warning(
+                                "Path {} is not a valid issue directory".format(
+                                    edition_path
+                                )
+                            )
+    return detected_issues
+
+
+def detect_journal_issues(base_dir, newspapers):
+    """Parse a directory structure and detect newspaper issues to be imported.
+
+    :param base_dir     : the root of the directory structure
+    :type base_dir      : IssueDir
+    :param newspapers   : the list of newspapers to consider (acronym blank separated)
+    :type newspapers    : str
+    :return             : list of `IssueDir` instances
+    :rtype              : list
+    """
+    detected_issues = []
+    dir_path, dirs, files = next(os.walk(base_dir))
+    journal_dirs = [d for d in dirs if d in newspapers]
+
+    for journal in journal_dirs:
+        journal_path = os.path.join(base_dir, journal)
+        journal = journal.split("_")[-1] if "_" in journal else journal
+        dir_path, year_dirs, files = next(os.walk(journal_path))
+
+        for year in year_dirs:
+            year_path = os.path.join(journal_path, year)
+            dir_path, month_dirs, files = next(os.walk(year_path))
+
+            for month in month_dirs:
+                month_path = os.path.join(year_path, month)
+                dir_path, day_dirs, files = next(os.walk(month_path))
+
+                for day in day_dirs:
+                    day_path = os.path.join(month_path, day)
+                    # concerning `edition="a"`: for now, no cases of newspapers
+                    # published more than once a day in Olive format (but it
+                    # may come later on)
+                    detected_issue = IssueDir(
+                        journal,
+                        date(int(year), int(month), int(day)),
+                        'a',
+                        day_path
+                    )
+                    logger.debug("Found an issue: {}".format(
+                        str(detected_issue))
+                    )
+                    detected_issues.append(detected_issue)
+    return detected_issues
