@@ -151,13 +151,13 @@ def detect_canonical_issues(base_dir, newspapers):
                     dir_path, edition_dirs, files = next(os.walk(day_path))
 
                     for edition in edition_dirs:
-                        edition_path = os.path.join(day_path, day)
+                        edition_path = os.path.join(day_path, edition)
                         try:
                             detected_issue = IssueDir(
                                 journal,
                                 date(int(year), int(month), int(day)),
                                 edition,
-                                day_path
+                                edition_path
                             )
                             logger.debug("Found an issue: {}".format(
                                 str(detected_issue))
@@ -174,7 +174,7 @@ def detect_canonical_issues(base_dir, newspapers):
 
 def detect_journal_issues(base_dir, newspapers):
     """Parse a directory structure and detect newspaper issues to be imported.
-    
+
     :param base_dir     : the root of the directory structure
     :type base_dir      : IssueDir
     :param newspapers   : the list of newspapers to consider (acronym blank separated)
