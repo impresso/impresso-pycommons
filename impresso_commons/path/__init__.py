@@ -209,11 +209,11 @@ def detect_journal_issues(base_dir, newspapers):
     :return: list of `IssueDir` instances
     :rtype: list
     """
-    newspapers = [journal.split("_")[-1] if "_" in journal else journal for journal in newspapers]
+    #newspapers = [journal.split("_")[-1] if "_" in journal else journal for journal in newspapers]
 
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-    journal_dirs = [d for d in dirs if d == newspapers]
+    journal_dirs = [d for d in dirs if d in newspapers]  # in to be replaced by '==' for checks
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
