@@ -3,7 +3,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 
 
 DESCRIPTION = "Python module with bits of code (objects, functions)\
@@ -16,6 +16,6 @@ setup(
     url='https://github.com/impresso/impresso-pycommons',
     version=VERSION,
     packages=find_packages(),
-    long_description=DESCRIPTION,
+    long_description=DESCRIPTION, install_requires=['dask']
     # install_requires=[]
 )
