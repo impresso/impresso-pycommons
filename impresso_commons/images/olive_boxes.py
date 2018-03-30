@@ -10,7 +10,7 @@ import os
 import zipfile
 import numpy as np
 
-from impresso_commons.images import utils
+from impresso_commons.images import img_utils
 
 __author__ = "maudehrmann"
 
@@ -21,12 +21,12 @@ logger = logging.getLogger(__name__)
 def get_iiif_url(page_id, box):
     """ Returns impresso iiif url given a page id and a box
 
-    :param page_id  : impresso page id, e.g. EXP-1930-06-10-a-p0001
-    :type page_id   : str
-    :param box      : iiif box (x, y, w, h)
-    :type box       : str (4 coordinate values blank separated)
-    :return         : iiif url of the box
-    :rtype          : str
+    :param page_id: impresso page id, e.g. EXP-1930-06-10-a-p0001
+    :type page_id: str
+    :param box: iiif box (x, y, w, h)
+    :type box: str (4 coordinate values blank separated)
+    :return: iiif url of the box
+    :rtype: str
     """
     base = "http://dhlabsrv17.epfl.ch/iiif_impresso"
     suffix = "full/0/default.jpg"
@@ -36,12 +36,12 @@ def get_iiif_url(page_id, box):
 def compute_scale_factor(img_source_path, img_dest_path):
     """ Computes x scale factor bewteen 2 images
 
-    :param img_source_path  : the source image
-    :type img_source_path   : full path to the image
-    :param img_dest_path    : the destination image
-    :type img_dest_path     : full path to the image
-    :return                 : scale factor
-    :rtype:                 : float
+    :param img_source_path: the source image
+    :type img_source_path: full path to the image
+    :param img_dest_path: the destination image
+    :type img_dest_path: full path to the image
+    :return: scale factor
+    :rtype:float
 
     """
 
@@ -56,12 +56,12 @@ def compute_box(scale_factor, input_box):
     """
     Compute IIIF box coordinates of input_box relative to scale_factor.
 
-    :param scale_factor : ratio between 2 images with different dimensions
-    :type scale_factor  : float
-    :param input_box    : string with 4 values separated by spaces
-    :type input_box     : str
-    :return             : new box coordinates
-    :rtype:             : str
+    :param scale_factor: ratio between 2 images with different dimensions
+    :type scale_factor: float
+    :param input_box: string with 4 values separated by spaces
+    :type input_box: str
+    :return: new box coordinates
+    :rtype: str
     """
     try:
         elems = input_box.split(" ")
@@ -80,10 +80,10 @@ def convert_box(input_box):
     """
     Convert a box with [x y x y] coordinates to [x y w h]
 
-    :param input_box  : box with 4 coordinates, x and y upper left and lower right
-    :type input_box   : str
-    :return     : box with 4 coordinates, x and y upper left, width and height
-    :rtype:     : str
+    :param input_box: box with 4 coordinates, x and y upper left and lower right
+    :type input_box: str
+    :return: box with 4 coordinates, x and y upper left, width and height
+    :rtype: str
     """
     try:
         elems = input_box.split(" ")
@@ -100,17 +100,17 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     """
     Returns the scale factor in Olive context, given a strategy to choose the source image.
 
-    :param issue_dir_path   : the path of the issue
-    :type  issue_dir_path   : str
-    :param archive          : the zip archive
-    :type  archive          : zipfile.ZipFile
-    :param page_xml         : the xml handler of the page
-    :type page_xml          : bytes
-    :param box_strategy     : the box strategy such as found in the info.txt from jp2 folder
-    :type box_strategy      : str
-    :param img_source_name  : as found in the info.txt from jp2 folder
-    :return:                : the hopefully correct scale factor
-    :rtype                  : float
+    :param issue_dir_path: the path of the issue
+    :type  issue_dir_path: str
+    :param archive: the zip archive
+    :type  archive: zipfile.ZipFile
+    :param page_xml: the xml handler of the page
+    :type page_xml: bytes
+    :param box_strategy: the box strategy such as found in the info.txt from jp2 folder
+    :type box_strategy: str
+    :param img_source_name: as found in the info.txt from jp2 folder
+    :return: the hopefully correct scale factor
+    :rtype: float
 
     Olive box coordinates were computed according to an image source which we have to identify.
     Image format coverage is different from issue to issue, and we have to devise strategies.
@@ -145,7 +145,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     page_root = page_soup.find("xmd-page")
     page_number = page_root.meta["page_no"]
 
-    if box_strategy == utils.BoxStrategy.tif.name:
+    if box_strategy == img_utils.BoxStrategy.tif.name:
         for f in page_root.datafiles.find_all('files'):
             if f['type'] == 'PAGE_IMG' and f['present'] == "1":
                 source_res = f['xresolution_dpi']
@@ -158,7 +158,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
                         " in {issue_dir_path}, page {page_number}")
             return None
 
-    elif box_strategy == utils.BoxStrategy.png_highest.name:
+    elif box_strategy == img_utils.BoxStrategy.png_highest.name:
         if "_" not in img_source_name:
             logger.info(f"Not valid png filename {img_source_name}")
             return None
@@ -172,11 +172,11 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
                         " in {issue_dir_path}, page {page_number}")
             return None
 
-    elif box_strategy == utils.BoxStrategy.png_uniq.name:
+    elif box_strategy == img_utils.BoxStrategy.png_uniq.name:
         # TODO if needed
         logger.info("Finally found a case of png_uniq, which is not ready yet")
 
-    elif box_strategy == utils.BoxStrategy.jpg_uniq.name:
+    elif box_strategy == img_utils.BoxStrategy.jpg_uniq.name:
         # get the x dimension of the unique jpg (from which jp2 was acquired)
         # and compare with olive's one
         img_data = archive.read(img_source_name)
@@ -202,7 +202,7 @@ def test():
     archive = os.path.join(base_dir, "TEST/1900/01/10/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, data, utils.BoxStrategy.tif.name, None)
+    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.tif.name, None)
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("GDL-1900-01-10-a-p0001", newbox)
     print("\nCASE: jpj uniq - word 'Centenaire'")
@@ -215,7 +215,7 @@ def test():
     archive = os.path.join(base_dir, "TEST/1900/01/11/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, data, utils.BoxStrategy.png_highest.name, "Img/Pg001_180.png")
+    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.png_highest.name, "Img/Pg001_180.png")
     print(sf)
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("EXP-1889-07-01-a-p0001", newbox)
@@ -229,7 +229,7 @@ def test():
     archive = os.path.join(base_dir, "TEST/1900/01/12/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg")
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("LCE-1868-08-02-a-p0001", newbox)
     print("\nCASE: jpj uniq - word 'hambourg'")
