@@ -4,6 +4,7 @@ import os
 import logging
 from datetime import date
 from collections import namedtuple
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,32 @@ IssueDir = namedtuple(
         'path'
     ]
 )
+
+
+page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
+
+
+def pair_issue(issue_list1, issue_list2):
+    """ Associates pairs of issues originating from original and canonical repositories.
+
+    :param issue_list1: list of IssueDir
+    :type issue_list1: array
+    :param issue_list2: list of IssueDir
+    :type issue_list2: array
+    :return: list containing tuples of issue pairs [(issue1, issue2), (...)]
+    :rtype: list
+    """
+    dict1 = {}
+    pairs = []
+    for i in issue_list1:
+        s_i = "-".join([i[0], str(i[1]), i[2]])
+        dict1[s_i] = i
+
+    for j in issue_list2:
+        s_j = "-".join([j[0], str(j[1]), j[2]])
+        if s_j in dict1:
+            pairs.append((dict1[s_j], j))
+    return pairs
 
 
 def canonical_path(dir, name=None, extension=None, path_type="file"):
@@ -119,18 +146,18 @@ def detect_canonical_issues(base_dir, newspapers):
 
     NB: invalid directories are skipped, and a warning message is logged.
 
-    :param base_dir     : the root of the directory structure
-    :type base_dir      : IssueDir
-    :param newspapers   : the list of newspapers to consider (acronym blank separated)
-    :type newspapers    : str
-    :return             : list of `IssueDir` instances
-    :rtype              : list
+    :param base_dir: the root of the directory structure
+    :type base_dir: IssueDir
+    :param newspapers: the list of newspapers to consider (acronym blank separated)
+    :type newspapers: str
+    :return: list of `IssueDir` instances
+    :rtype: list
     """
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
 
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
-    journal_dirs = [d for d in dirs if d.split("_")[-1] in newspapers]
+    journal_dirs = [d for d in dirs if d.split("_")[-1] == newspapers]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -175,16 +202,16 @@ def detect_canonical_issues(base_dir, newspapers):
 def detect_journal_issues(base_dir, newspapers):
     """Parse a directory structure and detect newspaper issues to be imported.
 
-    :param base_dir     : the root of the directory structure
-    :type base_dir      : IssueDir
-    :param newspapers   : the list of newspapers to consider (acronym blank separated)
-    :type newspapers    : str
-    :return             : list of `IssueDir` instances
-    :rtype              : list
+    :param base_dir: the root of the directory structure
+    :type base_dir: IssueDir
+    :param newspapers: the list of newspapers to consider (acronym blank separated)
+    :type newspapers: str
+    :return: list of `IssueDir` instances
+    :rtype: list
     """
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-    journal_dirs = [d for d in dirs if d in newspapers]
+    journal_dirs = [d for d in dirs if d == newspapers]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -215,3 +242,21 @@ def detect_journal_issues(base_dir, newspapers):
                     )
                     detected_issues.append(detected_issue)
     return detected_issues
+
+
+def check_filenaming(file_basename):
+    """ Checks whether a filename complies with our naming convention (GDL-1900-01-10-a-p0001)
+
+    :param file_basename: page file (txt or image)
+    :type file_basename: str
+    """
+
+    return page_pattern.match(file_basename)
+
+
+def get_issueshortpath(issuedir):
+    """ Returns short version of issue dir path"""
+
+    path = issuedir.path
+    return path[path.index(issuedir.journal):]
+
