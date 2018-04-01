@@ -112,14 +112,21 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     :return: the hopefully correct scale factor
     :rtype: float
 
+    Background information
+    ======================
+
     Olive box coordinates were computed according to an image source which we have to identify.
     Image format coverage is different from issue to issue, and we have to devise strategies.
 
-    Case 1: tif. The tif is present and is the file from which the jp2 was converted.
+    Case 1: tif
+    -----------
+    The tif is present and is the file from which the jp2 was converted.
     Dest: Tif dimensions can therfore be used as jp2 dimensions, no need to read the jp2 file.
     Source: Image source dimension is present in the page.xml (normally).
 
-    Case 2: several png. In this case the jp2 was acquired using the png with the highest dimension.
+    Case 2: several png
+    -------------------
+    In this case the jp2 was acquired using the png with the highest dimension.
     Dest: It looks that in case of several png, Olive also took the highest for the OCR. It is therefore
     possible to rely on the resolution indicated in the page xml, which should be the same as our jp2.
     N.B.: the page width and heigth indicated in the xml do not correspond (usually) to the highest
@@ -129,13 +136,16 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     Source: the highest png
     Here source and dest dimension are equals, the function returns 1.
 
-    Case 3: one png only. To be checked if it happens.
+    Case 3: one png only
+    --------------------
+    To be checked if it happens.
     In this case, there is no choice and Olive OCR and JP2 acquisition should be from the same source
     => scale factor of 1.
     Here we do an additional check to see if the page_width|height are the same as the image ones.
     The only danger is if Olive used another image file and did not provide it.
 
     Case 4: one jpg only.
+    --------------------
     Same as Case 3, scale factor of 1.
     Here we do an additional check to see if the page_width|height are the same as the image ones.
     (there is only one image and things should fit, not like in case 2)
