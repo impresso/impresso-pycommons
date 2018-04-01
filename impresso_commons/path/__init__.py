@@ -213,7 +213,7 @@ def detect_journal_issues(base_dir, newspapers):
 
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-    journal_dirs = [d for d in dirs if d in newspapers]  # in to be replaced by '==' for checks
+    journal_dirs = [d for d in dirs if d in newspapers]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
