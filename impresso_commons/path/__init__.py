@@ -221,32 +221,35 @@ def detect_journal_issues(base_dir, newspapers):
         dir_path, year_dirs, files = next(os.walk(journal_path))
 
         for year in year_dirs:
-            year_path = os.path.join(journal_path, year)
-            dir_path, month_dirs, files = next(os.walk(year_path))
+            if "_" not in year:
+                year_path = os.path.join(journal_path, year)
+                dir_path, month_dirs, files = next(os.walk(year_path))
 
-            for month in month_dirs:
-                month_path = os.path.join(year_path, month)
-                dir_path, day_dirs, files = next(os.walk(month_path))
+                for month in month_dirs:
+                    if "_" not in month:
+                        month_path = os.path.join(year_path, month)
+                        dir_path, day_dirs, files = next(os.walk(month_path))
 
-                for day in day_dirs:
-                    day_path = os.path.join(month_path, day)
-                    print(day_path)
-                    print(year)
-                    print(month)
-                    print(day)
-                    # concerning `edition="a"`: for now, no cases of newspapers
-                    # published more than once a day in Olive format (but it
-                    # may come later on)
-                    detected_issue = IssueDir(
-                        journal,
-                        date(int(year), int(month), int(day)),
-                        'a',
-                        day_path
-                    )
-                    logger.debug("Found an issue: {}".format(
-                        str(detected_issue))
-                    )
-                    detected_issues.append(detected_issue)
+                        for day in day_dirs:
+                            if "_" not in day:
+                                day_path = os.path.join(month_path, day)
+                                #print(day_path)
+                                #print(year)
+                                #print(month)
+                                #print(day)
+                                # concerning `edition="a"`: for now, no cases of newspapers
+                                # published more than once a day in Olive format (but it
+                                # may come later on)
+                                detected_issue = IssueDir(
+                                    journal,
+                                    date(int(year), int(month), int(day)),
+                                    'a',
+                                    day_path
+                                )
+                                logger.debug("Found an issue: {}".format(
+                                    str(detected_issue))
+                                )
+                                detected_issues.append(detected_issue)
     return detected_issues
 
 
