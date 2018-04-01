@@ -230,6 +230,10 @@ def detect_journal_issues(base_dir, newspapers):
 
                 for day in day_dirs:
                     day_path = os.path.join(month_path, day)
+                    print(day_path)
+                    print(year)
+                    print(month)
+                    print(day)
                     # concerning `edition="a"`: for now, no cases of newspapers
                     # published more than once a day in Olive format (but it
                     # may come later on)
