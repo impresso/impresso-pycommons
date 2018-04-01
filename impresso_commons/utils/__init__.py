@@ -28,20 +28,3 @@ def executetask(tasks, parallel_execution):
         else:
             result = compute(*tasks, get=dask.get)
     return result
-
-
-def init_logger(logger, log_level, log_file):
-    """Initialise the logger."""
-    logger.setLevel(log_level)
-
-    if log_file is not None:
-        handler = logging.FileHandler(filename=log_file, mode='w')
-    else:
-        handler = logging.StreamHandler()
-
-    formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.info("Logger successfully initialised")
