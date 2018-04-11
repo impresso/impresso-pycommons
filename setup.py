@@ -1,9 +1,9 @@
 """Config for Pypi."""
 
-import os
 from setuptools import setup, find_packages
+from impresso_commons import __version__
 
-VERSION = "0.1.3"
+VERSION = __version__
 
 
 DESCRIPTION = "Python module with bits of code (objects, functions)\
