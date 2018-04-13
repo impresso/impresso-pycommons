@@ -3,6 +3,7 @@
 import os
 import logging
 from datetime import date
+from smart_open import s3_iter_bucket
 from collections import namedtuple
 import re
 
@@ -22,7 +23,7 @@ IssueDir = namedtuple(
 KNOWN_JOURNALS = [
     "BDC",
     "CDV",
-    "DLE",
+    "DLE",  
     "EDA",
     "EXP",
     "IMP",
@@ -168,23 +169,44 @@ def detect_issues(base_dir, journal_filter=None):
     return detected_issues
 
 
-def detect_issues_s3(input_bucket, journal_filter=None):
+def s3_detect_issues(input_bucket, prefix=None):
     """
     Detect issues stored in an S3 drive/bucket.
 
-    Return a path to the key with issue.json,
-    like "s3://canonical-json/GDL-1900-01-02-a-issue.json"
+    The path in `issue.path`is just the key name.
 
-    Use something like:
-    ```
-    for key, content in s3_iter_bucket(
-        bucket,
-        prefix='foo/',
-        accept_key=lambda key: key.endswith('issue.json')
-    ):
-    ```
+    Returns a list of `IssueDir` instances.
     """
-    pass
+    def _key_to_issue(key):
+        """Instantiate an IssueDir from a (canonical) key name."""
+        name_no_prefix = key.name.split('/')[-1]
+        canon_name = name_no_prefix.replace("-issue.json", "")
+        journal, year, month, day, edition = canon_name.split('-')
+        path = key.name
+        return IssueDir(
+            journal,
+            date(int(year), int(month), int(day)),
+            edition,
+            path
+        )
+
+    if prefix is None:
+        return [
+            _key_to_issue(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                accept_key=lambda key: key.endswith('issue.json')
+            )
+        ]
+    else:
+        return [
+            _key_to_issue(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                prefix=prefix,
+                accept_key=lambda key: key.endswith('issue.json')
+            )
+        ]
 
 
 def detect_canonical_issues(base_dir, newspapers):

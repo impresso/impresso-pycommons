@@ -21,3 +21,4 @@ dask = {extras = ["complete"]}
 jupyter = "*"
 ipython = "*"
 ipdb = "*"
+isort = "*"
