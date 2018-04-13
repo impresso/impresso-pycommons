@@ -12,6 +12,8 @@ python_version = "3.5"
 
 [packages]
 
+smart-open = "*"
+dask = {extras = ["complete"]}
 
 
 [dev-packages]
