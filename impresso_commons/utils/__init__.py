@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# coding: utf-8 
-# created on 2018.03.27 using PyCharm 
+# coding: utf-8
+# created on 2018.03.27 using PyCharm
 # project impresso-image-acquisition
 
 

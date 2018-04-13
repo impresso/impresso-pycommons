@@ -16,6 +16,11 @@ setup(
     url='https://github.com/impresso/impresso-pycommons',
     version=VERSION,
     packages=find_packages(),
-    long_description=DESCRIPTION, install_requires=['dask']
+    long_description=DESCRIPTION,
+    install_requires=[
+        'dask',
+        'boto',
+        'bs4'
+    ]
     # install_requires=[]
 )

@@ -44,8 +44,6 @@ KNOWN_JOURNALS = [
     "LNQ",
 ]
 
-page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
-
 
 def pair_issue(issue_list1, issue_list2):
     """ Associates pairs of issues originating from original and canonical repositories.
@@ -170,6 +168,25 @@ def detect_issues(base_dir, journal_filter=None):
     return detected_issues
 
 
+def detect_issues_s3(input_bucket, journal_filter=None):
+    """
+    Detect issues stored in an S3 drive/bucket.
+
+    Return a path to the key with issue.json,
+    like "s3://canonical-json/GDL-1900-01-02-a-issue.json"
+
+    Use something like:
+    ```
+    for key, content in s3_iter_bucket(
+        bucket,
+        prefix='foo/',
+        accept_key=lambda key: key.endswith('issue.json')
+    ):
+    ```
+    """
+    pass
+
+
 def detect_canonical_issues(base_dir, newspapers):
     """Parse a directory structure and detect newspaper issues to be imported.
 
@@ -288,7 +305,7 @@ def check_filenaming(file_basename):
     :param file_basename: page file (txt or image)
     :type file_basename: str
     """
-
+    page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
     return page_pattern.match(file_basename)
 
 
