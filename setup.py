@@ -20,7 +20,9 @@ setup(
     install_requires=[
         'dask',
         'boto',
-        'bs4'
+        'boto3',
+        'bs4',
+        'opencv-python==3.4.0.12',
+        'numpy'
     ]
-    # install_requires=[]
 )
