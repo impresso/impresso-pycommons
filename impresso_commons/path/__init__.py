@@ -213,7 +213,7 @@ def detect_journal_issues(base_dir, newspapers):
 
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-    journal_dirs = [d for d in dirs if d in newspapers]
+    journal_dirs = [d for d in dirs if d == newspapers]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -233,10 +233,6 @@ def detect_journal_issues(base_dir, newspapers):
                         for day in day_dirs:
                             if "_" not in day:
                                 day_path = os.path.join(month_path, day)
-                                #print(day_path)
-                                #print(year)
-                                #print(month)
-                                #print(day)
                                 # concerning `edition="a"`: for now, no cases of newspapers
                                 # published more than once a day in Olive format (but it
                                 # may come later on)
