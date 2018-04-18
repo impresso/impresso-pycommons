@@ -188,9 +188,6 @@ def detect_canonical_issues(base_dir, newspapers):
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
     # journal_dirs = [d for d in dirs if d.split("_")[-1] == newspapers]
     journal_dirs = [d for d in dirs if d in [d.split("_")[-1] for d in newspapers]]
-    print(str(dirs))
-    print(str(newspapers))
-    print(str(journal_dirs))
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
