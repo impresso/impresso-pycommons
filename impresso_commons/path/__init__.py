@@ -19,6 +19,30 @@ IssueDir = namedtuple(
     ]
 )
 
+KNOWN_JOURNALS = [
+    "BDC",
+    "CDV",
+    "DLE",
+    "EDA",
+    "EXP",
+    "IMP",
+    "GDL",
+    "JDF",
+    "LBP",
+    "LCE",
+    "LCG",
+    "LCR",
+    "LCS",
+    "LES",
+    "LNF",
+    "LSE",
+    "LSR",
+    "LTF",
+    "LVE",
+    "EVT",
+    "JDG",
+    "LNQ",
+]
 
 page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
 
@@ -86,7 +110,7 @@ def canonical_path(dir, name=None, extension=None, path_type="file"):
         )
 
 
-def detect_issues(base_dir):
+def detect_issues(base_dir, journal_filter=None):
     """Parse a directory structure and detect newspaper issues to be imported.
 
     NB: invalid directories are skipped, and a warning message is logged.
@@ -95,11 +119,16 @@ def detect_issues(base_dir):
     :rtype: list of `IssueDir` instances
     """
     detected_issues = []
-    known_journals = ["GDL", "EVT", "JDG", "LNQ"]  # TODO: anything to add?
     dir_path, dirs, files = next(os.walk(base_dir))
 
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
-    journal_dirs = [d for d in dirs if d.split("_")[-1] in known_journals]
+    if journal_filter is None:
+        journal_dirs = [d for d in dirs if d.split("_")[-1] in KNOWN_JOURNALS]
+    else:
+        filtrd_journals = list(
+            set(KNOWN_JOURNALS).intersection(set(journal_filter))
+        )
+        journal_dirs = [d for d in dirs if d.split("_")[-1] in filtrd_journals]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -264,4 +293,3 @@ def get_issueshortpath(issuedir):
 
     path = issuedir.path
     return path[path.index(issuedir.journal):]
-
