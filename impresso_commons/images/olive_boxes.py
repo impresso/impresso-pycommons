@@ -164,7 +164,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         if source_res and dest_res:
             return int(source_res) / int(dest_res)
         else:
-            logger.info("Impossible to get resolution in case: tif"
+            logger.info(f"Impossible to get resolution in case: tif"
                         " in {issue_dir_path}, page {page_number}")
             return None
 
@@ -178,13 +178,13 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         if png_res == olive_res:
             return 1.0
         else:
-            logger.info("Incompatible resolutions between highest png and olive indications"
-                        " in {issue_dir_path}, page {page_number}")
+            logger.info(f"Incompatible resolutions between highest png and olive indications \
+            in {issue_dir_path}, page {page_number}")
             return None
 
     elif box_strategy == img_utils.BoxStrategy.png_uniq.name:
         # TODO if needed
-        logger.info("Finally found a case of png_uniq, which is not ready yet")
+        logger.info(f"Finally found a case of {png_uniq}, which is not ready yet")
 
     elif box_strategy == img_utils.BoxStrategy.jpg_uniq.name:
         # get the x dimension of the unique jpg (from which jp2 was acquired)
