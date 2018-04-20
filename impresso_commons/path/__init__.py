@@ -225,7 +225,8 @@ def detect_canonical_issues(base_dir, newspapers):
     dir_path, dirs, files = next(os.walk(base_dir))
 
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
-    journal_dirs = [d for d in dirs if d.split("_")[-1] == newspapers]
+    # journal_dirs = [d for d in dirs if d.split("_")[-1] == newspapers]
+    journal_dirs = [d for d in dirs if d in [d.split("_")[-1] for d in newspapers]]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -281,7 +282,7 @@ def detect_journal_issues(base_dir, newspapers):
 
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-    journal_dirs = [d for d in dirs if d in newspapers]
+    journal_dirs = [d for d in dirs if d == newspapers]
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
@@ -301,10 +302,6 @@ def detect_journal_issues(base_dir, newspapers):
                         for day in day_dirs:
                             if "_" not in day:
                                 day_path = os.path.join(month_path, day)
-                                #print(day_path)
-                                #print(year)
-                                #print(month)
-                                #print(day)
                                 # concerning `edition="a"`: for now, no cases of newspapers
                                 # published more than once a day in Olive format (but it
                                 # may come later on)
@@ -336,3 +333,10 @@ def get_issueshortpath(issuedir):
 
     path = issuedir.path
     return path[path.index(issuedir.journal):]
+
+
+if __name__ == '__main__':
+    np = "BDC CDV EDA EXP 01_GDL 02_GDL 01_JDG 02_JDG 02_LNQ".split(" ")
+    dirs = "GDL JDG LNQ BDC CDV EDA EXP".split(" ")
+    journal_dirs = [d for d in dirs if d in [d.split("_")[-1] for d in np]]
+    print(journal_dirs)
