@@ -191,6 +191,7 @@ def select_issues(config_dict, inp_dir):
         return issues
     else:
         filter_newspapers = set(filter_dict.keys()) if not exclude_list else set(exclude_list)
+        logger.debug(f"got filter_newspapers: {filter_newspapers}, with exclude flag: {exclude_flag}")
         issues = detect_issues(inp_dir, journal_filter=filter_newspapers, exclude=exclude_flag)
 
         # apply date filter if not exclusion mode
