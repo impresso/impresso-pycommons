@@ -2,9 +2,10 @@
 
 import os
 import logging
-from datetime import date
+from datetime import date, datetime
 from collections import namedtuple
 import re
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -110,24 +111,121 @@ def canonical_path(dir, name=None, extension=None, path_type="file"):
         )
 
 
-def detect_issues(base_dir, journal_filter=None):
+def _apply_datefilter(filter_dict, issues, year_only):
+    filtered_issues = []
+
+    for newspaper, dates in filter_dict.items():
+        # date filter is a range
+        if isinstance(dates, str):
+            start, end = dates.split("-")
+            start = datetime.strptime(start, "%Y/%m/%d").date()
+            end = datetime.strptime(end, "%Y/%m/%d").date()
+
+            if year_only:
+                filtered_issues += [
+                    i
+                    for i in issues
+                    if i.journal == newspaper and start.year <= i.date.year <= end.year
+                ]
+            else:
+                filtered_issues += [
+                    i
+                    for i in issues
+                    if i.journal == newspaper and start <= i.date <= end
+                ]
+
+        # date filter is not a range
+        elif isinstance(dates, list):
+            if not dates:
+                filtered_issues += [
+                    i
+                    for i in issues
+                    if i.journal == newspaper
+                ]
+            else:
+                filter_date = [
+                    datetime.strptime(d, "%Y/%m/%d").date().year if year_only else datetime.strptime(d, "%Y/%m/%d").date()
+                    for d in dates
+                ]
+
+                if year_only:
+                    filtered_issues += [
+                        i
+                        for i in issues
+                        if i.journal == newspaper and i.date.year in filter_date
+                    ]
+                else:
+                    filtered_issues += [
+                        i
+                        for i in issues
+                        if i.journal == newspaper and i.date in filter_date
+                    ]
+
+    return filtered_issues
+
+
+def select_issues(config_dict, inp_dir):
+    """ Reads a configuration file and select newspapers/issues to consider
+    See config.exemple.md for explanations.
+
+    :param config: dict of newspaper filter parameters
+    :type config: dict
+    :param inp_dir: base dit where to get the issues from
+    :type inp_dir: str
+
+    """
+    # read filters from json configuration (see config.example.json)
+    try:
+        filter_dict = config_dict.get("newspapers")
+        exclude_list = config_dict["exclude_newspapers"]
+        year_flag = config_dict["year_only"]
+    except KeyError:
+        logger.critical(f"The key [newspapers|exclude_newspapers|year_only] is missing in the config file.")
+        return
+    exclude_flag = False if not exclude_list else True
+
+    # detect issues to be imported
+    if not filter_dict and not exclude_list:
+        logger.debug("No positive nor negative filter definition, all issues in {inp_dir} will be considered.")
+        issues = detect_issues(inp_dir)
+        return issues
+    else:
+        filter_newspapers = set(filter_dict.keys()) if not exclude_list else set(exclude_list)
+        issues = detect_issues(inp_dir, journal_filter=filter_newspapers, exclude=exclude_flag)
+
+        # apply date filter if not exclusion mode
+        filtered_issues = _apply_datefilter(filter_dict, issues, year_only=year_flag) if not exclude_flag else issues
+
+        return filtered_issues
+
+
+def detect_issues(base_dir, journal_filter=None, exclude=False):
     """Parse a directory structure and detect newspaper issues to be imported.
 
     NB: invalid directories are skipped, and a warning message is logged.
 
     :param base_dir: the root of the directory structure
+    :type base_dir: basestring
+    :param journal_filter: list of newspaper to filter (positive or negative)
+    :type journal_filter: set
+    :param exclude: whether journal_filter is positive or negative
+    :type exclude: boolean
     :rtype: list of `IssueDir` instances
     """
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
-
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
     if journal_filter is None:
         journal_dirs = [d for d in dirs if d.split("_")[-1] in KNOWN_JOURNALS]
     else:
-        filtrd_journals = list(
-            set(KNOWN_JOURNALS).intersection(set(journal_filter))
-        )
+        if not exclude:
+            filtrd_journals = list(
+                set(KNOWN_JOURNALS).intersection(journal_filter)
+            )
+        else:
+            filtrd_journals = list(
+                set(KNOWN_JOURNALS).difference(journal_filter)
+            )
         journal_dirs = [d for d in dirs if d.split("_")[-1] in filtrd_journals]
 
     for journal in journal_dirs:
@@ -166,7 +264,6 @@ def detect_issues(base_dir, journal_filter=None):
                                 day_path
                             )
                         )
-
     return detected_issues
 
 
