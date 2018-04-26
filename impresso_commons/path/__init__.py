@@ -187,6 +187,10 @@ def select_issues(config_dict, inp_dir):
                  f"\nexclude_list: {exclude_list}, "
                  f"\nyear_flag: {year_flag}"
                  f"\nexclude_flag: {exclude_flag}")
+    print(f"got filter_dict: {filter_dict}, "
+                 f"\nexclude_list: {exclude_list}, "
+                 f"\nyear_flag: {year_flag}"
+                 f"\nexclude_flag: {exclude_flag}")
 
     # detect issues to be imported
     if not filter_dict and not exclude_list:
