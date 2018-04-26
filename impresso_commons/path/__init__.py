@@ -168,8 +168,8 @@ def select_issues(config_dict, inp_dir):
     """ Reads a configuration file and select newspapers/issues to consider
     See config.exemple.md for explanations.
 
-    :param config: dict of newspaper filter parameters
-    :type config: dict
+    :param config_dict: dict of newspaper filter parameters
+    :type config_dict: dict
     :param inp_dir: base dit where to get the issues from
     :type inp_dir: str
 
@@ -183,6 +183,10 @@ def select_issues(config_dict, inp_dir):
         logger.critical(f"The key [newspapers|exclude_newspapers|year_only] is missing in the config file.")
         return
     exclude_flag = False if not exclude_list else True
+    logger.debug(f"got filter_dict: {filter_dict}, "
+                 f"\nexclude_list: {exclude_list}, "
+                 f"\nyear_flag: {year_flag}"
+                 f"\nexclude_flag: {exclude_flag}")
 
     # detect issues to be imported
     if not filter_dict and not exclude_list:
