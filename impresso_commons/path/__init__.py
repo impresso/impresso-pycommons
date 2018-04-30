@@ -3,6 +3,7 @@
 import os
 import logging
 from datetime import date, datetime
+from smart_open import s3_iter_bucket
 from collections import namedtuple
 import re
 import json
@@ -44,8 +45,6 @@ KNOWN_JOURNALS = [
     "JDG",
     "LNQ",
 ]
-
-page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
 
 
 def pair_issue(issue_list1, issue_list2):
@@ -271,6 +270,46 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
     return detected_issues
 
 
+def s3_detect_issues(input_bucket, prefix=None):
+    """
+    Detect issues stored in an S3 drive/bucket.
+
+    The path in `issue.path`is just the key name.
+
+    Returns a list of `IssueDir` instances.
+    """
+    def _key_to_issue(key):
+        """Instantiate an IssueDir from a (canonical) key name."""
+        name_no_prefix = key.name.split('/')[-1]
+        canon_name = name_no_prefix.replace("-issue.json", "")
+        journal, year, month, day, edition = canon_name.split('-')
+        path = key.name
+        return IssueDir(
+            journal,
+            date(int(year), int(month), int(day)),
+            edition,
+            path
+        )
+
+    if prefix is None:
+        return [
+            _key_to_issue(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                accept_key=lambda key: key.endswith('issue.json')
+            )
+        ]
+    else:
+        return [
+            _key_to_issue(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                prefix=prefix,
+                accept_key=lambda key: key.endswith('issue.json')
+            )
+        ]
+
+
 def detect_canonical_issues(base_dir, newspapers):
     """Parse a directory structure and detect newspaper issues to be imported.
 
@@ -386,7 +425,7 @@ def check_filenaming(file_basename):
     :param file_basename: page file (txt or image)
     :type file_basename: str
     """
-
+    page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
     return page_pattern.match(file_basename)
 
 
