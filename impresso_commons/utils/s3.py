@@ -1,11 +1,13 @@
 """Reusable functions to read/write data from/to our S3 drive."""
 
 import os
-
+import logging
 import json
 import boto
 import boto.s3.connection
 from smart_open import s3_iter_bucket
+
+logger = logging.getLogger(__name__)
 
 
 def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
@@ -38,7 +40,7 @@ def s3_get_articles(issue, bucket):
     :param issue: the newspaper issue
     :type issue: an instance of `impresso_commons.path.IssueDir`
     :param bucket: the input s3 bucket
-    :type bucket: `boto.s3.bucket import Bucket`
+    :type bucket: `boto.s3.bucket.Bucket`
     :return: a list of articles (dictionaries)
 
     NB: Content items with type = "ad" (advertisement) are filtered out.
