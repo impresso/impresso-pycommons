@@ -24,7 +24,7 @@ from impresso_commons.path import IssueDir, detect_issues, s3_detect_issues
 from impresso_commons.utils.s3 import (get_s3_connection, s3_get_articles,
                                        s3_get_pages)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def get_bucket(name):
@@ -191,8 +191,8 @@ def rebuild_articles(issues, bucket_name, output_format, output_dir):
         for article in all_articles
     ]
 
-    c = Client(processes=False)
-    futures = c.compute(tasks)
+    client = Client(processes=False)
+    futures = client.compute(tasks)
     progress(futures)
     # return c.gather(futures)
     return
@@ -246,7 +246,7 @@ def main():
     bucket = get_bucket(bucket_name)
 
     if arguments["rebuild_articles"]:
-        issues = s3_detect_issues(bucket, prefix="IMP/1900/01/04")
+        issues = s3_detect_issues(bucket, prefix="IMP/1950/05/")
         rebuild_articles(issues, bucket.name, output_format, outp_dir)
 
     elif arguments["rebuild_pages"]:
