@@ -1,2 +1,4 @@
 .DS_Store
 *.pyc
+out_data/
+dask-worker-space/

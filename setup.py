@@ -16,6 +16,14 @@ setup(
     url='https://github.com/impresso/impresso-pycommons',
     version=VERSION,
     packages=find_packages(),
-    long_description=DESCRIPTION, install_requires=['dask']
-    # install_requires=[]
+    long_description=DESCRIPTION,
+    install_requires=[
+        'dask',
+        'boto',
+        'boto3',
+        'bs4',
+        'opencv-python==3.4.0.12',
+        'numpy',
+        'smart_open'
+    ]
 )
