@@ -395,10 +395,3 @@ def get_issueshortpath(issuedir):
 
     path = issuedir.path
     return path[path.index(issuedir.journal):]
-
-
-if __name__ == '__main__':
-    np = "BDC CDV EDA EXP 01_GDL 02_GDL 01_JDG 02_JDG 02_LNQ".split(" ")
-    dirs = "GDL JDG LNQ BDC CDV EDA EXP".split(" ")
-    journal_dirs = [d for d in dirs if d in [d.split("_")[-1] for d in np]]
-    print(journal_dirs)
