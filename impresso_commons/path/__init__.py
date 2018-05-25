@@ -21,6 +21,18 @@ IssueDir = namedtuple(
     ]
 )
 
+ContentItem = namedtuple(
+    "Item", [
+        'journal',
+        'date',
+        'edition',
+        'number',
+        'path',
+        'type'
+    ]
+)
+
+
 KNOWN_JOURNALS = [
     "BDC",
     "CDV",
@@ -306,6 +318,47 @@ def s3_detect_issues(input_bucket, prefix=None):
                 input_bucket,
                 prefix=prefix,
                 accept_key=lambda key: key.endswith('issue.json')
+            )
+        ]
+
+
+def s3_detect_contentitems(input_bucket, prefix=None):
+    """
+    Detect content_items stored in an S3 drive/bucket.
+
+    Returns a list of `ContentItem` instances.
+    """
+    def _key_to_contentitem(key): #GDL-1910-01-10-a-i0002.json
+        """Instantiate an ContentItem from a (canonical) key name."""
+        name_no_prefix = key.name.split('/')[-1]
+        canon_name = name_no_prefix.replace(".json", "")
+        journal, year, month, day, edition, number = canon_name.split('-')
+        ci_type = number[:1]
+        path = key.name
+        return ContentItem(
+                    journal,
+                    date(int(year), int(month), int(day)),
+                    edition,
+                    number[1:],
+                    path,
+                    ci_type
+                )
+
+    if prefix is None:
+        return [
+            _key_to_contentitem(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                accept_key=lambda key: key.endswith('.json')
+            )
+        ]
+    else:
+        return [
+            _key_to_contentitem(key)
+            for key, content in s3_iter_bucket(
+                input_bucket,
+                prefix=prefix,
+                accept_key=lambda key: key.endswith('.json')
             )
         ]
 
