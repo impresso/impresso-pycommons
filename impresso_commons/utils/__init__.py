@@ -5,13 +5,14 @@
 
 
 import logging
+import sys
+import time
+from datetime import timedelta
 
 import dask
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 from dask.multiprocessing import get as mp_get
-
-__author__ = "maudehrmann"
 
 
 def executetask(tasks, parallel_execution):
@@ -34,14 +35,61 @@ def init_logger(logger, log_level, log_file):
     """Initialise the logger."""
     logger.setLevel(log_level)
 
-    if log_file is not None:
-        handler = logging.FileHandler(filename=log_file, mode='w')
-    else:
-        handler = logging.StreamHandler()
-
     formatter = logging.Formatter(
         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
     )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+
+    if log_file is not None:
+        fh = logging.FileHandler(filename=log_file, mode='w')
+        fh.setFormatter(formatter)
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(fh)
+    logger.addHandler(ch)
     logger.info("Logger successfully initialised")
+
+    return logger
+
+
+def user_confirmation(question, default=None):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+
+
+class Timer:
+    """ Basic timer"""
+    def __init__(self):
+        self.t = time.process_time()
+
+    def tick(self):
+        elapsed_time = time.process_time() - self.t
+        self.t = time.process_time()
+        return str(timedelta(seconds=elapsed_time))
