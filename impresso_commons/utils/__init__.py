@@ -54,14 +54,14 @@ def init_logger(logger, log_level, log_file):
 
 
 def user_confirmation(question, default=None):
-    """Ask a yes/no question via raw_input() and return their answer.
+    """
+    Ask a yes/no question via raw_input() and return their answer.
 
-    "question" is a string that is presented to the user.
-    "default" is the presumed answer if the user just hits <Enter>.
+    @param question: a string that is presented to the user.
+    @param default: the presumed answer if the user just hits <Enter>.
         It must be "yes" (the default), "no" or None (meaning
         an answer is required of the user).
-
-    The "answer" return value is True for "yes" or False for "no".
+    @return: True for "yes" or False for "no".
     """
     valid = {"yes": True, "y": True, "no": False, "n": False}
     if default is None:
@@ -87,9 +87,15 @@ def user_confirmation(question, default=None):
 class Timer:
     """ Basic timer"""
     def __init__(self):
-        self.t = time.process_time()
+        self.start = time.time()
+        self.intermediate = time.time()
 
     def tick(self):
-        elapsed_time = time.process_time() - self.t
-        self.t = time.process_time()
+        elapsed_time = time.time() - self.intermediate
+        self.intermediate = time.time()
+        return str(timedelta(seconds=elapsed_time))
+
+    def stop(self):
+        elapsed_time = time.time() - self.start
+        self.intermediate = time.time()
         return str(timedelta(seconds=elapsed_time))
