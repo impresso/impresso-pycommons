@@ -8,10 +8,10 @@ from impresso_commons.utils.s3 import get_bucket
 
 
 def test_s3_select_contentitems():
-    rebuilt_bucket = get_bucket('canonical-rebuilt', create=False)
+    rebuilt_bucket = get_bucket('canonical-rebuilt-versioned', create=False)
 
     config = {
-        "GDL": [1910, 1912],
+        "GDL": [1950, 1952],
         "BDC": []
     }
 
