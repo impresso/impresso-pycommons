@@ -162,3 +162,30 @@ def s3_get_pages(issue_id, page_names, bucket):
         if key.name.split('/')[-1] in list(page_names.values())
     }
     """
+
+
+def get_s3_versions(bucket_name, key_name):
+    """Get versioning information for a given key.
+
+    :param bucket_name: the bucket's name
+    :type bucket_name: string
+    :param key_name: the key's name
+    :type key_name: string
+    :return: for each version, the version id and the last modified date
+    :rtype: a list of tuples, where tuple[0] is a string and tuple[1] a
+        `datetime` instance.
+
+    **NB:** it assumes a versioned bucket.
+    """
+    client = get_s3_client()
+    versions = client.Bucket(bucket_name).\
+        object_versions.filter(Prefix=key_name)
+
+    version_ids = [
+        (
+            v.get().get('VersionId'),
+            v.get().get('LastModified')
+        )
+        for v in versions
+    ]
+    return version_ids
