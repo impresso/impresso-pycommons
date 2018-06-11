@@ -8,6 +8,8 @@ from collections import namedtuple
 import re
 import json
 
+from impresso_commons.utils import _get_cores
+
 logger = logging.getLogger(__name__)
 
 # a simple data structure to represent input directories
@@ -21,7 +23,7 @@ IssueDir = namedtuple(
     ]
 )
 
-ContentItem = namedtuple(
+ContentItem = namedtuple(  # Todo: add version
     "Item", [
         'journal',
         'date',
@@ -59,7 +61,7 @@ KNOWN_JOURNALS = [
 ]
 
 
-def s3_detect_issues(input_bucket, prefix=None):
+def s3_detect_issues(input_bucket, prefix=None, workers=None):
     """
     Detect all issues stored in an S3 drive/bucket.
 
@@ -67,6 +69,7 @@ def s3_detect_issues(input_bucket, prefix=None):
 
     @param input_bucket: name of the bucket to consider
     @param prefix: prefix to consider (e.g. 'GDL' or 'GDL/1910')
+    @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return: a list of `IssueDir` instances.
     """
     def _key_to_issue(key):
@@ -82,12 +85,15 @@ def s3_detect_issues(input_bucket, prefix=None):
             path
         )
 
+    nb_workers = _get_cores() if workers is None else workers
+
     if prefix is None:
         return [
             _key_to_issue(key)
             for key, content in s3_iter_bucket(
                 input_bucket,
-                accept_key=lambda key: key.endswith('issue.json')
+                accept_key=lambda key: key.endswith('issue.json'),
+                workers=_get_cores()
             )
         ]
     else:
@@ -96,12 +102,13 @@ def s3_detect_issues(input_bucket, prefix=None):
             for key, content in s3_iter_bucket(
                 input_bucket,
                 prefix=prefix,
-                accept_key=lambda key: key.endswith('issue.json')
+                accept_key=lambda key: key.endswith('issue.json'),
+                workers=_get_cores()
             )
         ]
 
 
-def s3_detect_contentitems(input_bucket, prefix=None):
+def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
     """
     Detect all content_items stored in an S3 drive/bucket.
 
@@ -109,6 +116,7 @@ def s3_detect_contentitems(input_bucket, prefix=None):
 
     @param input_bucket: name of the bucket to consider
     @param prefix: prefix to consider (e.g. 'GDL' or 'GDL/1910')
+    @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return:a list of `ContentItem` instances.
     """
     def _key_to_contentitem(key):  # GDL-1910-01-10-a-i0002.json
@@ -127,12 +135,15 @@ def s3_detect_contentitems(input_bucket, prefix=None):
                     ci_type
                 )
 
+    nb_workers = _get_cores() if workers is None else workers
+
     if prefix is None:
         return [
             _key_to_contentitem(key)
             for key, content in s3_iter_bucket(
                 input_bucket,
-                accept_key=lambda key: key.endswith('.json')
+                accept_key=lambda key: key.endswith('.json'),
+                workers=_get_cores()
             )
         ]
     else:
@@ -141,17 +152,19 @@ def s3_detect_contentitems(input_bucket, prefix=None):
             for key, content in s3_iter_bucket(
                 input_bucket,
                 prefix=prefix,
-                accept_key=lambda key: key.endswith('.json')
+                accept_key=lambda key: key.endswith('.json'),
+                workers=_get_cores()
             )
         ]
 
 
-def s3_select_issues(input_bucket, np_config):
+def s3_select_issues(input_bucket, np_config, workers=None):
     """
     Select issues stored in an S3 drive/bucket.
 
     @param input_bucket: the name of the bucket
     @param newspaper_config: a json file specifying the selection where
+    @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     [keys = newspaper acronym and values = array]
     The value array can either contains 2 dates (start and end of interval to consider)
     or be empty (all years will be considered).
@@ -179,6 +192,8 @@ def s3_select_issues(input_bucket, np_config):
             path
         )
 
+    nb_workers = _get_cores() if workers is None else workers
+
     for np in np_config:
         if np_config[np]:
             k = []
@@ -190,7 +205,8 @@ def s3_select_issues(input_bucket, np_config):
                     for key, content in s3_iter_bucket(
                         input_bucket,
                         prefix=prefix,
-                        accept_key=lambda key: key.endswith('issue.json')
+                        accept_key=lambda key: key.endswith('issue.json'),
+                        workers=_get_cores()
                     )
                 ]
                 k.extend(t)
@@ -200,19 +216,21 @@ def s3_select_issues(input_bucket, np_config):
                 for key, content in s3_iter_bucket(
                     input_bucket,
                     prefix=np,
-                    accept_key=lambda key: key.endswith('issue.json')
+                    accept_key=lambda key: key.endswith('issue.json'),
+                    workers=_get_cores()
                 )
             ]
         keys.extend(k)
     return keys
 
 
-def s3_select_contentitems(input_bucket, np_config):
+def s3_select_contentitems(input_bucket, np_config, workers=None):
     """
     Select content_items (i.e. articles or pages) stored in an S3 drive/bucket.
 
     @param input_bucket: the name of the bucket
     @param newspaper_config: a json file specifying the selection where
+    @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     [keys = newspaper acronym and values = array]
     The value array can either contains 2 dates (start and end of interval to consider)
     or be empty (all years will be considered).
@@ -243,6 +261,8 @@ def s3_select_contentitems(input_bucket, np_config):
             ci_type
         )
 
+    nb_workers = _get_cores() if workers is None else workers
+
     for np in np_config:
         if np_config[np]:
             k = []
@@ -254,7 +274,8 @@ def s3_select_contentitems(input_bucket, np_config):
                     for key, content in s3_iter_bucket(
                         input_bucket,
                         prefix=prefix,
-                        accept_key=lambda key: key.endswith('.json')
+                        accept_key=lambda key: key.endswith('.json'),
+                        workers=nb_workers
                     )
                 ]
                 k.extend(t)
@@ -264,8 +285,12 @@ def s3_select_contentitems(input_bucket, np_config):
                 for key, content in s3_iter_bucket(
                     input_bucket,
                     prefix=np,
-                    accept_key=lambda key: key.endswith('.json')
+                    accept_key=lambda key: key.endswith('.json'),
+                    workers=nb_workers
                 )
             ]
         keys.extend(k)
     return keys
+
+
+
