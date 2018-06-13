@@ -27,7 +27,7 @@ def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
 
     if host_url is None:
         try:
-            host_url = os.environ["SE_HOST_BASE"]
+            host_url = os.environ["SE_HOST_URL"]
         except Exception:
             raise
 
