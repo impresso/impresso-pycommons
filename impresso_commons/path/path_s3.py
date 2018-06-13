@@ -5,6 +5,7 @@ import logging
 from datetime import date, datetime
 from smart_open import s3_iter_bucket
 from collections import namedtuple
+from impresso_commons.utils.s3 import get_s3_versions
 import re
 import json
 
@@ -23,16 +24,30 @@ IssueDir = namedtuple(
     ]
 )
 
-ContentItem = namedtuple(  # Todo: add version
-    "Item", [
-        'journal',
-        'date',
-        'edition',
-        'number',
-        'path',
-        'type'
-    ]
-)
+# ContentItem = namedtuple(  # Todo: add version
+#     "Item", [
+#         'journal',
+#         'date',
+#         'edition',
+#         'number',
+#         'path',
+#         'type',
+#         'rebuilt_version',
+#         'canonical_version'
+#     ]
+# )
+
+
+class ContentItem:
+    def __init__(self, journal, date, edition, number, path, type=None, rebuilt_version=None, canonical_version=None):
+        self.journal = journal
+        self.date = date
+        self.edition = edition
+        self.number = number
+        self.path = path
+        self.type = None
+        self.rebuilt_version = rebuilt_version
+        self.canonical_version = canonical_version
 
 
 KNOWN_JOURNALS = [
@@ -194,11 +209,12 @@ def s3_select_issues(input_bucket, np_config, workers=None):
 
     nb_workers = _get_cores() if workers is None else workers
 
+    logger.info(f"Start selecting issues with {nb_workers} for {np_config}")
     for np in np_config:
         if np_config[np]:
             k = []
             prefixes = [np + "/" + str(item) for item in range(np_config[np][0], np_config[np][1])]
-            logger.info(f"Detecting issues for {np} for years {prefixes}")
+            logger.info(f"Selecting issues for {np} for years {prefixes}")
             for prefix in prefixes:
                 t = [
                     _key_to_issue(key)
@@ -258,11 +274,12 @@ def s3_select_contentitems(input_bucket, np_config, workers=None):
             edition,
             number[1:],
             path,
-            ci_type
+            ci_type,
         )
 
     nb_workers = _get_cores() if workers is None else workers
 
+    logger.info(f"Start selecting content items with {nb_workers} for {np_config}")
     for np in np_config:
         if np_config[np]:
             k = []
