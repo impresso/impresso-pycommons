@@ -14,6 +14,32 @@ from impresso_commons.utils import _get_cores
 logger = logging.getLogger(__name__)
 
 
+def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
+    if host_url is None:
+        try:
+            host_url = os.environ["SE_HOST_URL"]
+        except Exception:
+            raise
+
+    try:
+        access_key = os.environ["SE_ACCESS_KEY"]
+    except Exception:
+        raise
+
+    try:
+        secret_key = os.environ["SE_SECRET_KEY"]
+    except Exception:
+        raise
+
+    return boto3.client(
+        's3',
+        aws_secret_access_key=secret_key,
+        aws_access_key_id=access_key,
+        endpoint_url=host_url
+    )
+
+
+
 def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
     """Get a boto3 resource object related to an S3 drive.
 
