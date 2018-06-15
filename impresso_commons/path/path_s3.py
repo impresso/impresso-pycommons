@@ -143,7 +143,7 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
         ]
 
 
-@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer ")
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket")
 def s3_select_issues(input_bucket, np_config, workers=None):
     """
     Select issues stored in an S3 drive/bucket.
@@ -211,7 +211,7 @@ def s3_select_issues(input_bucket, np_config, workers=None):
     return keys
 
 
-@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer ")
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket ")
 def s3_select_contentitems(input_bucket, np_config, workers=None):
     """
     Select content_items (i.e. articles or pages) stored in an S3 drive/bucket.
@@ -352,7 +352,7 @@ def impresso_s3_iter_bucket(
         >>> }
 
 
-    Example::
+    Example:: todo: update example
       >>> # get all JSON files under "GDL/1950/"
       >>> for key, content in iter_bucket(bucket_name, prefix="GDL/1950/", accept_key=lambda key: key.endswith('.json')):
       ...     print key, len(content)
@@ -401,19 +401,10 @@ def impresso_s3_iter_bucket(
     with _create_process_pool(processes=workers) as pool:
         result_iterator = pool.imap_unordered(build, key_iterator)
         for key_no, item in enumerate(result_iterator):
-            if key_no % 1000 == 0:
-
-                logger.info(key_no)
-
-                logger.info(
-                    "yielding key #%i: %s",
-                    key_no, item
-                )
-
+            if True or key_no % 1000 == 0:  # todo: fix printing every x keys when distributed
                 yield item
 
-            if key_limit is not None and key_no + 1 >= key_limit:
-                # we were asked to output only a limited number of keys => we're done
+            if key_limit is not None and key_no + 1 >= key_limit: # output only a limited number of keys
                 break
     logger.info(f"processed {key_no} keys")
 
@@ -457,7 +448,7 @@ def _list_bucket(bucket_name, prefix='', accept_key=lambda k: True, config=None)
             # if years are specified, take the range
             if config[np]:
                 prefixes = [np + "/" + str(item) for item in range(config[np][0], config[np][1])]
-            # otherwise prefix os just the newspaper
+            # otherwise prefix is just the newspaper
             else:
                 prefixes = [np]
             print(f"Detecting items for {np} for years {prefixes}")
@@ -480,7 +471,7 @@ def _list_bucket(bucket_name, prefix='', accept_key=lambda k: True, config=None)
                         break
 
 
-def convert(obj):  # todo: strangly does not work when call on issue
+def convert(obj):  # todo: fix - strangely does not work when call on issue
     """
     To convert a dictionary into a IssueDir namedtuple.
     @param obj:
@@ -503,7 +494,7 @@ class DummyPool(object):
 @contextlib.contextmanager
 def _create_process_pool(processes=1):
     if _MULTIPROCESSING and processes:
-        print("creating pool with %i workers", processes)
+        print(f"creating pool with {processes} workers")
         pool = multiprocessing.pool.Pool(processes=processes)
     else:
         print("creating dummy pool")
