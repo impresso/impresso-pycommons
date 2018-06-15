@@ -5,21 +5,14 @@ from datetime import date
 from smart_open import s3_iter_bucket
 from collections import namedtuple
 from deprecated import deprecated
-import multiprocessing
-import contextlib
-import six
+
+from dask.diagnostics import ProgressBar
+import dask.bag as db
 
 from impresso_commons.utils import _get_cores
 from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
 
 logger = logging.getLogger(__name__)
-
-_MULTIPROCESSING = False
-try:
-    import multiprocessing.pool
-    _MULTIPROCESSING = True
-except ImportError:
-    print("multiprocessing could not be imported and won't be used")
 
 
 # a simple data structure to represent input directories
@@ -57,6 +50,7 @@ def s3_detect_issues(input_bucket, prefix=None, workers=None):
     @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return: a list of `IssueDir` instances.
     """
+
     def _key_to_issue(key):
         """Instantiate an IssueDir from a (canonical) key name."""
         name_no_prefix = key.name.split('/')[-1]
@@ -93,6 +87,7 @@ def s3_detect_issues(input_bucket, prefix=None, workers=None):
         ]
 
 
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket")
 def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
     """
     Detect all content_items stored in an S3 drive/bucket.
@@ -104,6 +99,7 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
     @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return:a list of `ContentItem` instances.
     """
+
     def _key_to_contentitem(key):  # GDL-1910-01-10-a-i0002.json
         """Instantiate an ContentItem from a (canonical) key name."""
         name_no_prefix = key.name.split('/')[-1]
@@ -112,13 +108,13 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
         ci_type = number[:1]
         path = key.name
         return s3ContentItem(
-                    journal,
-                    date(int(year), int(month), int(day)),
-                    edition,
-                    number[1:],
-                    path,
-                    ci_type
-                )
+            journal,
+            date(int(year), int(month), int(day)),
+            edition,
+            number[1:],
+            path,
+            ci_type
+        )
 
     nb_workers = _get_cores() if workers is None else workers
 
@@ -240,7 +236,7 @@ def s3_select_contentitems(input_bucket, np_config, workers=None):
         journal, year, month, day, edition, number = canon_name.split('-')
         ci_type = number[:1]
         path = key.name
-        return ContentItem(
+        return s3ContentItem(
             journal,
             date(int(year), int(month), int(day)),
             edition,
@@ -282,6 +278,58 @@ def s3_select_contentitems(input_bucket, np_config, workers=None):
     return keys
 
 
+def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
+    client = get_s3_client()
+    paginator = client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+    keys = []
+    for page in page_iterator:
+        if "Contents" in page:
+            for key in page["Contents"]:
+                keyString = key["Key"]
+                if accept_key(keyString):
+                    keys.append(keyString)
+    return keys if keys else []
+
+
+def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: True, config=None):
+    if config is None:
+        client = get_s3_client()
+        paginator = client.get_paginator("list_objects")
+        page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+        keys = []
+        for page in page_iterator:
+            if "Contents" in page:
+                for key in page["Contents"]:
+                    keyString = key["Key"]
+                    if accept_key(keyString):
+                        keys.append(keyString)
+        return keys if keys else []
+
+    else:
+        for np in config:
+            # if years are specified, take the range
+            if config[np]:
+                prefixes = [np + "/" + str(item) for item in range(config[np][0], config[np][1])]
+            # otherwise prefix is just the newspaper
+            else:
+                prefixes = [np]
+            print(f"Detecting items for {np} for years {prefixes}")
+            filtered_keys = []
+            for prefix in prefixes:
+                client = get_s3_client()
+                paginator = client.get_paginator("list_objects")
+                page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+                keys = []
+                for page in page_iterator:
+                    if "Contents" in page:
+                        for key in page["Contents"]:
+                            keyString = key["Key"]
+                            if accept_key(keyString):
+                                filtered_keys.append(keyString)
+            return filtered_keys if filtered_keys else []
+
+
 def _key_to_issue(key_info):
     """Instantiate an IssueDir from a key info tuple."""
     key = key_info[0]
@@ -321,186 +369,34 @@ def _key_to_contentitem(key_info):
     )
 
 
-def impresso_s3_iter_bucket(
-        bucket_name,
-        item_type=None,
-        prefix=None,
-        filter_config=None,
-        key_limit=None,
-        workers=16,
-        retries=3,
-        ):
-    """
-    Adapted from smartopen https://github.com/RaRe-Technologies/smart_open/blob/master/smart_open/s3.py
-    for impresso needs
-
-    Iterate and download all S3 files under `bucket/prefix`, yielding out an item generator (ContentItem or Issue).
-
-    `accept_key` is a function that accepts a key name (unicode string) and
-    returns True/False, signalling whether the given key should be downloaded out or
-    not (default: accept all keys).
-
-    If `key_limit` is given, stop after yielding out that many results.
-    The keys are processed in parallel, using `workers` processes (default: 16),
-    to speed up downloads greatly. If multiprocessing is not available, thus
-    _MULTIPROCESSING is False, this parameter will be ignored.
-
-    You can specify a json config such as :
-        >>> np_config = {
-        >>> "GDL" : [1950, 1952], # => start / end of year interval to consider
-        >>> "BDC" : [] # => all years are considered
-        >>> }
+def _process_keys(key_name, bucket_name, item_type):
+    build = _key_to_issue if item_type == "issue" else _key_to_contentitem
+    version_id, last_modified = get_s3_versions("canonical-rebuilt-versioned", key_name)[0]
+    return build((key_name, version_id, last_modified))
 
 
-    Example:: todo: update example
-      >>> # get all JSON files under "GDL/1950/"
-      >>> for key, content in iter_bucket(bucket_name, prefix="GDL/1950/", accept_key=lambda key: key.endswith('.json')):
-      ...     print key, len(content)
-      >>> # limit to 10k files, using 32 parallel workers (default is 16)
-      >>> for key, content in iter_bucket(bucket_name, key_limit=10000, workers=32):
-      ...     print key, len(content)
-
-    @param bucket_name: the bucket string name
-    @param prefix: the prefix to select keys from. if defined, config must be None.
-    @param accept_key: see explanation above
-    @param key_limit: id.
-    @param workers: id.
-    @param retries: id.
-    @param config: a json object holding newspapers as keys and array of years as values
-    @return:
-    """
-
-    # if bucket instance, silently extract the name
-    try:
-        bucket_name = bucket_name.name
-    except AttributeError:
-        pass
-
+def impresso_iter_bucket(bucket_name,
+                         item_type=None,
+                         prefix=None,
+                         filter_config=None,
+                         partition_size=10):
     # either prefix or config, but not both
     if prefix and filter_config:
         logger.error("Provide either a prefix or a config but not both")
         return None
 
     # check which kind of object to build, issue or content_item
-    if item_type == "issue":
-        suffix = 'issue.json'
-        build = _key_to_issue
-    elif item_type == "content_item":
-        suffix = '.json'
-        build = _key_to_contentitem
+    suffix = 'issue.json' if item_type == "issue" else '.json'
+
+    if filter_config is None:
+        keys = _list_bucket_paginator(bucket_name, prefix, accept_key=lambda key: key.endswith(suffix))
     else:
-        logger.error("Specify the type of item to retrieve from S3.")
-        return None
+        keys = _list_bucket_paginator_filter(bucket_name, accept_key=lambda key: key.endswith(suffix),
+                                             config=filter_config)
 
-    # get the key iterator - if specified, filter is applied
-    key_no = -1
-    key_iterator = _list_bucket(bucket_name, prefix=prefix,
-                                accept_key=lambda key: key.endswith(suffix), config=filter_config)
+    ci_bag = db.from_sequence(keys, partition_size)
+    ci_bag = ci_bag.map(_process_keys, bucket_name=bucket_name, item_type=item_type)
 
-    # create objects in parallel
-    with _create_process_pool(processes=workers) as pool:
-        result_iterator = pool.imap_unordered(build, key_iterator)
-        for key_no, item in enumerate(result_iterator):
-            if True or key_no % 1000 == 0:  # todo: fix printing every x keys when distributed
-                yield item
-
-            if key_limit is not None and key_no + 1 >= key_limit: # output only a limited number of keys
-                break
-    logger.info(f"processed {key_no} keys")
-
-
-def _list_bucket(bucket_name, prefix='', accept_key=lambda k: True, config=None):
-    """
-    Adapted from smartopen https://github.com/RaRe-Technologies/smart_open/blob/master/smart_open/s3.py
-
-    Iterate 'bucket_name' to retrieve keys filtered by `prefix` of newspaper/range of years of 'config'.
-
-    Return a (key, version_id, last_modified) 3-tuple generator.
-
-    @param bucket_name:
-    @param prefix:
-    @param accept_key:
-    @param config:
-    @return:
-    """
-
-    client = get_s3_client()
-
-    if config is None:
-        ctoken = None
-        while True:
-            response = client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-            try:
-                content = response['Contents']
-            except KeyError:
-                pass
-            else:
-                for c in content:
-                    key = c['Key']
-                    if accept_key(key):
-                        version_id, last_modified = get_s3_versions(bucket_name, key)[0]
-                        yield (key, version_id, last_modified)
-            ctoken = response.get('NextContinuationToken', None)
-            if not ctoken:
-                break
-    else:
-        for np in config:
-            # if years are specified, take the range
-            if config[np]:
-                prefixes = [np + "/" + str(item) for item in range(config[np][0], config[np][1])]
-            # otherwise prefix is just the newspaper
-            else:
-                prefixes = [np]
-            print(f"Detecting items for {np} for years {prefixes}")
-            for prefix in prefixes:
-                ctoken = None
-                while True:
-                    response = client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-                    try:
-                        content = response['Contents']
-                    except KeyError:
-                        pass
-                    else:
-                        for c in content:
-                            key = c['Key']
-                            if accept_key(key):
-                                version_id, last_modified = get_s3_versions(bucket_name, key)[0]
-                                yield (key, version_id, last_modified)
-                    ctoken = response.get('NextContinuationToken', None)
-                    if not ctoken:
-                        break
-
-
-def convert(obj):  # todo: fix - strangely does not work when call on issue
-    """
-    To convert a dictionary into a IssueDir namedtuple.
-    @param obj:
-    @return:
-    """
-    for key, value in obj.items():
-        obj[key] = convert(value)
-    return namedtuple('IssueDir', obj.keys())(**obj)
-
-
-class DummyPool(object):
-    """A class that mimics multiprocessing.pool.Pool for our purposes."""
-    def imap_unordered(self, function, items):
-        return six.moves.map(function, items)
-
-    def terminate(self):
-        pass
-
-
-@contextlib.contextmanager
-def _create_process_pool(processes=1):
-    if _MULTIPROCESSING and processes:
-        print(f"creating pool with {processes} workers")
-        pool = multiprocessing.pool.Pool(processes=processes)
-    else:
-        print("creating dummy pool")
-        pool = DummyPool()
-    yield pool
-    pool.terminate()
-
-
-
+    with ProgressBar():
+        result = ci_bag.compute()
+    return result
