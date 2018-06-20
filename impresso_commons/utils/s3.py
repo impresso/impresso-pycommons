@@ -261,7 +261,24 @@ def get_s3_versions(bucket_name, key_name):
 
     **NB:** it assumes a versioned bucket.
     """
+
     client = get_s3_resource()
+
+    versions = client.Bucket(bucket_name).\
+        object_versions.filter(Prefix=key_name)
+
+    version_ids = [
+        (
+            v.get().get('VersionId'),
+            v.get().get('LastModified')
+        )
+        for v in versions
+    ]
+    return version_ids
+
+
+def get_s3_versions_client(client, bucket_name, key_name):
+
     versions = client.Bucket(bucket_name).\
         object_versions.filter(Prefix=key_name)
 
