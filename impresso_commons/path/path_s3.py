@@ -10,7 +10,7 @@ from dask.diagnostics import ProgressBar
 import dask.bag as db
 
 from impresso_commons.utils import _get_cores
-from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
+from impresso_commons.utils.s3 import get_s3_client, get_s3_versions, new_get_s3_versions
 
 logger = logging.getLogger(__name__)
 
@@ -379,7 +379,7 @@ def impresso_iter_bucket(bucket_name,
                          item_type=None,
                          prefix=None,
                          filter_config=None,
-                         partition_size=10):
+                         partition_size=15):
     # either prefix or config, but not both
     if prefix and filter_config:
         logger.error("Provide either a prefix or a config but not both")
@@ -388,12 +388,14 @@ def impresso_iter_bucket(bucket_name,
     # check which kind of object to build, issue or content_item
     suffix = 'issue.json' if item_type == "issue" else '.json'
 
+    logger.info(f"Start collecting key from s3 (not parallel)")
     if filter_config is None:
         keys = _list_bucket_paginator(bucket_name, prefix, accept_key=lambda key: key.endswith(suffix))
     else:
         keys = _list_bucket_paginator_filter(bucket_name, accept_key=lambda key: key.endswith(suffix),
                                              config=filter_config)
 
+    logger.info(f"Start processing key.")
     ci_bag = db.from_sequence(keys, partition_size)
     ci_bag = ci_bag.map(_process_keys, bucket_name=bucket_name, item_type=item_type)
 
