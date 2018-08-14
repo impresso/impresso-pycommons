@@ -371,7 +371,7 @@ def _key_to_contentitem(key_info):
 
 def _process_keys(key_name, bucket_name, item_type):
     build = _key_to_issue if item_type == "issue" else _key_to_contentitem
-    version_id, last_modified = get_s3_versions("canonical-rebuilt-versioned", key_name)[0]
+    version_id, last_modified = get_s3_versions(bucket_name, key_name)[0]
     return build((key_name, version_id, last_modified))
 
 

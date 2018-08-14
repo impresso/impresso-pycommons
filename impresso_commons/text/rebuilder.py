@@ -15,32 +15,27 @@ from functools import reduce
 from itertools import starmap
 
 import dask
-# import ipdb as pdb  # remove from production version
+import dask.bag as db
+import ipdb as pdb  # remove from production version
 from dask import compute, delayed
+from dask.diagnostics import ProgressBar
 from dask.distributed import Client, progress
 from docopt import docopt
 
+from impresso_commons.text.helpers import read_issue, read_issue_pages
 from impresso_commons.path.path_fs import IssueDir, detect_issues
-from impresso_commons.path.path_s3 import s3_detect_issues
-from impresso_commons.utils.s3 import (get_s3_connection, s3_get_articles,
-                                       s3_get_pages)
+from impresso_commons.path.path_s3 import (impresso_iter_bucket,
+                                           s3_detect_issues)
+from impresso_commons.utils.s3 import (get_bucket, get_s3_connection,
+                                       get_s3_versions, s3_get_pages)
 
-logger = logging.getLogger()
-
-
-def get_bucket(name):
-    """Create an s3 connection and returns the requested bucket.
-
-    :param name: the bucket's name
-    :type name: string
-    :return: an s3 bucket
-    :rtype: `boto.s3.bucket.Bucket`
-    """
-    conn = get_s3_connection()
-    bucket = [b for b in conn.get_all_buckets() if b.name == name][0]
-    return bucket
+dask.set_options(get=dask.threaded.get)
 
 
+logger = logging.getLogger('impresso_commons')
+
+
+# TODO: transform into `serialize_by_year` then abandon
 def serialize_article(article, output_format, output_dir):
     """Write the rebuilt article to disk in a given format (json or text).
 
@@ -98,6 +93,8 @@ def rebuild_text(tokens, string=None):
     return (string, regions)
 
 
+# TODO: reuse part the of the logic for `helpers.pages_to_article()`
+# then abandon
 def rebuild_article(article_metadata, bucket, output="JSON"):
     """Rebuilds the text of an article given its metadata as input.
 
@@ -168,50 +165,6 @@ def rebuild_article(article_metadata, bucket, output="JSON"):
     return article
 
 
-# TODO: implement
-def rebuild_pages(issues, bucket, output_format):
-    pass
-
-
-# TODO: refactor and abandon
-def rebuild_articles(issues, bucket_name, output_format, output_dir):
-    """A proxy function that distributes the work in parallel."""
-    bucket = get_bucket(bucket_name)
-    articles_by_issue = starmap(
-        s3_get_articles,
-        [(issue, bucket) for issue in issues]
-    )
-
-    all_articles = reduce(lambda x, y: x + y, articles_by_issue)
-    print(f'There are {len(all_articles)} articles to rebuild')
-
-    tasks = [
-        rebuild_and_serialize(article, bucket, output_format, output_dir)
-        for article in all_articles
-    ]
-
-    client = Client(processes=False)
-    futures = client.compute(tasks)
-    progress(futures)
-    # return c.gather(futures)
-    return
-
-
-# TODO: refactor and abandon
-@delayed
-def rebuild_and_serialize(article_metadata, bucket, output_format, output_dir):
-    """Rebuild the running text of an article and serialize the output."""
-    try:
-        r_article = rebuild_article(article_metadata, bucket, output_format)
-        serialize_article(r_article, output_format, output_dir)
-    except Exception as e:
-        logger.error("Processing of article {} failed with error {}".format(
-            article_metadata["m"]["id"],
-            e
-        ))
-    return
-
-
 def main():
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
@@ -245,9 +198,34 @@ def main():
 
     bucket = get_bucket(bucket_name)
 
+    def _odict_to_ntuple(odict):
+        return IssueDir(**odict)
+
     if arguments["rebuild_articles"]:
-        issues = s3_detect_issues(bucket, prefix="IMP/1950/05/")
-        rebuild_articles(issues, bucket.name, output_format, outp_dir)
+        issues = impresso_iter_bucket(
+            bucket.name,
+            prefix="GDL/1950/01/",
+            item_type="issue"
+        )
+        bag = db.from_sequence(issues, 20)
+        bag = bag.map(lambda x: IssueDir(**x))
+        bag = bag.map(read_issue, bucket)
+        bag = bag.starmap(read_issue_pages, bucket=bucket)
+
+        # attention, workaround: IssueDir cannot be pickled by `groupby`
+        bag = bag.map(lambda x: (x[0]._asdict(), x[1]))
+        # bag = bag.starmap(rejoin_articles)
+        # bag = bag.starmap(rebuild_articles)
+        # bag = bag.groupby(lambda x: x[0]['date'].year)
+        # bag = bag.starmap(serialize_by_year)
+    
+        with ProgressBar():
+            result = bag.compute()
+        assert result is not None
+        pdb.set_trace()
+        # some Dask Fu for later
+        # bag.groupby(lambda x: "{}-{}".format(x['date'].year, x['date'].month)).starmap(lambda k, v: (k, len(v))).compute()
+        # rebuild_articles(issues, bucket.name, output_format, outp_dir)
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
