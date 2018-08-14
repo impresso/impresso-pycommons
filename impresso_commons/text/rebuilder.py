@@ -20,7 +20,8 @@ from dask import compute, delayed
 from dask.distributed import Client, progress
 from docopt import docopt
 
-from impresso_commons.path import IssueDir, detect_issues, s3_detect_issues
+from impresso_commons.path.path_fs import IssueDir, detect_issues
+from impresso_commons.path.path_s3 import s3_detect_issues
 from impresso_commons.utils.s3 import (get_s3_connection, s3_get_articles,
                                        s3_get_pages)
 

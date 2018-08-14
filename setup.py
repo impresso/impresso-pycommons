@@ -18,7 +18,7 @@ setup(
     packages=find_packages(),
     long_description=DESCRIPTION,
     install_requires=[
-        'dask',
+        'dask[complete]',
         'boto',
         'boto3',
         'bs4',
