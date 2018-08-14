@@ -2,7 +2,7 @@
 
 import os
 import logging
-from datetime import date
+from datetime import date, datetime
 from smart_open import s3_iter_bucket
 from collections import namedtuple
 import re

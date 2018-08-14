@@ -66,6 +66,16 @@ def s3_get_pages(issue_id, page_names, bucket):
     :type bucket: instance of `boto.Bucket`
     :return: a dictionary with page filenames as keys, and JSON data as values.
     """
+    pages = {}
+
+    for page in page_names.values():
+        key_name = os.path.join(issue_id.replace('-', '/'), page)
+        key = bucket.get_key(key_name, validate=False)
+        logger.info(f'reading page {key_name}')
+        content = key.get_contents_as_string()
+        pages[key.name.split('/')[-1]] = json.loads(content.decode('utf-8'))
+    return pages
+    """
     return {
         key.name.split('/')[-1]: json.loads(content.decode('utf-8'))
         for key, content in s3_iter_bucket(
@@ -74,3 +84,4 @@ def s3_get_pages(issue_id, page_names, bucket):
         )
         if key.name.split('/')[-1] in list(page_names.values())
     }
+    """

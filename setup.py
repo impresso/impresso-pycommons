@@ -23,6 +23,7 @@ setup(
         'boto3',
         'bs4',
         'opencv-python==3.4.0.12',
-        'numpy'
+        'numpy',
+        'smart_open'
     ]
 )
