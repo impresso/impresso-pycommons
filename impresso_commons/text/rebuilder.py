@@ -51,8 +51,6 @@ def serialize_article(article, output_format, output_dir):
     :type output_dir: string
     """
 
-    # TODO: create subdirs within the output dicrectory
-
     if output_format == "json":
         out_filename = os.path.join(output_dir, f"{article['id']}.json")
 
@@ -82,9 +80,6 @@ def serialize_article(article, output_format, output_dir):
 def rebuild_text(tokens, string=None):
     """The text rebuilding function."""
 
-    def get_space(token):
-        return " "
-
     regions = []
 
     if string is None:
@@ -95,7 +90,7 @@ def rebuild_text(tokens, string=None):
         region["coords"] = token["c"]
         region["start"] = len(string)
         region["length"] = len(token["tx"])
-        string += "{} ".format(token["tx"])
+        string += "{} ".format(token["tx"])  # TODO: check `if "gn" in token`
         regions.append(region)
         logger.debug(token["tx"])
 
@@ -151,8 +146,10 @@ def rebuild_article(article_metadata, bucket, output="JSON"):
             for para in region["p"]
             for line in para["l"]
             for token in line["t"]
-            # TODO: handle better hyphenated words
         ]
+
+        # TODO: capture and store somewhere the line breaks
+        # see https://github.com/impresso/impresso-pycommons/issues/5
 
         if fulltext == "":
             fulltext, regions = rebuild_text(tokens)
@@ -175,6 +172,7 @@ def rebuild_pages(issues, bucket, output_format):
     pass
 
 
+# TODO: refactor and abandon
 def rebuild_articles(issues, bucket_name, output_format, output_dir):
     """A proxy function that distributes the work in parallel."""
     bucket = get_bucket(bucket_name)
@@ -198,6 +196,7 @@ def rebuild_articles(issues, bucket_name, output_format, output_dir):
     return
 
 
+# TODO: refactor and abandon
 @delayed
 def rebuild_and_serialize(article_metadata, bucket, output_format, output_dir):
     """Rebuild the running text of an article and serialize the output."""
