@@ -1,20 +1,21 @@
 """Code for parsing impresso's canonical directory structures."""
 
-import os
 import logging
-from datetime import date, datetime
+from datetime import date
 from smart_open import s3_iter_bucket
 from collections import namedtuple
-from impresso_commons.utils.s3 import get_s3_versions
-import re
-import json
+from deprecated import deprecated
+
+from dask.diagnostics import ProgressBar
+import dask.bag as db
 
 from impresso_commons.utils import _get_cores
+from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
 
 logger = logging.getLogger(__name__)
 
+
 # a simple data structure to represent input directories
-# a `Document.zip` file is expected to be found in `IssueDir.path`
 IssueDir = namedtuple(
     "IssueDirectory", [
         'journal',
@@ -24,56 +25,18 @@ IssueDir = namedtuple(
     ]
 )
 
-# ContentItem = namedtuple(  # Todo: add version
-#     "Item", [
-#         'journal',
-#         'date',
-#         'edition',
-#         'number',
-#         'path',
-#         'type',
-#         'rebuilt_version',
-#         'canonical_version'
-#     ]
-# )
 
-
-class ContentItem:
-    def __init__(self, journal, date, edition, number, path, type=None, rebuilt_version=None, canonical_version=None):
+class s3ContentItem:
+    def __init__(self, journal, date, edition, number, key_name,
+                 doc_type=None, rebuilt_version=None, canonical_version=None):
         self.journal = journal
         self.date = date
         self.edition = edition
         self.number = number
-        self.path = path
-        self.type = None
+        self.doc_type = doc_type
+        self.key_name = key_name
         self.rebuilt_version = rebuilt_version
         self.canonical_version = canonical_version
-
-
-KNOWN_JOURNALS = [
-    "BDC",
-    "CDV",
-    "DLE",
-    "EDA",
-    "EXP",
-    "IMP",
-    "GDL",
-    "JDF",
-    "LBP",
-    "LCE",
-    "LCG",
-    "LCR",
-    "LCS",
-    "LES",
-    "LNF",
-    "LSE",
-    "LSR",
-    "LTF",
-    "LVE",
-    "EVT",
-    "JDG",
-    "LNQ",
-]
 
 
 def s3_detect_issues(input_bucket, prefix=None, workers=None):
@@ -87,6 +50,7 @@ def s3_detect_issues(input_bucket, prefix=None, workers=None):
     @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return: a list of `IssueDir` instances.
     """
+
     def _key_to_issue(key):
         """Instantiate an IssueDir from a (canonical) key name."""
         name_no_prefix = key.name.split('/')[-1]
@@ -123,6 +87,7 @@ def s3_detect_issues(input_bucket, prefix=None, workers=None):
         ]
 
 
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket")
 def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
     """
     Detect all content_items stored in an S3 drive/bucket.
@@ -134,6 +99,7 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
     @param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
     @return:a list of `ContentItem` instances.
     """
+
     def _key_to_contentitem(key):  # GDL-1910-01-10-a-i0002.json
         """Instantiate an ContentItem from a (canonical) key name."""
         name_no_prefix = key.name.split('/')[-1]
@@ -141,14 +107,14 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
         journal, year, month, day, edition, number = canon_name.split('-')
         ci_type = number[:1]
         path = key.name
-        return ContentItem(
-                    journal,
-                    date(int(year), int(month), int(day)),
-                    edition,
-                    number[1:],
-                    path,
-                    ci_type
-                )
+        return s3ContentItem(
+            journal,
+            date(int(year), int(month), int(day)),
+            edition,
+            number[1:],
+            path,
+            ci_type
+        )
 
     nb_workers = _get_cores() if workers is None else workers
 
@@ -173,6 +139,7 @@ def s3_detect_contentitems(input_bucket, prefix=None, workers=None):
         ]
 
 
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket")
 def s3_select_issues(input_bucket, np_config, workers=None):
     """
     Select issues stored in an S3 drive/bucket.
@@ -240,6 +207,7 @@ def s3_select_issues(input_bucket, np_config, workers=None):
     return keys
 
 
+@deprecated(reason="smart_open needlessly -for us- downloads the content of the key. Prefer impresso_s3_iter_bucket ")
 def s3_select_contentitems(input_bucket, np_config, workers=None):
     """
     Select content_items (i.e. articles or pages) stored in an S3 drive/bucket.
@@ -268,7 +236,7 @@ def s3_select_contentitems(input_bucket, np_config, workers=None):
         journal, year, month, day, edition, number = canon_name.split('-')
         ci_type = number[:1]
         path = key.name
-        return ContentItem(
+        return s3ContentItem(
             journal,
             date(int(year), int(month), int(day)),
             edition,
@@ -310,4 +278,127 @@ def s3_select_contentitems(input_bucket, np_config, workers=None):
     return keys
 
 
+def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
+    client = get_s3_client()
+    paginator = client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+    keys = []
+    for page in page_iterator:
+        if "Contents" in page:
+            for key in page["Contents"]:
+                keyString = key["Key"]
+                if accept_key(keyString):
+                    keys.append(keyString)
+    return keys if keys else []
 
+
+def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: True, config=None):
+    if config is None:
+        client = get_s3_client()
+        paginator = client.get_paginator("list_objects")
+        page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+        keys = []
+        for page in page_iterator:
+            if "Contents" in page:
+                for key in page["Contents"]:
+                    keyString = key["Key"]
+                    if accept_key(keyString):
+                        keys.append(keyString)
+        return keys if keys else []
+
+    else:
+        for np in config:
+            # if years are specified, take the range
+            if config[np]:
+                prefixes = [np + "/" + str(item) for item in range(config[np][0], config[np][1])]
+            # otherwise prefix is just the newspaper
+            else:
+                prefixes = [np]
+            print(f"Detecting items for {np} for years {prefixes}")
+            filtered_keys = []
+            for prefix in prefixes:
+                client = get_s3_client()
+                paginator = client.get_paginator("list_objects")
+                page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+                keys = []
+                for page in page_iterator:
+                    if "Contents" in page:
+                        for key in page["Contents"]:
+                            keyString = key["Key"]
+                            if accept_key(keyString):
+                                filtered_keys.append(keyString)
+            return filtered_keys if filtered_keys else []
+
+
+def _key_to_issue(key_info):
+    """Instantiate an IssueDir from a key info tuple."""
+    key = key_info[0]
+    name_no_prefix = key.split('/')[-1]
+    canon_name = name_no_prefix.replace("-issue.json", "")
+    journal, year, month, day, edition = canon_name.split('-')
+    path = key
+    issue = IssueDir(
+        journal,
+        date(int(year), int(month), int(day)),
+        edition,
+        path
+    )
+    return issue._asdict()
+
+
+def _key_to_contentitem(key_info):
+    """
+    Instantiate an ContentItem from a key info tuple.
+    @param key_info: tuple (key_name, key_versionid, date_lastupdated)
+    @return: ContentItem
+    """
+    key = key_info[0]  # GDL/1950/01/06/a/GDL-1950-01-06-a-i0056.json
+    name_no_prefix = key.split('/')[-1]
+    canon_name = name_no_prefix.replace(".json", "")
+    journal, year, month, day, edition, number = canon_name.split('-')
+    ci_type = number[:1]
+    path = key
+    return s3ContentItem(
+        journal,
+        date(int(year), int(month), int(day)),
+        edition,
+        number[1:],
+        path,
+        ci_type,
+        rebuilt_version=key_info[1]
+    )
+
+
+def _process_keys(key_name, bucket_name, item_type):
+    build = _key_to_issue if item_type == "issue" else _key_to_contentitem
+    version_id, last_modified = get_s3_versions("canonical-rebuilt-versioned", key_name)[0]
+    return build((key_name, version_id, last_modified))
+
+
+def impresso_iter_bucket(bucket_name,
+                         item_type=None,
+                         prefix=None,
+                         filter_config=None,
+                         partition_size=15):
+    # either prefix or config, but not both
+    if prefix and filter_config:
+        logger.error("Provide either a prefix or a config but not both")
+        return None
+
+    # check which kind of object to build, issue or content_item
+    suffix = 'issue.json' if item_type == "issue" else '.json'
+
+    logger.info(f"Start collecting key from s3 (not parallel)")
+    if filter_config is None:
+        keys = _list_bucket_paginator(bucket_name, prefix, accept_key=lambda key: key.endswith(suffix))
+    else:
+        keys = _list_bucket_paginator_filter(bucket_name, accept_key=lambda key: key.endswith(suffix),
+                                             config=filter_config)
+
+    logger.info(f"Start processing key.")
+    ci_bag = db.from_sequence(keys, partition_size)
+    ci_bag = ci_bag.map(_process_keys, bucket_name=bucket_name, item_type=item_type)
+
+    with ProgressBar():
+        result = ci_bag.compute()
+    return result

@@ -107,3 +107,8 @@ def _get_cores():
         return nb - 10
     else:
         return nb
+
+def chunk(list, chunksize):
+    """Yield successive n-sized chunks from list."""
+    for i in range(0, len(list), chunksize):
+        yield list[i:i + chunksize]

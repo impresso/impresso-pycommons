@@ -14,6 +14,32 @@ from impresso_commons.utils import _get_cores
 logger = logging.getLogger(__name__)
 
 
+def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
+    if host_url is None:
+        try:
+            host_url = os.environ["SE_HOST_URL"]
+        except Exception:
+            raise
+
+    try:
+        access_key = os.environ["SE_ACCESS_KEY"]
+    except Exception:
+        raise
+
+    try:
+        secret_key = os.environ["SE_SECRET_KEY"]
+    except Exception:
+        raise
+
+    return boto3.client(
+        's3',
+        aws_secret_access_key=secret_key,
+        aws_access_key_id=access_key,
+        endpoint_url=host_url
+    )
+
+
+
 def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
     """Get a boto3 resource object related to an S3 drive.
 
@@ -235,7 +261,24 @@ def get_s3_versions(bucket_name, key_name):
 
     **NB:** it assumes a versioned bucket.
     """
+
     client = get_s3_resource()
+
+    versions = client.Bucket(bucket_name).\
+        object_versions.filter(Prefix=key_name)
+
+    version_ids = [
+        (
+            v.get().get('VersionId'),
+            v.get().get('LastModified')
+        )
+        for v in versions
+    ]
+    return version_ids
+
+
+def get_s3_versions_client(client, bucket_name, key_name):
+
     versions = client.Bucket(bucket_name).\
         object_versions.filter(Prefix=key_name)
 
