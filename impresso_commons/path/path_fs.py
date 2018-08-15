@@ -250,6 +250,7 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
                 set(KNOWN_JOURNALS).difference(journal_filter)
             )
         journal_dirs = [d for d in dirs if d.split("_")[-1] in filtrd_journals]
+        print(journal_dirs)
 
     for journal in journal_dirs:
         journal_path = os.path.join(base_dir, journal)
