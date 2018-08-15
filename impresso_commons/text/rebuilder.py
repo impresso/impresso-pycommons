@@ -22,10 +22,12 @@ from dask.diagnostics import ProgressBar
 from dask.distributed import Client, progress
 from docopt import docopt
 
-from impresso_commons.text.helpers import read_issue, read_issue_pages
 from impresso_commons.path.path_fs import IssueDir, detect_issues
 from impresso_commons.path.path_s3 import (impresso_iter_bucket,
                                            s3_detect_issues)
+from impresso_commons.text.helpers import (read_issue, read_issue_pages,
+                                           rejoin_articles)
+from impresso_commons.utils import Timer
 from impresso_commons.utils.s3 import (get_bucket, get_s3_connection,
                                        get_s3_versions, s3_get_pages)
 
@@ -73,42 +75,70 @@ def serialize_article(article, output_format, output_dir):
     return
 
 
-def rebuild_text(tokens, string=None):
+def rebuild_text(lines, string=None):
     """The text rebuilding function."""
 
     regions = []
+    linebreaks = []
 
     if string is None:
         string = ""
 
-    for token in tokens:
-        region = {}
-        region["coords"] = token["c"]
-        region["start"] = len(string)
-        region["length"] = len(token["tx"])
-        string += "{} ".format(token["tx"])  # TODO: check `if "gn" in token`
-        regions.append(region)
-        logger.debug(token["tx"])
+    # in order to be able to keep line break information
+    # we iterate over a list of lists (lines of tokens)
+    for line in lines:
+        for n, token in enumerate(line):
 
-    return (string, regions)
+            region = {}
+            region["coords"] = token["c"]
+            region["start"] = len(string)
+            region["surface"] = None
+
+            # if token is the last in a line
+            if n == len(line) - 1:
+                linebreaks.append(region["start"] + len(token["tx"]))
+
+            if "hy" in token:
+                region["length"] = len(token["tx"][:-1])
+                region["surface"] = token["tx"][:-1]
+
+            elif "nf" in token:
+                region["length"] = len(token["nf"])
+
+                if "gn" in token and token["gn"]:
+                    tmp = "{}".format(token["nf"])
+                    region["surface"] = token["tx"]
+                    string += tmp
+                else:
+                    tmp = "{} ".format(token["nf"])
+                    region["surface"] = token["tx"]
+                    string += tmp
+            else:
+                region["length"] = len(token["tx"])
+
+                if "gn" in token and token["gn"]:
+                    tmp = "{}".format(token["tx"])
+                    region["surface"] = tmp
+                    string += tmp
+                else:
+                    tmp = "{} ".format(token["tx"])
+                    region["surface"] = tmp
+                    string += tmp
+
+            regions.append(region)
+
+    return (string, regions, linebreaks)
 
 
-# TODO: reuse part the of the logic for `helpers.pages_to_article()`
-# then abandon
-def rebuild_article(article_metadata, bucket, output="JSON"):
+def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
-
-    It fetches the JSON for each of its pages from S3, and applies the text
-    rebuilding function corresponding to article's language.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
-    :param bucket: the s3 bucket where the pages are stored
-    :type bucket: `boto.s3.bucket.Bucket`
-    :return: a dictionary with the following keys: "id", "pages", "text",
-        "datetime", "title", "lang", "journal"
+    :return: a dictionary with the following keys: TBD
     :rtype: dict
     """
+    t = Timer()
     article_id = article_metadata["m"]["id"]
     logger.info(f'Started rebuilding article {article_id}')
     issue_id = "-".join(article_id.split('-')[:-1])
@@ -116,51 +146,53 @@ def rebuild_article(article_metadata, bucket, output="JSON"):
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
         for p in article_metadata["m"]["pp"]
     }
-    pages = s3_get_pages(issue_id, page_file_names, bucket)
     year, month, day = article_id.split('-')[1:4]
     d = datetime.datetime(int(year), int(month), int(day), 5, 0, 0)
 
     fulltext = ""
+    linebreaks = []
     article = {
         "id": article_id,
         # "series": None,
-        "pages": [],
+        "pages": article_metadata["m"]["pp"],
         "datetime": d.isoformat() + 'Z',
-        "title": article_metadata["m"]["t"],
-        "lang": article_metadata["m"]["l"],
-        "journal": article_metadata["m"]["pub"],
+        "lg": article_metadata["m"]["l"],
+        "ppreb": [],
+        "lb": []
+        # "journal": article_metadata["m"]["pub"],
     }
 
-    for page_no in page_file_names:
-        page = pages[page_file_names[page_no]]
-        regions = [
-            region
-            for region in page["r"]
-            if region["pOf"] == article_id
-        ]
+    if 't' in article_metadata:
+        article["title"]: article_metadata["m"]["t"]
+
+    if 'pub' in article_metadata:
+        article["pub"]: article_metadata["m"]["pub"]
+
+    for n, page_no in enumerate(article['pages']):
+
+        page = article_metadata['pprr'][n]
         tokens = [
-            token
-            for region in regions
+            [token for token in line["t"]]
+            for region in page
             for para in region["p"]
             for line in para["l"]
-            for token in line["t"]
         ]
 
-        # TODO: capture and store somewhere the line breaks
-        # see https://github.com/impresso/impresso-pycommons/issues/5
-
         if fulltext == "":
-            fulltext, regions = rebuild_text(tokens)
+            fulltext, regions, _linebreaks = rebuild_text(tokens)
         else:
-            fulltext, regions = rebuild_text(tokens, fulltext)
+            fulltext, regions, _linebreaks = rebuild_text(tokens, fulltext)
+
+        linebreaks += _linebreaks
 
         page_doc = {
             "id": page_file_names[page_no],
             "n": page_no,
             "regions": regions
         }
-        article["pages"].append(page_doc)
-    logger.info(f'Done rebuilding article {article_id}')
+        article["lb"] = linebreaks
+        article["ppreb"].append(page_doc)
+    logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
     article["text"] = fulltext
     return article
 
@@ -198,9 +230,6 @@ def main():
 
     bucket = get_bucket(bucket_name)
 
-    def _odict_to_ntuple(odict):
-        return IssueDir(**odict)
-
     if arguments["rebuild_articles"]:
         issues = impresso_iter_bucket(
             bucket.name,
@@ -211,14 +240,16 @@ def main():
         bag = bag.map(lambda x: IssueDir(**x))
         bag = bag.map(read_issue, bucket)
         bag = bag.starmap(read_issue_pages, bucket=bucket)
+        bag = bag.starmap(rejoin_articles)
+        bag = bag.flatten()
+        # TODO: check output_format
+        bag = bag.starmap(rebuild_for_solr)
 
         # attention, workaround: IssueDir cannot be pickled by `groupby`
-        bag = bag.map(lambda x: (x[0]._asdict(), x[1]))
-        # bag = bag.starmap(rejoin_articles)
-        # bag = bag.starmap(rebuild_articles)
+        # bag = bag.map(lambda x: (x[0]._asdict(), x[1]))
         # bag = bag.groupby(lambda x: x[0]['date'].year)
         # bag = bag.starmap(serialize_by_year)
-    
+
         with ProgressBar():
             result = bag.compute()
         assert result is not None
