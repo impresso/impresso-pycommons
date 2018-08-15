@@ -155,6 +155,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     page_root = page_soup.find("xmd-page")
     page_number = page_root.meta["page_no"]
 
+    # ---- TIFS ------
     if box_strategy == img_utils.BoxStrategy.tif.name:
         for f in page_root.datafiles.find_all('files'):
             if f['type'] == 'PAGE_IMG' and f['present'] == "1":
@@ -162,45 +163,93 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
                 dest_res = page_root.meta['images_resolution']
                 break
         if source_res and dest_res:
-            return int(source_res) / int(dest_res)
+            result = int(source_res) / int(dest_res)
+            logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
+                         f'page={page_xml}, img_source={img_source_name}')
+            return result
         else:
-            logger.info(f"Impossible to get resolution in case: tif"
-                        " in {issue_dir_path}, page {page_number}")
+            logger.error(f'Impossible to get resolution with {box_strategy} strategy'
+                         ' for issue={issue_dir_path}, page={page_xml}, img_source={img_source_name}')
             return None
 
+    # ---- PNGS HIGHEST ------
     elif box_strategy == img_utils.BoxStrategy.png_highest.name:
         if "_" not in img_source_name:
-            logger.info(f"Not valid png filename {img_source_name}")
+            logger.error(f"Not valid png filename {img_source_name} (issue={issue_dir_path}, page={page_xml})")
             return None
 
-        png_res = os.path.splitext(img_source_name)[0].split("_", 1)[-1]
-        olive_res = page_root.meta['images_resolution']
-        if png_res == olive_res:
-            return 1.0
-        else:
-            logger.info(f"Incompatible resolutions between highest png and olive indications \
-            in {issue_dir_path}, page {page_number}")
-            return None
+        # commenting out: it might be that even if the res are identical, Olive worked with another image
+        #png_res = os.path.splitext(img_source_name)[0].split("_", 1)[-1]
+        #olive_res = page_root.meta['images_resolution']
+        #if png_res == olive_res:
+        #    logger.debug(f'scale factor with {box_strategy} strategy = 1.0 for issue={issue_dir_path}, '
+        #                 f'page={page_xml}, img_source={img_source_name}')
+        #    return 1.0
+        #else:
+        #    logger.info(f"Incompatible resolutions between highest png and olive indications \
+        #    in {issue_dir_path}, page {page_number}")
+        #   return None
 
+        # take the resolution mentioned in the xml and compute scaling factor
+        source_res = os.path.splitext(img_source_name)[0].split("_", 1)[-1]
+        dest_res = page_root.meta['images_resolution']
+        result = int(source_res) / int(dest_res)
+        logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
+                     f'page={page_xml}, img_source={img_source_name}')
+        return result
+
+    # ---- PNGS uniq ------
     elif box_strategy == img_utils.BoxStrategy.png_uniq.name:
         # TODO if needed
         logger.info(f"Finally found a case of {png_uniq}, which is not ready yet")
 
+    # ---- JPG uniq ------
     elif box_strategy == img_utils.BoxStrategy.jpg_uniq.name:
         # get the x dimension of the unique jpg (from which jp2 was acquired)
         # and compare with olive's one
-        img_data = archive.read(img_source_name)
-        img = cv.imdecode(np.frombuffer(img_data, np.uint8), 1)
-        jpg_x_dim = img.shape[1]
+        #img_data = archive.read(img_source_name)
+        #img = cv.imdecode(np.frombuffer(img_data, np.uint8), 1)
+        #jpg_x_dim = img.shape[1]
+        #olive_x_dim = page_root.meta['page_width']
+        #if jpg_x_dim == int(olive_x_dim):
+        #   return 1.0
+        #else:
+            olive_x_dim = page_root.meta['page_width']
+            img_data = archive.read(img_source_name)
+            img = cv.imdecode(np.frombuffer(img_data, np.uint8), 1)
+            jpg_x_dim = img.shape[1]
+            result = int(olive_x_dim) / int(jpg_x_dim)
+            logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
+                         f'page={page_xml}, img_source={img_source_name}')
+            return result
 
-        olive_x_dim = page_root.meta['page_width']
-
-        if jpg_x_dim == int(olive_x_dim):
-            return 1.0
-        else:
-            logger.info("Incompatible resolutions between uniq jpg and olive indications"
-                        " in {issue_dir_path}, page {page_number}.")
+    # addendum for jpg highest
+    elif box_strategy == img_utils.BoxStrategy.jpg_highest.name:
+        if "_" not in img_source_name:
+            logger.info(f"Not valid jpg filename for {img_source_name} given {box_strategy} ")
             return None
+
+        #jpg_res = os.path.splitext(img_source_name)[0].split("_", 1)[-1]
+        #olive_res = page_root.meta['images_resolution']
+        #if jpg_res == olive_res:
+        #    return 1.0
+        else:
+            # take the resolution mentioned in the xml and compute scaling factor
+            # source_res = jpg_res
+            # dest_res = page_root.meta['images_resolution']
+            olive_x_dim = page_root.meta['page_width']
+            img_data = archive.read(img_source_name)
+            img = cv.imdecode(np.frombuffer(img_data, np.uint8), 1)
+            jpg_x_dim = img.shape[1]
+            result = int(olive_x_dim) / int(jpg_x_dim)
+            logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
+                         f'page={page_xml}, img_source={img_source_name}')
+            return result
+
+        # else:
+        #    logger.info(f"Incompatible resolutions between highest png and olive indications \
+        #    in {issue_dir_path}, page {page_number}")
+        #   return None
 
 
 def test():
@@ -225,8 +274,7 @@ def test():
     archive = os.path.join(base_dir, "TEST/1900/01/11/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.png_highest.name, "Img/Pg001_180.png")
-    print(sf)
+    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.png_highest.name, "1/Img/Pg001_180.png")
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("EXP-1889-07-01-a-p0001", newbox)
     print("\nCASE: png_highest - word 'NEUCHATEL'")
@@ -247,8 +295,37 @@ def test():
     print(f"Newbox: {newbox}")
     print(f"IIIF: {iiif}")
 
+    # png_highest, where it was actually not the highest which was used for OCR in Olive.
+    box = "758 354 958 410"  # Noiraigues in p15 Ar01500.xml
+    archive = "/Users/maudehrmann/Desktop/test-impresso/input/IMP/1983/09/21/Document.zip"
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("15/Pg015.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "15/Img/Pg015_100.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("IMP-1983-09-21-a-p0015", newbox)
+    print("\nCASE: png highest - word 'noiraigues'")
+    print(f"Scale factor: {sf}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}")
+
+    # jpg_highest, where it was actually not the highest which was used for OCR in Olive.
+    box = "1469 1472 1599 1519"  # collision in p15 Ar00100.xml
+    archive = "/Users/maudehrmann/Desktop/test-impresso/input/IMP/2006/01/25/Document.zip"
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_highest.name,
+                          "1/Img/Pg001_144.jpg")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("IMP-2006-01-25-a-p0001", newbox)
+    print("\nCASE: jpg highest - word 'collision'")
+    print(f"Scale factor: {sf}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}")
+
+
 
 if __name__ == '__main__':
-    # test()
-    box = "1096 454 1200 470"
-    print(convert_box(box))
+    test()
+   # box = "1096 454 1200 470"
+   # print(convert_box(box))
