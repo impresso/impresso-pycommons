@@ -15,7 +15,7 @@ boto = "*"
 numpy = "*"
 "boto3" = "*"
 docopt = "*"
-six = "*"
+lxml = "*"
 
 [dev-packages]
 jupyter = "*"
@@ -28,3 +28,4 @@ pytest = "*"
 tox = "*"
 graphviz = "*"
 deprecated = "*"
+six = "*"
