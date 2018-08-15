@@ -14,6 +14,9 @@ With `pip`:
 With `pipenv`:
 
     pipenv install -e git+ssh://git@github.com/impresso/impresso-pycommons.git#egg=impresso_commons
+    
+    with a specific branch:
+    pipenv install -e git+ssh://git@github.com/impresso/impresso-pycommons.git@mybranch#egg=impresso_commons
 
 
 ## Usage
