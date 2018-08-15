@@ -132,7 +132,7 @@ def _apply_datefilter(filter_dict, issues, year_only):
 
     for newspaper, dates in filter_dict.items():
         newspaper = newspaper.split("_")[-1] if "_" in newspaper else newspaper
-        
+
         # date filter is a range
         if isinstance(dates, str):
             start, end = dates.split("-")
@@ -155,7 +155,6 @@ def _apply_datefilter(filter_dict, issues, year_only):
         # date filter is not a range
         elif isinstance(dates, list):
             if not dates:
-                print(f"NP {newspaper}")
                 filtered_issues += [
                     i
                     for i in issues
@@ -227,7 +226,6 @@ def select_issues(config_dict, inp_dir):
 
         # apply date filter if not exclusion mode
         filtered_issues = _apply_datefilter(filter_dict, issues, year_only=year_flag) if not exclude_flag else issues
-        print(filtered_issues)
         return filtered_issues
 
 
