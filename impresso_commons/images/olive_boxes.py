@@ -226,7 +226,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     # addendum for jpg highest
     elif box_strategy == img_utils.BoxStrategy.jpg_highest.name:
         if "_" not in img_source_name:
-            logger.info(f"Not valid jpg filename for {img_source_name} given {box_strategy} ")
+            logger.error(f"Not valid jpg filename for {img_source_name} given {box_strategy} ")
             return None
 
         #jpg_res = os.path.splitext(img_source_name)[0].split("_", 1)[-1]
@@ -323,6 +323,19 @@ def test():
     print(f"Newbox: {newbox}")
     print(f"IIIF: {iiif}")
 
+    # LCE
+    box = "62 586 301 646"  # GOUVERNER in p1 Ar00101.xml
+    archive = "/Users/maudehrmann/Desktop/test-impresso/input/LCE/1981/10/02/Document.zip"
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name,
+                          "1/Img/Pg001.jpg")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("LCE-1981-10-02-a-p0001", newbox)
+    print("\nCASE: jpg uniq - word 'gouverner'")
+    print(f"Scale factor: {sf}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}")
 
 
 if __name__ == '__main__':
