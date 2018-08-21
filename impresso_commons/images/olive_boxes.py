@@ -165,17 +165,17 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         if source_res and dest_res:
             result = int(source_res) / int(dest_res)
             logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
-                         f'page={page_xml}, img_source={img_source_name}')
+                         f'page={page_number}, img_source={img_source_name}')
             return result
         else:
             logger.error(f'Impossible to get resolution with {box_strategy} strategy'
-                         ' for issue={issue_dir_path}, page={page_xml}, img_source={img_source_name}')
+                         ' for issue={issue_dir_path}, page={page_number}, img_source={img_source_name}')
             return None
 
     # ---- PNGS HIGHEST ------
     elif box_strategy == img_utils.BoxStrategy.png_highest.name:
         if "_" not in img_source_name:
-            logger.error(f"Not valid png filename {img_source_name} (issue={issue_dir_path}, page={page_xml})")
+            logger.error(f"Not valid png filename {img_source_name} (issue={issue_dir_path}, page={page_number})")
             return None
 
         # commenting out: it might be that even if the res are identical, Olive worked with another image
@@ -195,7 +195,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         dest_res = page_root.meta['images_resolution']
         result = int(source_res) / int(dest_res)
         logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
-                     f'page={page_xml}, img_source={img_source_name}')
+                     f'page={page_number}, img_source={img_source_name}')
         return result
 
     # ---- PNGS uniq ------
@@ -220,7 +220,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
             jpg_x_dim = img.shape[1]
             result = int(olive_x_dim) / int(jpg_x_dim)
             logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
-                         f'page={page_xml}, img_source={img_source_name}')
+                         f'page={page_number}, img_source={img_source_name}')
             return result
 
     # addendum for jpg highest
@@ -243,7 +243,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
             jpg_x_dim = img.shape[1]
             result = int(olive_x_dim) / int(jpg_x_dim)
             logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
-                         f'page={page_xml}, img_source={img_source_name}')
+                         f'page={page_number}, img_source={img_source_name}')
             return result
 
         # else:
