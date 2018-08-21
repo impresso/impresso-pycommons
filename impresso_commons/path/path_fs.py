@@ -246,7 +246,7 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
     dir_path, dirs, files = next(os.walk(base_dir))
     # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
     if journal_filter is None:
-        journal_dirs = [d for d in dirs if d.split("_")[-1] in KNOWN_JOURNALS]
+        filtrd_journals = [d for d in dirs if d.split("_")[-1] in KNOWN_JOURNALS]
     else:
         if not exclude:
             filtrd_journals = list(
@@ -256,7 +256,6 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
             filtrd_journals = list(
                 set(KNOWN_JOURNALS).difference(journal_filter)
             )
-        #journal_dirs = [d for d in dirs if d.split("_")[-1] in filtrd_journals]
 
     for journal in filtrd_journals:
         journal_path = os.path.join(base_dir, journal)
@@ -312,8 +311,7 @@ def detect_canonical_issues(base_dir, newspapers):
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
 
-    # workaround to deal with journal-level folders like: 01_GDL, 02_GDL
-    # journal_dirs = [d for d in dirs if d.split("_")[-1] == newspapers]
+    # workaround to deal with journal-level folders like: 01_GDL, 02_GDL 
     journal_dirs = [d for d in dirs if d in [d.split("_")[-1] for d in newspapers]]
 
     for journal in journal_dirs:
