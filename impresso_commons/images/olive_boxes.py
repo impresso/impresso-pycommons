@@ -244,6 +244,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
             result = int(olive_x_dim) / int(jpg_x_dim)
             logger.debug(f'scale factor with {box_strategy} strategy = {result} for issue={issue_dir_path}, '
                          f'page={page_number}, img_source={img_source_name}')
+            
             return result
 
         # else:
