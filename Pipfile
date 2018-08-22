@@ -1,12 +1,17 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+
 [requires]
+
 python_version = "3.6"
 
+
 [packages]
+
 smart-open = "*"
 dask = {extras = ["complete"]}
 opencv-python = "==3.4.0.12"
@@ -16,8 +21,11 @@ numpy = "*"
 "boto3" = "*"
 docopt = "*"
 six = "*"
+jsonlines = "*"
+
 
 [dev-packages]
+
 jupyter = "*"
 ipython = "*"
 ipdb = "*"
