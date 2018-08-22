@@ -11,33 +11,35 @@ import json
 import logging
 import os
 import shutil
-from functools import reduce
-from itertools import starmap
+
+import ipdb as pdb  # remove from production version
+from docopt import docopt
 
 import dask
 import dask.bag as db
-import ipdb as pdb  # remove from production version
-from dask import compute, delayed
+import jsonlines
 from dask.diagnostics import ProgressBar
-from dask.distributed import Client, progress
-from docopt import docopt
-
-from impresso_commons.path.path_fs import IssueDir, detect_issues
-from impresso_commons.path.path_s3 import (impresso_iter_bucket,
-                                           s3_detect_issues)
+from impresso_commons.path import parse_canonical_filename
+from impresso_commons.path.path_fs import IssueDir
+from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (read_issue, read_issue_pages,
                                            rejoin_articles)
 from impresso_commons.utils import Timer
-from impresso_commons.utils.s3 import (get_bucket, get_s3_connection,
-                                       get_s3_versions, s3_get_pages)
+from impresso_commons.utils.s3 import get_bucket
+from smart_open import smart_open
 
-dask.set_options(get=dask.threaded.get)
-
+dask.config.set(scheduler='threads')
 
 logger = logging.getLogger('impresso_commons')
 
 
-# TODO: transform into `serialize_by_year` then abandon
+TYPE_MAPPINGS = {
+    "article": "ar",
+    "advertisement": "ad",
+    "ad": "ad"
+}
+
+
 def serialize_article(article, output_format, output_dir):
     """Write the rebuilt article to disk in a given format (json or text).
 
@@ -90,39 +92,33 @@ def rebuild_text(lines, string=None):
         for n, token in enumerate(line):
 
             region = {}
-            region["coords"] = token["c"]
-            region["start"] = len(string)
-            region["surface"] = None
+            region["c"] = token["c"]
+            region["s"] = len(string)
 
             # if token is the last in a line
             if n == len(line) - 1:
-                linebreaks.append(region["start"] + len(token["tx"]))
+                linebreaks.append(region["s"] + len(token["tx"]))
 
             if "hy" in token:
-                region["length"] = len(token["tx"][:-1])
-                region["surface"] = token["tx"][:-1]
+                region["l"] = len(token["tx"][:-1])
 
             elif "nf" in token:
-                region["length"] = len(token["nf"])
+                region["l"] = len(token["nf"])
 
                 if "gn" in token and token["gn"]:
                     tmp = "{}".format(token["nf"])
-                    region["surface"] = token["tx"]
                     string += tmp
                 else:
                     tmp = "{} ".format(token["nf"])
-                    region["surface"] = token["tx"]
                     string += tmp
             else:
-                region["length"] = len(token["tx"])
+                region["l"] = len(token["tx"])
 
                 if "gn" in token and token["gn"]:
                     tmp = "{}".format(token["tx"])
-                    region["surface"] = tmp
                     string += tmp
                 else:
                     tmp = "{} ".format(token["tx"])
-                    region["surface"] = tmp
                     string += tmp
 
             regions.append(region)
@@ -148,27 +144,25 @@ def rebuild_for_solr(article_metadata):
     }
     year, month, day = article_id.split('-')[1:4]
     d = datetime.datetime(int(year), int(month), int(day), 5, 0, 0)
+    mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
 
     fulltext = ""
     linebreaks = []
     article = {
         "id": article_id,
         # "series": None,
-        "pages": article_metadata["m"]["pp"],
-        "datetime": d.isoformat() + 'Z',
+        "pp": article_metadata["m"]["pp"],
+        "d": d.isoformat() + 'Z',
         "lg": article_metadata["m"]["l"],
+        "tp": mapped_type,
         "ppreb": [],
         "lb": []
-        # "journal": article_metadata["m"]["pub"],
     }
 
-    if 't' in article_metadata:
-        article["title"]: article_metadata["m"]["t"]
+    if 't' in article_metadata["m"]:
+        article["t"] = article_metadata["m"]["t"]
 
-    if 'pub' in article_metadata:
-        article["pub"]: article_metadata["m"]["pub"]
-
-    for n, page_no in enumerate(article['pages']):
+    for n, page_no in enumerate(article['pp']):
 
         page = article_metadata['pprr'][n]
         tokens = [
@@ -188,13 +182,39 @@ def rebuild_for_solr(article_metadata):
         page_doc = {
             "id": page_file_names[page_no],
             "n": page_no,
-            "regions": regions
+            "t": regions
         }
         article["lb"] = linebreaks
         article["ppreb"].append(page_doc)
     logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
-    article["text"] = fulltext
+    article["ft"] = fulltext
     return article
+
+
+def serialize(sort_key, articles, output_dir=None):
+    """Serialize a bunch of articles into a compressed JSONLines archive.
+
+    :param sort_key: the key used to group articles (e.g. "GDL-1900")
+    :type sort_key: string
+    :param articles: a list of JSON documents, encoded as python dictionaries
+    :type: list of dict
+
+    NB: sort_key is the concatenation of newspaper ID and year (e.g. GDL-1900).
+    """
+    logger.info(f"Serializing {sort_key} (n = {len(articles)})")
+    newspaper, year = sort_key.split('-')
+    filename = f'{newspaper}-{year}.jsonl.bz2'
+    filepath = os.path.join(output_dir, filename)
+
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
+    with smart_open(filepath, 'wb') as fout:
+        writer = jsonlines.Writer(fout)
+        writer.write_all(articles)
+        writer.close()
+
+    return sort_key, filepath
 
 
 def main():
@@ -202,7 +222,7 @@ def main():
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
     outp_dir = arguments["--output-dir"]
-    output_format = arguments["--format"]
+    # output_format = arguments["--format"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
@@ -230,12 +250,22 @@ def main():
 
     bucket = get_bucket(bucket_name)
 
+    """
+    # there was a connection error issue with s3
+    config = {
+          "GDL": [1950, 1960],
+          "JDG": [1950, 1960]
+    }
+    """
+
     if arguments["rebuild_articles"]:
         issues = impresso_iter_bucket(
             bucket.name,
-            prefix="GDL/1950/01/",
+            # filter_config=config
+            prefix="GDL/195",
             item_type="issue"
         )
+        print(f'There are {len(issues)} issues to rebuild')
         bag = db.from_sequence(issues, 20)
         bag = bag.map(lambda x: IssueDir(**x))
         bag = bag.map(read_issue, bucket)
@@ -243,20 +273,19 @@ def main():
         bag = bag.starmap(rejoin_articles)
         bag = bag.flatten()
         # TODO: check output_format
-        bag = bag.starmap(rebuild_for_solr)
-
-        # attention, workaround: IssueDir cannot be pickled by `groupby`
-        # bag = bag.map(lambda x: (x[0]._asdict(), x[1]))
-        # bag = bag.groupby(lambda x: x[0]['date'].year)
-        # bag = bag.starmap(serialize_by_year)
+        bag = bag.map(rebuild_for_solr)
+        bag = bag.groupby(
+            lambda x: "{}-{}".format(
+                parse_canonical_filename(x["id"])[0],
+                parse_canonical_filename(x["id"])[1][0]
+            )
+        )
+        bag = bag.starmap(serialize, output_dir=outp_dir)
 
         with ProgressBar():
             result = bag.compute()
         assert result is not None
         pdb.set_trace()
-        # some Dask Fu for later
-        # bag.groupby(lambda x: "{}-{}".format(x['date'].year, x['date'].month)).starmap(lambda k, v: (k, len(v))).compute()
-        # rebuild_articles(issues, bucket.name, output_format, outp_dir)
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
