@@ -22,10 +22,7 @@ numpy = "*"
 docopt = "*"
 six = "*"
 jsonlines = "*"
-
-
-[dev-packages]
-
+lxml = "*"
 jupyter = "*"
 ipython = "*"
 ipdb = "*"
@@ -36,3 +33,4 @@ pytest = "*"
 tox = "*"
 graphviz = "*"
 deprecated = "*"
+six = "*"
