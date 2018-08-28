@@ -264,7 +264,7 @@ def main():
         issues = impresso_iter_bucket(
             bucket.name,
             # filter_config=config
-            prefix="GDL/195",
+            prefix="GDL/1950",
             item_type="issue"
         )
         print(f'There are {len(issues)} issues to rebuild')

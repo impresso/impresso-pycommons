@@ -26,6 +26,7 @@ setup(
         'opencv-python==3.4.0.12',
         'numpy',
         'smart_open',
-        'jsonlines'
+        'jsonlines',
+        'ipdb'
     ]
 )
