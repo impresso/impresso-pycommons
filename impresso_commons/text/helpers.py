@@ -54,27 +54,23 @@ def read_page(page_key, bucket):
 def read_issue_pages(issue, issue_json, bucket=None):
     """Read all pages of a given issue from S3 in parallel."""
 
-    bag = db.from_sequence(
-        [
-            os.path.join(
-                "/".join(issue.path.split('/')[:-1]),
-                f"{page}.json"
-            )
-            for page in issue_json["pp"]
-        ]
-    )
+    pages = []
 
-    bag = bag.map(read_page, bucket=bucket)
-    issue_json["pp"] = bag.compute()
-
+    for page in issue_json["pp"]:
+        page_key = os.path.join(
+            "/".join(issue.path.split('/')[:-1]),
+            f"{page}.json"
+        )
+        pages.append(
+            read_page(page_key, bucket=bucket)
+        )
+    issue_json['pp'] = pages
     return (issue, issue_json)
 
 
-# TODO: finish implementation
 def rejoin_articles(issue, issue_json):
-    # extract text regions and put them inside each article
-    # TODO: store the s3 version somewhere
-    bag = db.from_sequence([
+    logger.info(f"Rejoining pages for issue {issue.path}")
+    return [
         (
             article,
             [
@@ -84,10 +80,7 @@ def rejoin_articles(issue, issue_json):
         )
         for article in issue_json['i']
         if article['m']['tp'] != 'ad'
-    ])
-    bag = bag.starmap(pages_to_article)
-    result = bag.compute()
-    return result
+    ]
 
 
 def pages_to_article(article, pages):

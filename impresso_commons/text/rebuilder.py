@@ -23,12 +23,12 @@ from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (read_issue, read_issue_pages,
-                                           rejoin_articles)
+                                           rejoin_articles, pages_to_article)
 from impresso_commons.utils import Timer
 from impresso_commons.utils.s3 import get_bucket
 from smart_open import smart_open
 
-dask.config.set(scheduler='threads')
+#dask.config.set(scheduler='threads')
 
 logger = logging.getLogger('impresso_commons')
 
@@ -264,25 +264,25 @@ def main():
         issues = impresso_iter_bucket(
             bucket.name,
             # filter_config=config
-            prefix="GDL/195",
+            prefix="GDL/1950",
             item_type="issue"
         )
         print(f'There are {len(issues)} issues to rebuild')
-        bag = db.from_sequence(issues, 20)
-        bag = bag.map(lambda x: IssueDir(**x))
-        bag = bag.map(read_issue, bucket)
-        bag = bag.starmap(read_issue_pages, bucket=bucket)
-        bag = bag.starmap(rejoin_articles)
-        bag = bag.flatten()
-        # TODO: check output_format
-        bag = bag.map(rebuild_for_solr)
-        bag = bag.groupby(
-            lambda x: "{}-{}".format(
-                parse_canonical_filename(x["id"])[0],
-                parse_canonical_filename(x["id"])[1][0]
-            )
-        )
-        bag = bag.starmap(serialize, output_dir=outp_dir)
+        bag = db.from_sequence(issues, 20) \
+            .map(lambda x: IssueDir(**x)) \
+            .map(read_issue, bucket) \
+            .starmap(read_issue_pages, bucket=bucket) \
+            .starmap(rejoin_articles) \
+            .flatten() \
+            .starmap(pages_to_article) \
+            .map(rebuild_for_solr) \
+            .groupby(
+                lambda x: "{}-{}".format(
+                    parse_canonical_filename(x["id"])[0],
+                    parse_canonical_filename(x["id"])[1][0]
+                )
+            )\
+            .starmap(serialize, output_dir=outp_dir)
 
         with ProgressBar():
             result = bag.compute()
