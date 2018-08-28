@@ -267,6 +267,8 @@ def get_s3_versions(bucket_name, key_name):
 
     client = get_s3_resource()
 
+    # may be worth comparing with
+    # client.list_object_versions(prefix)
     versions = client.Bucket(bucket_name).\
         object_versions.filter(Prefix=key_name)
 

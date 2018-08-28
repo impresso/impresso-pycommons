@@ -191,6 +191,8 @@ def rebuild_for_solr(article_metadata):
     return article
 
 
+# try http://dask.pydata.org/en/latest/bag-api.html
+# use `to_textfiles`
 def serialize(sort_key, articles, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
