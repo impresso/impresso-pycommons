@@ -22,7 +22,7 @@ setup(
         'boto',
         'boto3',
         'bs4',
-        'opencv-python==3.4.0.12',
+        'opencv-python>=3.4.0.12',
         'numpy',
         'smart_open',
         'jsonlines'
