@@ -293,41 +293,30 @@ def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
 
 
 def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: True, config=None):
-    if config is None:
-        client = get_s3_client()
-        paginator = client.get_paginator("list_objects")
-        page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
-        keys = []
-        for page in page_iterator:
-            if "Contents" in page:
-                for key in page["Contents"]:
-                    keyString = key["Key"]
-                    if accept_key(keyString):
-                        keys.append(keyString)
-        return keys if keys else []
+    filtered_keys = []
 
-    else:
-        for np in config:
-            # if years are specified, take the range
-            if config[np]:
-                prefixes = [np + "/" + str(item) for item in range(config[np][0], config[np][1])]
-            # otherwise prefix is just the newspaper
-            else:
-                prefixes = [np]
-            print(f"Detecting items for {np} for years {prefixes}")
-            filtered_keys = []
-            for prefix in prefixes:
-                client = get_s3_client()
-                paginator = client.get_paginator("list_objects")
-                page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
-                keys = []
-                for page in page_iterator:
-                    if "Contents" in page:
-                        for key in page["Contents"]:
-                            keyString = key["Key"]
-                            if accept_key(keyString):
-                                filtered_keys.append(keyString)
-            return filtered_keys if filtered_keys else []
+    for np in config:
+        # if years are specified, take the range
+        if config[np]:
+            prefixes = [
+                np + "/" + str(item)
+                for item in range(config[np][0], config[np][1])
+            ]
+        # otherwise prefix is just the newspaper
+        else:
+            prefixes = [np]
+        print(f"Detecting items for {np} for years {prefixes}")
+        for prefix in prefixes:
+            client = get_s3_client()
+            paginator = client.get_paginator("list_objects")
+            page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=prefix)
+            for page in page_iterator:
+                if "Contents" in page:
+                    for key in page["Contents"]:
+                        keyString = key["Key"]
+                        if accept_key(keyString):
+                            filtered_keys.append(keyString)
+    return filtered_keys if filtered_keys else []
 
 
 def _key_to_issue(key_info):
@@ -371,7 +360,7 @@ def _key_to_contentitem(key_info):
 
 def _process_keys(key_name, bucket_name, item_type):
     build = _key_to_issue if item_type == "issue" else _key_to_contentitem
-    version_id, last_modified = get_s3_versions("canonical-rebuilt-versioned", key_name)[0]
+    version_id, last_modified = get_s3_versions(bucket_name, key_name)[0]
     return build((key_name, version_id, last_modified))
 
 

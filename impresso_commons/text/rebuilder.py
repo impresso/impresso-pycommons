@@ -11,34 +11,33 @@ import json
 import logging
 import os
 import shutil
-from functools import reduce
-from itertools import starmap
 
-import dask
-# import ipdb as pdb  # remove from production version
-from dask import compute, delayed
-from dask.distributed import Client, progress
+import ipdb as pdb  # remove from production version
 from docopt import docopt
 
-from impresso_commons.path.path_fs import IssueDir, detect_issues
-from impresso_commons.path.path_s3 import s3_detect_issues
-from impresso_commons.utils.s3 import (get_s3_connection, s3_get_articles,
-                                       s3_get_pages)
+import dask
+import dask.bag as db
+import jsonlines
+from dask.diagnostics import ProgressBar
+from impresso_commons.path import parse_canonical_filename
+from impresso_commons.path.path_fs import IssueDir
+from impresso_commons.path.path_s3 import impresso_iter_bucket
+from impresso_commons.text.helpers import (read_issue, read_issue_pages,
+                                           rejoin_articles)
+from impresso_commons.utils import Timer
+from impresso_commons.utils.s3 import get_bucket
+from smart_open import smart_open
 
-logger = logging.getLogger()
+dask.config.set(scheduler='threads')
+
+logger = logging.getLogger('impresso_commons')
 
 
-def get_bucket(name):
-    """Create an s3 connection and returns the requested bucket.
-
-    :param name: the bucket's name
-    :type name: string
-    :return: an s3 bucket
-    :rtype: `boto.s3.bucket.Bucket`
-    """
-    conn = get_s3_connection()
-    bucket = [b for b in conn.get_all_buckets() if b.name == name][0]
-    return bucket
+TYPE_MAPPINGS = {
+    "article": "ar",
+    "advertisement": "ad",
+    "ad": "ad"
+}
 
 
 def serialize_article(article, output_format, output_dir):
@@ -51,8 +50,6 @@ def serialize_article(article, output_format, output_dir):
     :param outp_dir:
     :type output_dir: string
     """
-
-    # TODO: create subdirs within the output dicrectory
 
     if output_format == "json":
         out_filename = os.path.join(output_dir, f"{article['id']}.json")
@@ -80,43 +77,64 @@ def serialize_article(article, output_format, output_dir):
     return
 
 
-def rebuild_text(tokens, string=None):
+def rebuild_text(lines, string=None):
     """The text rebuilding function."""
 
-    def get_space(token):
-        return " "
-
     regions = []
+    linebreaks = []
 
     if string is None:
         string = ""
 
-    for token in tokens:
-        region = {}
-        region["coords"] = token["c"]
-        region["start"] = len(string)
-        region["length"] = len(token["tx"])
-        string += "{} ".format(token["tx"])
-        regions.append(region)
-        logger.debug(token["tx"])
+    # in order to be able to keep line break information
+    # we iterate over a list of lists (lines of tokens)
+    for line in lines:
+        for n, token in enumerate(line):
 
-    return (string, regions)
+            region = {}
+            region["c"] = token["c"]
+            region["s"] = len(string)
+
+            # if token is the last in a line
+            if n == len(line) - 1:
+                linebreaks.append(region["s"] + len(token["tx"]))
+
+            if "hy" in token:
+                region["l"] = len(token["tx"][:-1])
+
+            elif "nf" in token:
+                region["l"] = len(token["nf"])
+
+                if "gn" in token and token["gn"]:
+                    tmp = "{}".format(token["nf"])
+                    string += tmp
+                else:
+                    tmp = "{} ".format(token["nf"])
+                    string += tmp
+            else:
+                region["l"] = len(token["tx"])
+
+                if "gn" in token and token["gn"]:
+                    tmp = "{}".format(token["tx"])
+                    string += tmp
+                else:
+                    tmp = "{} ".format(token["tx"])
+                    string += tmp
+
+            regions.append(region)
+
+    return (string, regions, linebreaks)
 
 
-def rebuild_article(article_metadata, bucket, output="JSON"):
+def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
-
-    It fetches the JSON for each of its pages from S3, and applies the text
-    rebuilding function corresponding to article's language.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
-    :param bucket: the s3 bucket where the pages are stored
-    :type bucket: `boto.s3.bucket.Bucket`
-    :return: a dictionary with the following keys: "id", "pages", "text",
-        "datetime", "title", "lang", "journal"
+    :return: a dictionary with the following keys: TBD
     :rtype: dict
     """
+    t = Timer()
     article_id = article_metadata["m"]["id"]
     logger.info(f'Started rebuilding article {article_id}')
     issue_id = "-".join(article_id.split('-')[:-1])
@@ -124,93 +142,81 @@ def rebuild_article(article_metadata, bucket, output="JSON"):
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
         for p in article_metadata["m"]["pp"]
     }
-    pages = s3_get_pages(issue_id, page_file_names, bucket)
     year, month, day = article_id.split('-')[1:4]
     d = datetime.datetime(int(year), int(month), int(day), 5, 0, 0)
+    mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
 
     fulltext = ""
+    linebreaks = []
     article = {
         "id": article_id,
         # "series": None,
-        "pages": [],
-        "datetime": d.isoformat() + 'Z',
-        "title": article_metadata["m"]["t"],
-        "lang": article_metadata["m"]["l"],
-        "journal": article_metadata["m"]["pub"],
+        "pp": article_metadata["m"]["pp"],
+        "d": d.isoformat() + 'Z',
+        "lg": article_metadata["m"]["l"],
+        "tp": mapped_type,
+        "ppreb": [],
+        "lb": []
     }
 
-    for page_no in page_file_names:
-        page = pages[page_file_names[page_no]]
-        regions = [
-            region
-            for region in page["r"]
-            if region["pOf"] == article_id
-        ]
+    if 't' in article_metadata["m"]:
+        article["t"] = article_metadata["m"]["t"]
+
+    for n, page_no in enumerate(article['pp']):
+
+        page = article_metadata['pprr'][n]
         tokens = [
-            token
-            for region in regions
+            [token for token in line["t"]]
+            for region in page
             for para in region["p"]
             for line in para["l"]
-            for token in line["t"]
-            # TODO: handle better hyphenated words
         ]
 
         if fulltext == "":
-            fulltext, regions = rebuild_text(tokens)
+            fulltext, regions, _linebreaks = rebuild_text(tokens)
         else:
-            fulltext, regions = rebuild_text(tokens, fulltext)
+            fulltext, regions, _linebreaks = rebuild_text(tokens, fulltext)
+
+        linebreaks += _linebreaks
 
         page_doc = {
             "id": page_file_names[page_no],
             "n": page_no,
-            "regions": regions
+            "t": regions
         }
-        article["pages"].append(page_doc)
-    logger.info(f'Done rebuilding article {article_id}')
-    article["text"] = fulltext
+        article["lb"] = linebreaks
+        article["ppreb"].append(page_doc)
+    logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
+    article["ft"] = fulltext
     return article
 
 
-# TODO: implement
-def rebuild_pages(issues, bucket, output_format):
-    pass
+# try http://dask.pydata.org/en/latest/bag-api.html
+# use `to_textfiles`
+def serialize(sort_key, articles, output_dir=None):
+    """Serialize a bunch of articles into a compressed JSONLines archive.
 
+    :param sort_key: the key used to group articles (e.g. "GDL-1900")
+    :type sort_key: string
+    :param articles: a list of JSON documents, encoded as python dictionaries
+    :type: list of dict
 
-def rebuild_articles(issues, bucket_name, output_format, output_dir):
-    """A proxy function that distributes the work in parallel."""
-    bucket = get_bucket(bucket_name)
-    articles_by_issue = starmap(
-        s3_get_articles,
-        [(issue, bucket) for issue in issues]
-    )
+    NB: sort_key is the concatenation of newspaper ID and year (e.g. GDL-1900).
+    """
+    logger.info(f"Serializing {sort_key} (n = {len(articles)})")
+    newspaper, year = sort_key.split('-')
+    filename = f'{newspaper}-{year}.jsonl.bz2'
+    filepath = os.path.join(output_dir, filename)
 
-    all_articles = reduce(lambda x, y: x + y, articles_by_issue)
-    print(f'There are {len(all_articles)} articles to rebuild')
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
 
-    tasks = [
-        rebuild_and_serialize(article, bucket, output_format, output_dir)
-        for article in all_articles
-    ]
+    with smart_open(filepath, 'wb') as fout:
+        writer = jsonlines.Writer(fout)
+        writer.write_all(articles)
+        writer.close()
 
-    client = Client(processes=False)
-    futures = client.compute(tasks)
-    progress(futures)
-    # return c.gather(futures)
-    return
-
-
-@delayed
-def rebuild_and_serialize(article_metadata, bucket, output_format, output_dir):
-    """Rebuild the running text of an article and serialize the output."""
-    try:
-        r_article = rebuild_article(article_metadata, bucket, output_format)
-        serialize_article(r_article, output_format, output_dir)
-    except Exception as e:
-        logger.error("Processing of article {} failed with error {}".format(
-            article_metadata["m"]["id"],
-            e
-        ))
-    return
+    return sort_key, filepath
 
 
 def main():
@@ -218,7 +224,7 @@ def main():
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
     outp_dir = arguments["--output-dir"]
-    output_format = arguments["--format"]
+    # output_format = arguments["--format"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
@@ -246,9 +252,42 @@ def main():
 
     bucket = get_bucket(bucket_name)
 
+    """
+    # there was a connection error issue with s3
+    config = {
+          "GDL": [1950, 1960],
+          "JDG": [1950, 1960]
+    }
+    """
+
     if arguments["rebuild_articles"]:
-        issues = s3_detect_issues(bucket, prefix="IMP/1950/05/")
-        rebuild_articles(issues, bucket.name, output_format, outp_dir)
+        issues = impresso_iter_bucket(
+            bucket.name,
+            # filter_config=config
+            prefix="GDL/195",
+            item_type="issue"
+        )
+        print(f'There are {len(issues)} issues to rebuild')
+        bag = db.from_sequence(issues, 20)
+        bag = bag.map(lambda x: IssueDir(**x))
+        bag = bag.map(read_issue, bucket)
+        bag = bag.starmap(read_issue_pages, bucket=bucket)
+        bag = bag.starmap(rejoin_articles)
+        bag = bag.flatten()
+        # TODO: check output_format
+        bag = bag.map(rebuild_for_solr)
+        bag = bag.groupby(
+            lambda x: "{}-{}".format(
+                parse_canonical_filename(x["id"])[0],
+                parse_canonical_filename(x["id"])[1][0]
+            )
+        )
+        bag = bag.starmap(serialize, output_dir=outp_dir)
+
+        with ProgressBar():
+            result = bag.compute()
+        assert result is not None
+        pdb.set_trace()
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")

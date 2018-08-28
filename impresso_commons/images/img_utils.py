@@ -5,6 +5,8 @@
 from enum import Enum
 from collections import defaultdict
 import os
+import cv2 as cv
+import numpy as np
 
 __author__ = "maudehrmann"
 
@@ -14,6 +16,7 @@ class BoxStrategy(Enum):
     png_highest = "png_highest"
     png_uniq = "png_uniq"
     jpg_uniq = "jpg_uniq"
+    jpg_highest = "jpg_highest"
 
 
 def get_img_from_archive(archive, path_checker, ext_checker, name_checker=None):
@@ -48,6 +51,7 @@ def get_tif(tifs, page_digit):
 
 def get_jpg(jpgs, page_digit):
     # jpg files have the form of /Img/Pg006.jpg'
+    # addendum: jpg files can also have various resolution: Pg010.jpg, Pg010_120.jpg, Pg010_144.jpg
     if not jpgs:
         return None
     else:
@@ -81,3 +85,9 @@ def get_png(pngs, page_digit):
             return png_paths[0]
         else:
             return None
+
+
+def get_imgdimensions(image_data):
+    """ Returns image height and width"""
+    img = cv.imdecode(np.frombuffer(image_data, np.uint8), 1)
+    return tuple(img.shape[0:2])  # todo: check here which values to return
