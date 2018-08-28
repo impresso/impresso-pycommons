@@ -246,7 +246,7 @@ def main():
     bucket = get_bucket(bucket_name)
 
     if arguments["rebuild_articles"]:
-        issues = s3_detect_issues(bucket, prefix="IMP/1950/05/")
+        issues = s3_detect_issues(bucket, prefix="GDL/195")
         rebuild_articles(issues, bucket.name, output_format, outp_dir)
 
     elif arguments["rebuild_pages"]:
