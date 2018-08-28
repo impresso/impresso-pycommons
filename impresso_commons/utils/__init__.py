@@ -13,6 +13,7 @@ import dask
 from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 from dask.multiprocessing import get as mp_get
+import multiprocessing
 
 
 def executetask(tasks, parallel_execution):
@@ -97,5 +98,17 @@ class Timer:
 
     def stop(self):
         elapsed_time = time.time() - self.start
-        self.intermediate = time.time()
         return str(timedelta(seconds=elapsed_time))
+
+
+def _get_cores():
+    nb = multiprocessing.cpu_count()
+    if nb >= 48:
+        return nb - 10
+    else:
+        return nb
+
+def chunk(list, chunksize):
+    """Yield successive n-sized chunks from list."""
+    for i in range(0, len(list), chunksize):
+        yield list[i:i + chunksize]

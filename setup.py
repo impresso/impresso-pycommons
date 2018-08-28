@@ -18,12 +18,14 @@ setup(
     packages=find_packages(),
     long_description=DESCRIPTION,
     install_requires=[
-        'dask',
+        'dask[complete]',
         'boto',
         'boto3',
         'bs4',
+        'deprecated',
         'opencv-python==3.4.0.12',
         'numpy',
-        'smart_open'
+        'smart_open',
+        'jsonlines'
     ]
 )
