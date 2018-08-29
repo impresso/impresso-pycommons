@@ -4,7 +4,6 @@ Warning: 2 boto libraries are used, and need to be kept until third party lib de
 """
 
 import os
-import ipdb as pdb
 import logging
 import json
 import boto

@@ -1,8 +1,8 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> (--output-dir=<od> | --output-bucket=<ob>) [--verbose --clear --format=<f>]
-    rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> (--output-dir=<od> | --output-bucket=<ob>) [--verbose --clear --format=<f>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--output-bucket=<ob> --verbose --clear --format=<f>]
+    rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> --output-dir=<od> [--output-bucket=<ob> --verbose --clear --format=<f>]
 """  # noqa: E501
 
 import codecs
@@ -12,23 +12,20 @@ import logging
 import os
 import shutil
 
-import ipdb as pdb  # remove from production version
-from docopt import docopt
-
-import dask
+# import dask
 import dask.bag as db
 import jsonlines
 from dask.diagnostics import ProgressBar
+from docopt import docopt
+from smart_open import smart_open
+
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
-from impresso_commons.text.helpers import (read_issue, read_issue_pages,
-                                           rejoin_articles, pages_to_article)
+from impresso_commons.text.helpers import (pages_to_article, read_issue,
+                                           read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer
-from impresso_commons.utils.s3 import get_bucket
-from smart_open import smart_open
-
-#dask.config.set(scheduler='threads')
+from impresso_commons.utils.s3 import get_bucket, get_s3_resource
 
 logger = logging.getLogger('impresso_commons')
 
@@ -216,14 +213,82 @@ def serialize(sort_key, articles, output_dir=None):
         writer.write_all(articles)
         writer.close()
 
+    # return also number of articles?
     return sort_key, filepath
+
+
+def upload(sort_key, filepath, bucket_name=None):
+    # create connection with bucket
+    # copy contents to s3 key
+    newspaper, year = sort_key.split('-')
+    key_name = "{}/{}".format(
+        newspaper,
+        os.path.basename(filepath)
+    )
+    s3 = get_s3_resource()
+    try:
+        bucket = s3.Bucket(bucket_name)
+        bucket.upload_file(filepath, key_name)
+        logger.info(f'Uploaded {filepath} to {key_name}')
+        return True, filepath
+    except Exception as e:
+        logger.error(e)
+        logger.error(f'The upoload of {filepath} failed with error {e}')
+        return False, filepath
+
+
+def cleanup(success, filepath):
+    if success:
+        os.remove(filepath)
+        logger.info(f'Removed temporary file {filepath}')
+    else:
+        logger.info(f'Not removing {filepath} as upload has failed')
+
+
+def rebuild_issues(
+        issues,
+        input_bucket,
+        output_dir,
+        output_bucket,
+        clear_output
+):
+    """TODO"""
+    print(f'There are {len(issues)} issues to rebuild')
+    bag = db.from_sequence(issues, 40) \
+        .map(lambda x: IssueDir(**x)) \
+        .map(read_issue, input_bucket) \
+        .starmap(read_issue_pages, bucket=input_bucket) \
+        .starmap(rejoin_articles) \
+        .flatten() \
+        .starmap(pages_to_article) \
+        .map(rebuild_for_solr) \
+        .groupby(
+            lambda x: "{}-{}".format(
+                parse_canonical_filename(x["id"])[0],  # e.g. GDL
+                parse_canonical_filename(x["id"])[1][0][:3]  # e.g. 195
+            )
+        )\
+        .starmap(serialize, output_dir=output_dir)
+
+    if output_bucket is not None:
+        bag = bag.starmap(upload, bucket_name=output_bucket)
+
+        if clear_output:
+            bag = bag.starmap(cleanup)
+
+    with ProgressBar():
+        result = bag.compute()
+
+    return result
 
 
 def main():
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
+    output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
+    filter_config_file = arguments["--filter-config"]
     # output_format = arguments["--format"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
@@ -250,42 +315,30 @@ def main():
             shutil.rmtree(outp_dir)
             os.mkdir(outp_dir)
 
+    # there was a connection error issue with s3
+    with open(filter_config_file, 'r') as file:
+        config = json.load(file)
+
     bucket = get_bucket(bucket_name)
 
-    """
-    # there was a connection error issue with s3
-    config = {
-          "GDL": [1950, 1960],
-          "JDG": [1950, 1960]
-    }
-    """
-
     if arguments["rebuild_articles"]:
+
+        print('Retrieving issues...')
         issues = impresso_iter_bucket(
-            bucket.name,
-            # filter_config=config
-            prefix="GDL/1950",
+            bucket_name,
+            filter_config=config,
+            # prefix="GDL/1950/01",
             item_type="issue"
         )
-        print(f'There are {len(issues)} issues to rebuild')
-        bag = db.from_sequence(issues, 20) \
-            .map(lambda x: IssueDir(**x)) \
-            .map(read_issue, bucket) \
-            .starmap(read_issue_pages, bucket=bucket) \
-            .starmap(rejoin_articles) \
-            .flatten() \
-            .starmap(pages_to_article) \
-            .map(rebuild_for_solr) \
-            .groupby(
-                lambda x: "{}-{}".format(
-                    parse_canonical_filename(x["id"])[0],
-                    parse_canonical_filename(x["id"])[1][0]
-                )
-            )\
-            .starmap(serialize, output_dir=outp_dir)
 
-        with ProgressBar():
-            result = bag.compute()
+        result = rebuild_issues(
+            issues,
+            bucket,
+            outp_dir,
+            output_bucket_name,
+            clear_output
+        )
+
         assert result is not None
 
     elif arguments["rebuild_pages"]:

@@ -1,0 +1,2 @@
+2018-08-29 12:26:10,059 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-08-29 12:26:11,739 impresso_commons.path.path_s3 INFO     Start processing key.
