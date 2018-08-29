@@ -177,7 +177,7 @@ def rebuild_for_solr(article_metadata):
         linebreaks += _linebreaks
 
         page_doc = {
-            "id": page_file_names[page_no],
+            "id": page_file_names[page_no].replace('.json', ''),
             "n": page_no,
             "t": regions
         }
@@ -188,8 +188,6 @@ def rebuild_for_solr(article_metadata):
     return article
 
 
-# try http://dask.pydata.org/en/latest/bag-api.html
-# use `to_textfiles`
 def serialize(sort_key, articles, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
@@ -253,6 +251,12 @@ def rebuild_issues(
         clear_output
 ):
     """TODO"""
+
+    def has_problem(article):
+        if article['has_problem']:
+            logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
+        return not article['has_problem']
+
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues, 40) \
         .map(lambda x: IssueDir(**x)) \
@@ -260,7 +264,8 @@ def rebuild_issues(
         .starmap(read_issue_pages, bucket=input_bucket) \
         .starmap(rejoin_articles) \
         .flatten() \
-        .starmap(pages_to_article) \
+        .starmap(pages_to_article)\
+        .filter(has_problem) \
         .map(rebuild_for_solr) \
         .groupby(
             lambda x: "{}-{}".format(
@@ -327,7 +332,7 @@ def main():
         issues = impresso_iter_bucket(
             bucket_name,
             filter_config=config,
-            # prefix="GDL/1950/01",
+            # prefix="GDL/1948/09/03",
             item_type="issue"
         )
 
@@ -340,7 +345,7 @@ def main():
         )
 
         assert result is not None
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
