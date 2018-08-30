@@ -47,7 +47,7 @@ def read_page(page_key, bucket):
         k.close()
         return page_json
     except Exception as e:
-        print(f'There was a problem reading {page_key}: {e}')
+        logger.error(f'There was a problem reading {page_key}: {e}')
         return None
 
 
@@ -85,15 +85,19 @@ def rejoin_articles(issue, issue_json):
 
 def pages_to_article(article, pages):
     """Return all text regions belonging to a given article."""
-
-    art_id = article['m']['id']
-    logger.info("Extracting text regions for article {}".format(art_id))
-    regions_by_page = []
-    for page in pages:
-        regions_by_page.append([
-            region
-            for region in page["r"]
-            if region["pOf"] == art_id
-        ])
-    article['pprr'] = regions_by_page
-    return article
+    try:
+        art_id = article['m']['id']
+        logger.info("Extracting text regions for article {}".format(art_id))
+        regions_by_page = []
+        for page in pages:
+            regions_by_page.append([
+                region
+                for region in page["r"]
+                if region["pOf"] == art_id
+            ])
+        article['has_problem'] = False
+        article['pprr'] = regions_by_page
+        return article
+    except Exception as e:
+        article['has_problem'] = True
+        return article

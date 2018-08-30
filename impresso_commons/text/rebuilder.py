@@ -27,7 +27,7 @@ from impresso_commons.text.helpers import (pages_to_article, read_issue,
 from impresso_commons.utils import Timer
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
 
-logger = logging.getLogger('impresso_commons')
+logger = logging.getLogger(__name__)
 
 
 TYPE_MAPPINGS = {
@@ -177,7 +177,7 @@ def rebuild_for_solr(article_metadata):
         linebreaks += _linebreaks
 
         page_doc = {
-            "id": page_file_names[page_no],
+            "id": page_file_names[page_no].replace('.json', ''),
             "n": page_no,
             "t": regions
         }
@@ -188,8 +188,6 @@ def rebuild_for_solr(article_metadata):
     return article
 
 
-# try http://dask.pydata.org/en/latest/bag-api.html
-# use `to_textfiles`
 def serialize(sort_key, articles, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
@@ -233,7 +231,7 @@ def upload(sort_key, filepath, bucket_name=None):
         return True, filepath
     except Exception as e:
         logger.error(e)
-        logger.error(f'The upoload of {filepath} failed with error {e}')
+        logger.error(f'The upload of {filepath} failed with error {e}')
         return False, filepath
 
 
@@ -249,18 +247,25 @@ def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        output_bucket,
-        clear_output
+        output_bucket
 ):
     """TODO"""
+
+    def has_problem(article):
+        if article['has_problem']:
+            logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
+        return not article['has_problem']
+
     print(f'There are {len(issues)} issues to rebuild')
-    bag = db.from_sequence(issues, 40) \
-        .map(lambda x: IssueDir(**x)) \
+    bag = db.from_sequence(issues)
+    logger.info(f"Number of partitions: {bag.npartitions}")
+    bag = bag.map(lambda x: IssueDir(**x)) \
         .map(read_issue, input_bucket) \
         .starmap(read_issue_pages, bucket=input_bucket) \
         .starmap(rejoin_articles) \
         .flatten() \
-        .starmap(pages_to_article) \
+        .starmap(pages_to_article)\
+        .filter(has_problem) \
         .map(rebuild_for_solr) \
         .groupby(
             lambda x: "{}-{}".format(
@@ -268,13 +273,8 @@ def rebuild_issues(
                 parse_canonical_filename(x["id"])[1][0][:3]  # e.g. 195
             )
         )\
-        .starmap(serialize, output_dir=output_dir)
-
-    if output_bucket is not None:
-        bag = bag.starmap(upload, bucket_name=output_bucket)
-
-        if clear_output:
-            bag = bag.starmap(cleanup)
+        .starmap(serialize, output_dir=output_dir)\
+        .starmap(upload, bucket_name=output_bucket)
 
     with ProgressBar():
         result = bag.compute()
@@ -295,6 +295,7 @@ def main():
 
     # Initialise the logger
     global logger
+    logger = logging.getLogger()
     logger.setLevel(log_level)
 
     if(log_file is not None):
@@ -327,16 +328,16 @@ def main():
         issues = impresso_iter_bucket(
             bucket_name,
             filter_config=config,
-            # prefix="GDL/1950/01",
+            # prefix="GDL/1948/09/03",
             item_type="issue"
         )
 
+        # TODO: add support for `output_format`
         result = rebuild_issues(
             issues,
             bucket,
             outp_dir,
-            output_bucket_name,
-            clear_output
+            output_bucket_name
         )
 
         assert result is not None
