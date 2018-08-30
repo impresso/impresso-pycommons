@@ -1,11 +1,12 @@
 import logging
 import pkg_resources
 
-logger = logging.getLogger('impresso_commons')
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # suppressing botocore's verbose logging
 logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('smart_open').setLevel(logging.WARNING)
 
 log_file = pkg_resources.resource_filename(
     'impresso_commons',

@@ -27,7 +27,7 @@ from impresso_commons.text.helpers import (pages_to_article, read_issue,
 from impresso_commons.utils import Timer
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
 
-logger = logging.getLogger('impresso_commons')
+logger = logging.getLogger(__name__)
 
 
 TYPE_MAPPINGS = {
@@ -231,7 +231,7 @@ def upload(sort_key, filepath, bucket_name=None):
         return True, filepath
     except Exception as e:
         logger.error(e)
-        logger.error(f'The upoload of {filepath} failed with error {e}')
+        logger.error(f'The upload of {filepath} failed with error {e}')
         return False, filepath
 
 
@@ -247,8 +247,7 @@ def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        output_bucket,
-        clear_output
+        output_bucket
 ):
     """TODO"""
 
@@ -258,8 +257,9 @@ def rebuild_issues(
         return not article['has_problem']
 
     print(f'There are {len(issues)} issues to rebuild')
-    bag = db.from_sequence(issues, 40) \
-        .map(lambda x: IssueDir(**x)) \
+    bag = db.from_sequence(issues)
+    logger.info(f"Number of partitions: {bag.npartitions}")
+    bag = bag.map(lambda x: IssueDir(**x)) \
         .map(read_issue, input_bucket) \
         .starmap(read_issue_pages, bucket=input_bucket) \
         .starmap(rejoin_articles) \
@@ -273,13 +273,8 @@ def rebuild_issues(
                 parse_canonical_filename(x["id"])[1][0][:3]  # e.g. 195
             )
         )\
-        .starmap(serialize, output_dir=output_dir)
-
-    if output_bucket is not None:
-        bag = bag.starmap(upload, bucket_name=output_bucket)
-
-        if clear_output:
-            bag = bag.starmap(cleanup)
+        .starmap(serialize, output_dir=output_dir)\
+        .starmap(upload, bucket_name=output_bucket)
 
     with ProgressBar():
         result = bag.compute()
@@ -300,6 +295,7 @@ def main():
 
     # Initialise the logger
     global logger
+    logger = logging.getLogger()
     logger.setLevel(log_level)
 
     if(log_file is not None):
@@ -336,16 +332,18 @@ def main():
             item_type="issue"
         )
 
+        # TODO: add support for `output_format`
         result = rebuild_issues(
             issues,
             bucket,
             outp_dir,
-            output_bucket_name,
-            clear_output
+            output_bucket_name
         )
 
         assert result is not None
-        # import pdb; pdb.set_trace()
+
+        if clear_output is not None and clear_output:
+            shutil.rmtree(outp_dir)
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")

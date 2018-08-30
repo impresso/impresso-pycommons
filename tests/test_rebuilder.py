@@ -23,7 +23,6 @@ def test_rebuild_issues():
         bucket,
         outp_dir,
         None,  # do not upload to s3
-        True
     )
 
     assert result is not None
