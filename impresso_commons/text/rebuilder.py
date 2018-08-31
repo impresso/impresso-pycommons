@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--output-bucket=<ob> --verbose --clear --format=<f>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--scheduler=<sch> --output-bucket=<ob> --verbose --clear --format=<f>]
     rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> --output-dir=<od> [--output-bucket=<ob> --verbose --clear --format=<f>]
 """  # noqa: E501
 
@@ -12,13 +12,13 @@ import logging
 import os
 import shutil
 
+from docopt import docopt
+
 # import dask
 import dask.bag as db
 import jsonlines
 from dask.diagnostics import ProgressBar
-from docopt import docopt
-from smart_open import smart_open
-
+from dask.distributed import Client, LocalCluster, progress
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
@@ -26,6 +26,7 @@ from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
+from smart_open import smart_open
 
 logger = logging.getLogger(__name__)
 
@@ -199,6 +200,7 @@ def serialize(sort_key, articles, output_dir=None):
     NB: sort_key is the concatenation of newspaper ID and year (e.g. GDL-1900).
     """
     logger.info(f"Serializing {sort_key} (n = {len(articles)})")
+    print(f"Serializing {sort_key} (n = {len(articles)})")
     newspaper, year = sort_key.split('-')
     filename = f'{newspaper}-{year}.jsonl.bz2'
     filepath = os.path.join(output_dir, filename)
@@ -259,7 +261,7 @@ def rebuild_issues(
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
     logger.info(f"Number of partitions: {bag.npartitions}")
-    bag = bag.map(lambda x: IssueDir(**x)) \
+    process_bag = bag.map(lambda x: IssueDir(**x)) \
         .map(read_issue, input_bucket) \
         .starmap(read_issue_pages, bucket=input_bucket) \
         .starmap(rejoin_articles) \
@@ -270,19 +272,20 @@ def rebuild_issues(
         .groupby(
             lambda x: "{}-{}".format(
                 parse_canonical_filename(x["id"])[0],  # e.g. GDL
-                parse_canonical_filename(x["id"])[1][0][:3]  # e.g. 195
+                parse_canonical_filename(x["id"])[1][0]  # e.g. 1950
             )
         )\
         .starmap(serialize, output_dir=output_dir)\
         .starmap(upload, bucket_name=output_bucket)
 
-    with ProgressBar():
-        result = bag.compute()
-
+    x = process_bag.persist()
+    progress(x)
+    result = x.compute()
     return result
 
 
 def main():
+
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
@@ -290,13 +293,13 @@ def main():
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
     # output_format = arguments["--format"]
+    dask_scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
-    # Initialise the logger
-    global logger
-    logger = logging.getLogger()
-    logger.setLevel(log_level)
+    # Initialise the loggerr
+    root_logger = logging.getLogger('impresso_commons')
+    root_logger.setLevel(log_level)
 
     if(log_file is not None):
         handler = logging.FileHandler(filename=log_file, mode='w')
@@ -307,8 +310,16 @@ def main():
         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
     )
     handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.info("Logger successfully initialised")
+    root_logger.addHandler(handler)
+    root_logger.info("Logger successfully initialised")
+
+    # start the dask local cluster
+    if dask_scheduler is None:
+        client = Client()
+    else:
+        client = Client(dask_scheduler)
+
+    root_logger.info(f"Dask cluster: {client}")
 
     # clean output directory if existing
     if outp_dir is not None and os.path.exists(outp_dir):
@@ -324,23 +335,24 @@ def main():
 
     if arguments["rebuild_articles"]:
 
-        print('Retrieving issues...')
-        issues = impresso_iter_bucket(
-            bucket_name,
-            filter_config=config,
-            # prefix="GDL/1948/09/03",
-            item_type="issue"
-        )
+        for n, batch in enumerate(config):
+            print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
+            print('Retrieving issues...')
+            issues = impresso_iter_bucket(
+                bucket_name,
+                filter_config=batch,
+                # prefix="GDL/1948/09/03",
+                item_type="issue"
+            )
 
-        # TODO: add support for `output_format`
-        result = rebuild_issues(
-            issues,
-            bucket,
-            outp_dir,
-            output_bucket_name
-        )
-
-        assert result is not None
+            # TODO: add support for `output_format`
+            r = rebuild_issues(
+                issues,
+                bucket,
+                outp_dir,
+                output_bucket_name
+            )
+            import ipdb; ipdb.set_trace()
 
         if clear_output is not None and clear_output:
             shutil.rmtree(outp_dir)
