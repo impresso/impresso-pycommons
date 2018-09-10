@@ -280,8 +280,26 @@ def rebuild_issues(
 
     x = process_bag.persist()
     progress(x)
-    result = x.compute()
-    return result
+    #result = x.compute()
+    return
+
+
+def init_logging(level, file):
+    # Initialise the loggerr
+    root_logger = logging.getLogger('')
+    root_logger.setLevel(level)
+
+    if(file is not None):
+        handler = logging.FileHandler(filename=file, mode='w')
+    else:
+        handler = logging.StreamHandler()
+
+    formatter = logging.Formatter(
+        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+    )
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
+    root_logger.info("Logger successfully initialised")
 
 
 def main():
@@ -297,29 +315,16 @@ def main():
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
-    # Initialise the loggerr
-    root_logger = logging.getLogger('impresso_commons')
-    root_logger.setLevel(log_level)
+    init_logging(log_level, log_file)
 
-    if(log_file is not None):
-        handler = logging.FileHandler(filename=log_file, mode='w')
-    else:
-        handler = logging.StreamHandler()
-
-    formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    )
-    handler.setFormatter(formatter)
-    root_logger.addHandler(handler)
-    root_logger.info("Logger successfully initialised")
+    logger = logging.getLogger(__name__)
 
     # start the dask local cluster
     if dask_scheduler is None:
         client = Client()
     else:
         client = Client(dask_scheduler)
-
-    root_logger.info(f"Dask cluster: {client}")
+    logger.info(f"Dask cluster: {client}")
 
     # clean output directory if existing
     if outp_dir is not None and os.path.exists(outp_dir):
@@ -352,7 +357,6 @@ def main():
                 outp_dir,
                 output_bucket_name
             )
-            import ipdb; ipdb.set_trace()
 
         if clear_output is not None and clear_output:
             shutil.rmtree(outp_dir)
