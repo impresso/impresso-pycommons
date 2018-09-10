@@ -75,53 +75,66 @@ def serialize_article(article, output_format, output_dir):
     return
 
 
-def rebuild_text(lines, string=None):
+def rebuild_text(page, string=None):
     """The text rebuilding function."""
 
-    regions = []
-    linebreaks = []
+    coordinates = {
+        "regions": [],
+        "tokens": []
+    }
+
+    offsets = {
+        "line": [],
+        "para": []
+    }
 
     if string is None:
         string = ""
 
     # in order to be able to keep line break information
     # we iterate over a list of lists (lines of tokens)
-    for line in lines:
-        for n, token in enumerate(line):
+    for region in page:
+        coordinates['regions'].append(region['c'])
+        for i, para in enumerate(region["p"]):
 
-            region = {}
-            region["c"] = token["c"]
-            region["s"] = len(string)
+            if i > 0:
+                offsets['para'].append(len(string))
 
-            # if token is the last in a line
-            if n == len(line) - 1:
-                linebreaks.append(region["s"] + len(token["tx"]))
+            for line in para["l"]:
+                for n, token in enumerate(line['t']):
+                    region = {}
+                    region["c"] = token["c"]
+                    region["s"] = len(string)
 
-            if "hy" in token:
-                region["l"] = len(token["tx"][:-1])
+                    # if token is the last in a line
+                    if n == len(line) - 1:
+                        offsets['line'].append(region["s"] + len(token["tx"]))
 
-            elif "nf" in token:
-                region["l"] = len(token["nf"])
+                    if "hy" in token:
+                        region["l"] = len(token["tx"][:-1])
 
-                if "gn" in token and token["gn"]:
-                    tmp = "{}".format(token["nf"])
-                    string += tmp
-                else:
-                    tmp = "{} ".format(token["nf"])
-                    string += tmp
-            else:
-                region["l"] = len(token["tx"])
+                    elif "nf" in token:
+                        region["l"] = len(token["nf"])
 
-                if "gn" in token and token["gn"]:
-                    tmp = "{}".format(token["tx"])
-                    string += tmp
-                else:
-                    tmp = "{} ".format(token["tx"])
-                    string += tmp
+                        if "gn" in token and token["gn"]:
+                            tmp = "{}".format(token["nf"])
+                            string += tmp
+                        else:
+                            tmp = "{} ".format(token["nf"])
+                            string += tmp
+                    else:
+                        region["l"] = len(token["tx"])
 
-            regions.append(region)
+                        if "gn" in token and token["gn"]:
+                            tmp = "{}".format(token["tx"])
+                            string += tmp
+                        else:
+                            tmp = "{} ".format(token["tx"])
+                            string += tmp
 
-    return (string, regions, linebreaks)
+                    coordinates['tokens'].append(region)
+
+    return (string, coordinates, offsets)
 
 
 def rebuild_for_solr(article_metadata):
@@ -146,6 +159,7 @@ def rebuild_for_solr(article_metadata):
 
     fulltext = ""
     linebreaks = []
+    parabreaks = []
     article = {
         "id": article_id,
         # "series": None,
@@ -163,27 +177,24 @@ def rebuild_for_solr(article_metadata):
     for n, page_no in enumerate(article['pp']):
 
         page = article_metadata['pprr'][n]
-        tokens = [
-            [token for token in line["t"]]
-            for region in page
-            for para in region["p"]
-            for line in para["l"]
-        ]
 
         if fulltext == "":
-            fulltext, regions, _linebreaks = rebuild_text(tokens)
+            fulltext, coords, offsets = rebuild_text(page)
         else:
-            fulltext, regions, _linebreaks = rebuild_text(tokens, fulltext)
+            fulltext, coords, offsets = rebuild_text(page, fulltext)
 
-        linebreaks += _linebreaks
+        linebreaks += offsets['line']
+        parabreaks += offsets['para']
 
         page_doc = {
             "id": page_file_names[page_no].replace('.json', ''),
             "n": page_no,
-            "t": regions
+            "t": coords['tokens'],
+            "r": coords['regions']
         }
-        article["lb"] = linebreaks
         article["ppreb"].append(page_doc)
+    article["lb"] = linebreaks
+    article["pb"] = parabreaks
     logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
     article["ft"] = fulltext
     return article
