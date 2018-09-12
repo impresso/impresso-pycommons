@@ -85,7 +85,8 @@ def rebuild_text(page, string=None):
 
     offsets = {
         "line": [],
-        "para": []
+        "para": [],
+        "region": []
     }
 
     if string is None:
@@ -93,8 +94,13 @@ def rebuild_text(page, string=None):
 
     # in order to be able to keep line break information
     # we iterate over a list of lists (lines of tokens)
-    for region in page:
+    for region_n, region in enumerate(page):
+
+        if region_n > 0:
+            offsets['region'].append(len(string))
+
         coordinates['regions'].append(region['c'])
+
         for i, para in enumerate(region["p"]):
 
             if i > 0:
@@ -160,6 +166,8 @@ def rebuild_for_solr(article_metadata):
     fulltext = ""
     linebreaks = []
     parabreaks = []
+    regionbreaks = []
+
     article = {
         "id": article_id,
         # "series": None,
@@ -185,6 +193,7 @@ def rebuild_for_solr(article_metadata):
 
         linebreaks += offsets['line']
         parabreaks += offsets['para']
+        regionbreaks += offsets['region']
 
         page_doc = {
             "id": page_file_names[page_no].replace('.json', ''),
@@ -195,6 +204,7 @@ def rebuild_for_solr(article_metadata):
         article["ppreb"].append(page_doc)
     article["lb"] = linebreaks
     article["pb"] = parabreaks
+    article["rb"] = regionbreaks
     logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
     article["ft"] = fulltext
     return article
