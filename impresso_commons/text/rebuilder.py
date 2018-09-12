@@ -1,8 +1,19 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--scheduler=<sch> --output-bucket=<ob> --verbose --clear --format=<f>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--scheduler=<sch> --output-bucket=<ob> --verbose --clear --format=<fo>]
     rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> --output-dir=<od> [--output-bucket=<ob> --verbose --clear --format=<f>]
+
+Options:
+
+    --input-bucket=<b>  S3 bucket where canonical JSON data will be read from
+    --output-bucket=<ob>    Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)
+    --log-file=<f>  Path to log file
+    --scheduler=<sch>   Tell dask to use an existing scheduler (otherwise it'll create one)
+    --filter-config=<fc>    A JSON configuration file specifying which newspaper issues will be rebuilt
+    --format=<fo>   In which format to rebuild (default: "json" for compressed JSON lines file)
+    --verbose   Set logging level to DEBUG (by default is INFO)
+    --clear Remove output directory before and after rebuilding
 """  # noqa: E501
 
 import codecs
@@ -266,18 +277,35 @@ def cleanup(success, filepath):
         logger.info(f'Not removing {filepath} as upload has failed')
 
 
+def _article_has_problem(article):
+    """Helper function to filter out articles with problems.
+
+    :param article: input article
+    :type article: dict
+    :return: `True` or `False`
+    :rtype: boolean
+    """
+    if article['has_problem']:
+        logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
+    return not article['has_problem']
+
+
 def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        output_bucket
+        output_bucket,
+        dask_scheduler,
+        format
 ):
     """TODO"""
 
-    def has_problem(article):
-        if article['has_problem']:
-            logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
-        return not article['has_problem']
+    # start the dask local cluster
+    if dask_scheduler is None:
+        client = Client()
+    else:
+        client = Client(dask_scheduler)
+    logger.info(f"Dask cluster: {client}")
 
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
@@ -288,7 +316,7 @@ def rebuild_issues(
         .starmap(rejoin_articles) \
         .flatten() \
         .starmap(pages_to_article)\
-        .filter(has_problem) \
+        .filter(_article_has_problem) \
         .map(rebuild_for_solr) \
         .groupby(
             lambda x: "{}-{}".format(
@@ -301,8 +329,7 @@ def rebuild_issues(
 
     x = process_bag.persist()
     progress(x)
-    #result = x.compute()
-    return
+    return x.compute()
 
 
 def init_logging(level, file):
@@ -331,8 +358,8 @@ def main():
     output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
-    # output_format = arguments["--format"]
-    dask_scheduler = arguments["--scheduler"]
+    output_format = arguments["--format"]
+    scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
@@ -340,20 +367,12 @@ def main():
 
     logger = logging.getLogger(__name__)
 
-    # start the dask local cluster
-    if dask_scheduler is None:
-        client = Client()
-    else:
-        client = Client(dask_scheduler)
-    logger.info(f"Dask cluster: {client}")
-
     # clean output directory if existing
     if outp_dir is not None and os.path.exists(outp_dir):
         if clear_output is not None and clear_output:
             shutil.rmtree(outp_dir)
             os.mkdir(outp_dir)
 
-    # there was a connection error issue with s3
     with open(filter_config_file, 'r') as file:
         config = json.load(file)
 
@@ -364,7 +383,7 @@ def main():
         for n, batch in enumerate(config):
             print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
             print('Retrieving issues...')
-            issues = impresso_iter_bucket(
+            input_issues = impresso_iter_bucket(
                 bucket_name,
                 filter_config=batch,
                 # prefix="GDL/1948/09/03",
@@ -372,11 +391,13 @@ def main():
             )
 
             # TODO: add support for `output_format`
-            r = rebuild_issues(
-                issues,
-                bucket,
-                outp_dir,
-                output_bucket_name
+            rebuild_issues(
+                issues=input_issues,
+                input_bucket=bucket,
+                output_dir=outp_dir,
+                output_bucket=output_bucket_name,
+                dask_scheduler=scheduler,
+                format=output_format
             )
 
         if clear_output is not None and clear_output:
