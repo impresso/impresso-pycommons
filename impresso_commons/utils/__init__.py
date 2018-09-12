@@ -43,12 +43,12 @@ def init_logger(logger, log_level, log_file):
     if log_file is not None:
         fh = logging.FileHandler(filename=log_file, mode='w')
         fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(formatter)
-
-    logger.addHandler(fh)
     logger.addHandler(ch)
+    
     logger.info("Logger successfully initialised")
 
     return logger

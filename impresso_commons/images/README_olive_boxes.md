@@ -5,7 +5,7 @@
 1) For each page, call the `get_scale_factor`     
 2) For each box of the page, call the function `compute_box`
 
-info.txt files of image conversion are in the images folder, with canonical file tree.
+info.json files of image conversion are in the images folder, with canonical file tree.
 
 ## Documentation
 
@@ -26,7 +26,7 @@ A box in Olive is like `262 624 73 26`, where:
 
 The region parameter of IIIF Image API also requires 4 coordinates, but with:
 
-`x,y,width,height` 
+`x, y, width, height`
 
 ### Computing scale factor between source and dest image
 

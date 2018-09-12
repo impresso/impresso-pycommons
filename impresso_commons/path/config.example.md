@@ -29,7 +29,7 @@ About newspapers object:
 
 - selected issues will include the specified newspapers
 - for each newspaper, the specified dates will be included
-- date format should always be `yyy/mm/dd`, even when `year_only=true`
+- date format should be `yyyy/mm/dd`, even when `year_only=true`
 - possible date specifications:
 	1. a list of dates (array of strings)
 	2. a date range (string with hyphen)
