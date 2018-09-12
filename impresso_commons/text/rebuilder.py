@@ -1,43 +1,39 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--scheduler=<sch> --output-bucket=<ob> --verbose --clear --format=<fo>]
-    rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> --output-dir=<od> [--output-bucket=<ob> --verbose --clear --format=<f>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear]
 
 Options:
 
-    --input-bucket=<b>  S3 bucket where canonical JSON data will be read from
-    --output-bucket=<ob>    Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)
-    --log-file=<f>  Path to log file
-    --scheduler=<sch>   Tell dask to use an existing scheduler (otherwise it'll create one)
-    --filter-config=<fc>    A JSON configuration file specifying which newspaper issues will be rebuilt
-    --format=<fo>   In which format to rebuild (default: "json" for compressed JSON lines file)
-    --verbose   Set logging level to DEBUG (by default is INFO)
-    --clear Remove output directory before and after rebuilding
+--input-bucket=<b>  S3 bucket where canonical JSON data will be read from
+--output-bucket=<ob>  Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)
+--log-file=<f>  Path to log file
+--scheduler=<sch>  Tell dask to use an existing scheduler (otherwise it'll create one)
+--filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
+--verbose  Set logging level to DEBUG (by default is INFO)
+--clear  Remove output directory before and after rebuilding
+--format=<fo>  stuff
 """  # noqa: E501
 
-import codecs
 import datetime
 import json
 import logging
 import os
 import shutil
 
-from docopt import docopt
-
-# import dask
 import dask.bag as db
 import jsonlines
-from dask.diagnostics import ProgressBar
-from dask.distributed import Client, LocalCluster, progress
+from dask.distributed import Client, progress
+from docopt import docopt
+from smart_open import smart_open
+
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
-from impresso_commons.utils import Timer
+from impresso_commons.utils import Timer, init_logger
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
-from smart_open import smart_open
 
 logger = logging.getLogger(__name__)
 
@@ -49,45 +45,18 @@ TYPE_MAPPINGS = {
 }
 
 
-def serialize_article(article, output_format, output_dir):
-    """Write the rebuilt article to disk in a given format (json or text).
-
-    :param article: the output of `rebuild_article()`
-    :type article: dict
-    :param output_format: text or json (for now)
-    :type output_format: string
-    :param outp_dir:
-    :type output_dir: string
-    """
-
-    if output_format == "json":
-        out_filename = os.path.join(output_dir, f"{article['id']}.json")
-
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            json.dump(article, out_file, indent=3)
-            logger.info("serialized {}".format(article["id"]))
-
-    elif output_format == "txt":
-        fulltext = article.pop("text")
-
-        out_filename = os.path.join(output_dir, f"{article['id']}.json")
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            json.dump(article, out_file, indent=3)
-            logger.info("serialized metadata for {}".format(article["id"]))
-
-        out_filename = os.path.join(output_dir, f"{article['id']}.txt")
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            out_file.write(fulltext)
-            logger.info("serialized fulltext for {}".format(article["id"]))
-
-    else:
-        raise Exception("Unsupported output format {}".format(output_format))
-
-    return
-
-
 def rebuild_text(page, string=None):
-    """The text rebuilding function."""
+    """The text rebuilding function.
+
+    :param page: a newspaper page conforming to the impresso JSON schema
+        for pages.
+    :type page: dict
+    :param string: the rebuilt text of the previous page. If `string` is not
+    `None`, then the rebuilt text is appended to it.
+    :type string: str
+    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+        [2] coordinates of token regions (dict of lists).
+    """
 
     coordinates = {
         "regions": [],
@@ -156,6 +125,11 @@ def rebuild_text(page, string=None):
 
 def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
+
+    ..note::
+
+    This rebuild function is thought especially for ingesting the newspaper
+    data into our Solr index.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
@@ -228,8 +202,13 @@ def serialize(sort_key, articles, output_dir=None):
     :type sort_key: string
     :param articles: a list of JSON documents, encoded as python dictionaries
     :type: list of dict
+    :return: a tuple with: sorting key [0] and path to serialized file [1].
+    :rtype: tuple
 
-    NB: sort_key is the concatenation of newspaper ID and year (e.g. GDL-1900).
+    ..note::
+
+    `sort_key` is expected to be the concatenation of newspaper ID and year
+        (e.g. GDL-1900).
     """
     logger.info(f"Serializing {sort_key} (n = {len(articles)})")
     print(f"Serializing {sort_key} (n = {len(articles)})")
@@ -250,6 +229,22 @@ def serialize(sort_key, articles, output_dir=None):
 
 
 def upload(sort_key, filepath, bucket_name=None):
+    """Uploads a file to a given S3 bucket.
+
+    :param sort_key: the key used to group articles (e.g. "GDL-1900")
+    :type sort_key: str
+    :param filepath: path of the file to upload to S3
+    :type filepath: str
+    :param bucket_name: name of S3 bucket where to upload the file
+    :type bucket_name: str
+    :return: a tuple with [0] whether the upload was successful (boolean) and
+        [1] the path of the uploaded file (string)
+
+    ..note::
+
+    `sort_key` is expected to be the concatenation of newspaper ID and year
+        (e.g. GDL-1900).
+    """
     # create connection with bucket
     # copy contents to s3 key
     newspaper, year = sort_key.split('-')
@@ -269,8 +264,15 @@ def upload(sort_key, filepath, bucket_name=None):
         return False, filepath
 
 
-def cleanup(success, filepath):
-    if success:
+def cleanup(upload_success, filepath):
+    """Removes a file if it has been successfully uploaded to S3.
+
+    :param upload_success: whether the upload was successful
+    :type upload_success: bool
+    :param filepath: path to the uploaded file
+    :type filepath: str
+    """
+    if upload_success:
         os.remove(filepath)
         logger.info(f'Removed temporary file {filepath}')
     else:
@@ -298,7 +300,23 @@ def rebuild_issues(
         dask_scheduler,
         format
 ):
-    """TODO"""
+    """Rebuild a set of newspaper issues into a given format.
+
+    :param issues: issues to rebuild
+    :type issues: list of `IssueDir` objects
+    :param input_bucket: name of input s3 bucket
+    :type input_bucket: str
+    :param outp_dir: local directory where to store the rebuilt files
+    :type outp_dir: str
+    :param output_bucket: name of S3 bucket where to upload the rebuilt files (
+        no upload if None)
+    :type output_bucket: str
+    :param dask_scheduler: IP address of an existing dask scheduler (for
+        distributed processing).
+    :type dask_scheduler: str
+    :return: a list of tuples (see return type of `upload`)
+    :rtype: list of tuples
+    """
 
     # start the dask local cluster
     if dask_scheduler is None:
@@ -333,7 +351,20 @@ def rebuild_issues(
 
 
 def init_logging(level, file):
-    # Initialise the loggerr
+    """Initialises the root logger.
+
+    :param level: desired level of logging (default: logging.INFO)
+    :type level: int
+    :param file:
+    :type file: str
+    :return: the initialised logger
+    :rtype: `logging.RootLogger`
+
+    ..note::
+    It's basically a duplicate of `impresso_commons.utils.init_logger` but I
+    could not get it to work properly, so keeping this duplicate.
+    """
+    # Initialise the logger
     root_logger = logging.getLogger('')
     root_logger.setLevel(level)
 
@@ -349,10 +380,13 @@ def init_logging(level, file):
     root_logger.addHandler(handler)
     root_logger.info("Logger successfully initialised")
 
+    return root_logger
+
 
 def main():
 
     arguments = docopt(__doc__)
+    print(arguments)
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
     output_bucket_name = arguments["--output-bucket"]
@@ -364,8 +398,6 @@ def main():
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
     init_logging(log_level, log_file)
-
-    logger = logging.getLogger(__name__)
 
     # clean output directory if existing
     if outp_dir is not None and os.path.exists(outp_dir):
