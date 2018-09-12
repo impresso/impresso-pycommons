@@ -22,8 +22,11 @@ setup(
         'boto',
         'boto3',
         'bs4',
+        'docopt',
+        'deprecated',
         'opencv-python==3.4.0.12',
         'numpy',
-        'smart_open'
+        'smart_open',
+        'jsonlines'
     ]
 )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-
+import pytest
 from impresso_commons.path.path_s3 import (s3_select_contentitems,
                                            s3_select_issues,
                                            s3_detect_issues,
@@ -10,6 +10,7 @@ from impresso_commons.path.path_s3 import (s3_select_contentitems,
 from impresso_commons.utils.s3 import get_bucket
 
 
+@pytest.mark.skip
 def test_s3_select_contentitems():
     rebuilt_bucket = get_bucket('canonical-rebuilt-versioned', create=False)
 
@@ -24,6 +25,7 @@ def test_s3_select_contentitems():
     assert len(keys) > 0
 
 
+@pytest.mark.skip
 def test_s3_select_issues():
     canonical_bucket = get_bucket('canonical-json', create=False)
 
@@ -45,6 +47,7 @@ def test_s3_detect_issues():
     assert len(keys) > 0
 
 
+@pytest.mark.skip
 def test_s3_detect_contentitems():
     canonical_bucket = get_bucket('canonical-rebuilt-versioned', create=False)
     keys = s3_detect_contentitems(canonical_bucket, "GDL/1950/01")

@@ -8,6 +8,7 @@ import logging
 import json
 import boto
 import boto3
+from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
 from impresso_commons.utils import _get_cores
 
@@ -37,7 +38,6 @@ def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
         aws_access_key_id=access_key,
         endpoint_url=host_url
     )
-
 
 
 def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
@@ -95,7 +95,7 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         host=host,
-        calling_format=boto.s3.connection.OrdinaryCallingFormat(),
+        calling_format=OrdinaryCallingFormat(),
     )
 
 
@@ -206,7 +206,9 @@ def s3_get_articles(issue, bucket, workers=None):
     NB: Content items with type = "ad" (advertisement) are filtered out.
     """
     nb_workers = _get_cores() if workers is None else workers
-    issue_data = list(s3_iter_bucket(bucket, prefix=issue.path, workers=nb_workers))[0][1]
+    issue_data = list(s3_iter_bucket(bucket, prefix=issue.path, workers=nb_workers))
+    print(issue_data)
+    issue_data = issue_data[0][1]
     issue_json = json.loads(issue_data.decode('utf-8'))
     articles = [
         item
@@ -264,6 +266,8 @@ def get_s3_versions(bucket_name, key_name):
 
     client = get_s3_resource()
 
+    # may be worth comparing with
+    # client.list_object_versions(prefix)
     versions = client.Bucket(bucket_name).\
         object_versions.filter(Prefix=key_name)
 
