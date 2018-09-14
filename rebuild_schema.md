@@ -20,6 +20,8 @@ Meaning of keys:
         - `c`: page coordinates of token
         - `s`: offset start (relative to `ft` field)
         - `l`: token length
+    - `r`: a list of int arrays, with coordinates of page regions over which
+        the article spans (as identified by the OCR engine). 
 
 ```json
 {
