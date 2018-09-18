@@ -32,7 +32,7 @@ from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
-from impresso_commons.utils import Timer, init_logger
+from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
 
 logger = logging.getLogger(__name__)
@@ -87,14 +87,11 @@ def rebuild_text(page, string=None):
                 offsets['para'].append(len(string))
 
             for line in para["l"]:
+
                 for n, token in enumerate(line['t']):
                     region = {}
                     region["c"] = token["c"]
                     region["s"] = len(string)
-
-                    # if token is the last in a line
-                    if n == len(line) - 1:
-                        offsets['line'].append(region["s"] + len(token["tx"]))
 
                     if "hy" in token:
                         region["l"] = len(token["tx"][:-1])
@@ -117,6 +114,10 @@ def rebuild_text(page, string=None):
                         else:
                             tmp = "{} ".format(token["tx"])
                             string += tmp
+
+                    # if token is the last in a line
+                    if n == len(line['t']) - 1:
+                        offsets['line'].append(region["s"] + len(token["tx"]))
 
                     coordinates['tokens'].append(region)
 
@@ -145,7 +146,7 @@ def rebuild_for_solr(article_metadata):
         for p in article_metadata["m"]["pp"]
     }
     year, month, day = article_id.split('-')[1:4]
-    d = datetime.datetime(int(year), int(month), int(day), 5, 0, 0)
+    d = datetime.date(int(year), int(month), int(day))
     mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
 
     fulltext = ""
@@ -157,7 +158,8 @@ def rebuild_for_solr(article_metadata):
         "id": article_id,
         # "series": None,
         "pp": article_metadata["m"]["pp"],
-        "d": d.isoformat() + 'Z',
+        "d": d.isoformat(),
+        "ts": timestamp(),
         "lg": article_metadata["m"]["l"],
         "tp": mapped_type,
         "ppreb": [],
