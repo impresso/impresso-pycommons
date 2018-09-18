@@ -1,2 +1,7 @@
-2018-09-12 12:56:55,929 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
-2018-09-12 12:56:56,262 impresso_commons.path.path_s3 INFO     Start processing key.
+2018-09-18 10:29:41,528 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-09-18 10:29:43,295 impresso_commons.path.path_s3 INFO     Start processing key.
+2018-09-18 10:32:10,582 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-09-18 10:32:10,729 impresso_commons.path.path_s3 INFO     Start processing key.
+2018-09-18 10:32:14,641 impresso_commons.text.rebuilder INFO     Dask cluster: <Client: scheduler='tcp://127.0.0.1:56025' processes=8 cores=8>
+2018-09-18 10:32:14,642 impresso_commons.text.rebuilder INFO     Number of partitions: 26
+2018-09-18 10:32:50,280 test_rebuilder INFO     [(False, '/Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1950.jsonl.bz2')]
