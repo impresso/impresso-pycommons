@@ -1,4 +1,5 @@
-2018-08-31 15:59:13,799 root         INFO     Logger successfully initialised
-2018-08-31 15:59:13,852 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
-2018-08-31 15:59:14,918 impresso_commons.path.path_s3 INFO     Start processing key.
-2018-08-31 15:59:32,531 __main__     INFO     Number of partitions: 103
+2018-09-12 17:39:09,083 root         INFO     Logger successfully initialised
+2018-09-12 17:39:09,135 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-09-12 17:39:10,004 impresso_commons.path.path_s3 INFO     Start processing key.
+2018-09-12 17:39:26,992 __main__     INFO     Dask cluster: <Client: scheduler='tcp://127.0.0.1:51466' processes=8 cores=8>
+2018-09-12 17:39:27,004 __main__     INFO     Number of partitions: 103

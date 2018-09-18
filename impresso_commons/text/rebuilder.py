@@ -1,32 +1,39 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--scheduler=<sch> --output-bucket=<ob> --verbose --clear --format=<f>]
-    rebuilder.py rebuild_pages --input-bucket=<b> --log-file=<f> --output-dir=<od> [--output-bucket=<ob> --verbose --clear --format=<f>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear]
+
+Options:
+
+--input-bucket=<b>  S3 bucket where canonical JSON data will be read from
+--output-bucket=<ob>  Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)
+--log-file=<f>  Path to log file
+--scheduler=<sch>  Tell dask to use an existing scheduler (otherwise it'll create one)
+--filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
+--verbose  Set logging level to DEBUG (by default is INFO)
+--clear  Remove output directory before and after rebuilding
+--format=<fo>  stuff
 """  # noqa: E501
 
-import codecs
 import datetime
 import json
 import logging
 import os
 import shutil
 
-from docopt import docopt
-
-# import dask
 import dask.bag as db
 import jsonlines
-from dask.diagnostics import ProgressBar
-from dask.distributed import Client, LocalCluster, progress
+from dask.distributed import Client, progress
+from docopt import docopt
+from smart_open import smart_open
+
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
-from impresso_commons.utils import Timer
+from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_bucket, get_s3_resource
-from smart_open import smart_open
 
 logger = logging.getLogger(__name__)
 
@@ -38,94 +45,92 @@ TYPE_MAPPINGS = {
 }
 
 
-def serialize_article(article, output_format, output_dir):
-    """Write the rebuilt article to disk in a given format (json or text).
+def rebuild_text(page, string=None):
+    """The text rebuilding function.
 
-    :param article: the output of `rebuild_article()`
-    :type article: dict
-    :param output_format: text or json (for now)
-    :type output_format: string
-    :param outp_dir:
-    :type output_dir: string
+    :param page: a newspaper page conforming to the impresso JSON schema
+        for pages.
+    :type page: dict
+    :param string: the rebuilt text of the previous page. If `string` is not
+    `None`, then the rebuilt text is appended to it.
+    :type string: str
+    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+        [2] coordinates of token regions (dict of lists).
     """
 
-    if output_format == "json":
-        out_filename = os.path.join(output_dir, f"{article['id']}.json")
+    coordinates = {
+        "regions": [],
+        "tokens": []
+    }
 
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            json.dump(article, out_file, indent=3)
-            logger.info("serialized {}".format(article["id"]))
-
-    elif output_format == "txt":
-        fulltext = article.pop("text")
-
-        out_filename = os.path.join(output_dir, f"{article['id']}.json")
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            json.dump(article, out_file, indent=3)
-            logger.info("serialized metadata for {}".format(article["id"]))
-
-        out_filename = os.path.join(output_dir, f"{article['id']}.txt")
-        with codecs.open(out_filename, "w", "utf-8") as out_file:
-            out_file.write(fulltext)
-            logger.info("serialized fulltext for {}".format(article["id"]))
-
-    else:
-        raise Exception("Unsupported output format {}".format(output_format))
-
-    return
-
-
-def rebuild_text(lines, string=None):
-    """The text rebuilding function."""
-
-    regions = []
-    linebreaks = []
+    offsets = {
+        "line": [],
+        "para": [],
+        "region": []
+    }
 
     if string is None:
         string = ""
 
     # in order to be able to keep line break information
     # we iterate over a list of lists (lines of tokens)
-    for line in lines:
-        for n, token in enumerate(line):
+    for region_n, region in enumerate(page):
 
-            region = {}
-            region["c"] = token["c"]
-            region["s"] = len(string)
+        if region_n > 0:
+            offsets['region'].append(len(string))
 
-            # if token is the last in a line
-            if n == len(line) - 1:
-                linebreaks.append(region["s"] + len(token["tx"]))
+        coordinates['regions'].append(region['c'])
 
-            if "hy" in token:
-                region["l"] = len(token["tx"][:-1])
+        for i, para in enumerate(region["p"]):
 
-            elif "nf" in token:
-                region["l"] = len(token["nf"])
+            if i > 0:
+                offsets['para'].append(len(string))
 
-                if "gn" in token and token["gn"]:
-                    tmp = "{}".format(token["nf"])
-                    string += tmp
-                else:
-                    tmp = "{} ".format(token["nf"])
-                    string += tmp
-            else:
-                region["l"] = len(token["tx"])
+            for line in para["l"]:
 
-                if "gn" in token and token["gn"]:
-                    tmp = "{}".format(token["tx"])
-                    string += tmp
-                else:
-                    tmp = "{} ".format(token["tx"])
-                    string += tmp
+                for n, token in enumerate(line['t']):
+                    region = {}
+                    region["c"] = token["c"]
+                    region["s"] = len(string)
 
-            regions.append(region)
+                    if "hy" in token:
+                        region["l"] = len(token["tx"][:-1])
 
-    return (string, regions, linebreaks)
+                    elif "nf" in token:
+                        region["l"] = len(token["nf"])
+
+                        if "gn" in token and token["gn"]:
+                            tmp = "{}".format(token["nf"])
+                            string += tmp
+                        else:
+                            tmp = "{} ".format(token["nf"])
+                            string += tmp
+                    else:
+                        region["l"] = len(token["tx"])
+
+                        if "gn" in token and token["gn"]:
+                            tmp = "{}".format(token["tx"])
+                            string += tmp
+                        else:
+                            tmp = "{} ".format(token["tx"])
+                            string += tmp
+
+                    # if token is the last in a line
+                    if n == len(line['t']) - 1:
+                        offsets['line'].append(region["s"] + len(token["tx"]))
+
+                    coordinates['tokens'].append(region)
+
+    return (string, coordinates, offsets)
 
 
 def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
+
+    ..note::
+
+    This rebuild function is thought especially for ingesting the newspaper
+    data into our Solr index.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
@@ -141,16 +146,20 @@ def rebuild_for_solr(article_metadata):
         for p in article_metadata["m"]["pp"]
     }
     year, month, day = article_id.split('-')[1:4]
-    d = datetime.datetime(int(year), int(month), int(day), 5, 0, 0)
+    d = datetime.date(int(year), int(month), int(day))
     mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
 
     fulltext = ""
     linebreaks = []
+    parabreaks = []
+    regionbreaks = []
+
     article = {
         "id": article_id,
         # "series": None,
         "pp": article_metadata["m"]["pp"],
-        "d": d.isoformat() + 'Z',
+        "d": d.isoformat(),
+        "ts": timestamp(),
         "lg": article_metadata["m"]["l"],
         "tp": mapped_type,
         "ppreb": [],
@@ -163,27 +172,26 @@ def rebuild_for_solr(article_metadata):
     for n, page_no in enumerate(article['pp']):
 
         page = article_metadata['pprr'][n]
-        tokens = [
-            [token for token in line["t"]]
-            for region in page
-            for para in region["p"]
-            for line in para["l"]
-        ]
 
         if fulltext == "":
-            fulltext, regions, _linebreaks = rebuild_text(tokens)
+            fulltext, coords, offsets = rebuild_text(page)
         else:
-            fulltext, regions, _linebreaks = rebuild_text(tokens, fulltext)
+            fulltext, coords, offsets = rebuild_text(page, fulltext)
 
-        linebreaks += _linebreaks
+        linebreaks += offsets['line']
+        parabreaks += offsets['para']
+        regionbreaks += offsets['region']
 
         page_doc = {
             "id": page_file_names[page_no].replace('.json', ''),
             "n": page_no,
-            "t": regions
+            "t": coords['tokens'],
+            "r": coords['regions']
         }
-        article["lb"] = linebreaks
         article["ppreb"].append(page_doc)
+    article["lb"] = linebreaks
+    article["pb"] = parabreaks
+    article["rb"] = regionbreaks
     logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
     article["ft"] = fulltext
     return article
@@ -196,8 +204,13 @@ def serialize(sort_key, articles, output_dir=None):
     :type sort_key: string
     :param articles: a list of JSON documents, encoded as python dictionaries
     :type: list of dict
+    :return: a tuple with: sorting key [0] and path to serialized file [1].
+    :rtype: tuple
 
-    NB: sort_key is the concatenation of newspaper ID and year (e.g. GDL-1900).
+    ..note::
+
+    `sort_key` is expected to be the concatenation of newspaper ID and year
+        (e.g. GDL-1900).
     """
     logger.info(f"Serializing {sort_key} (n = {len(articles)})")
     print(f"Serializing {sort_key} (n = {len(articles)})")
@@ -218,6 +231,22 @@ def serialize(sort_key, articles, output_dir=None):
 
 
 def upload(sort_key, filepath, bucket_name=None):
+    """Uploads a file to a given S3 bucket.
+
+    :param sort_key: the key used to group articles (e.g. "GDL-1900")
+    :type sort_key: str
+    :param filepath: path of the file to upload to S3
+    :type filepath: str
+    :param bucket_name: name of S3 bucket where to upload the file
+    :type bucket_name: str
+    :return: a tuple with [0] whether the upload was successful (boolean) and
+        [1] the path of the uploaded file (string)
+
+    ..note::
+
+    `sort_key` is expected to be the concatenation of newspaper ID and year
+        (e.g. GDL-1900).
+    """
     # create connection with bucket
     # copy contents to s3 key
     newspaper, year = sort_key.split('-')
@@ -237,26 +266,66 @@ def upload(sort_key, filepath, bucket_name=None):
         return False, filepath
 
 
-def cleanup(success, filepath):
-    if success:
+def cleanup(upload_success, filepath):
+    """Removes a file if it has been successfully uploaded to S3.
+
+    :param upload_success: whether the upload was successful
+    :type upload_success: bool
+    :param filepath: path to the uploaded file
+    :type filepath: str
+    """
+    if upload_success:
         os.remove(filepath)
         logger.info(f'Removed temporary file {filepath}')
     else:
         logger.info(f'Not removing {filepath} as upload has failed')
 
 
+def _article_has_problem(article):
+    """Helper function to filter out articles with problems.
+
+    :param article: input article
+    :type article: dict
+    :return: `True` or `False`
+    :rtype: boolean
+    """
+    if article['has_problem']:
+        logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
+    return not article['has_problem']
+
+
 def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        output_bucket
+        output_bucket,
+        dask_scheduler,
+        format
 ):
-    """TODO"""
+    """Rebuild a set of newspaper issues into a given format.
 
-    def has_problem(article):
-        if article['has_problem']:
-            logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
-        return not article['has_problem']
+    :param issues: issues to rebuild
+    :type issues: list of `IssueDir` objects
+    :param input_bucket: name of input s3 bucket
+    :type input_bucket: str
+    :param outp_dir: local directory where to store the rebuilt files
+    :type outp_dir: str
+    :param output_bucket: name of S3 bucket where to upload the rebuilt files (
+        no upload if None)
+    :type output_bucket: str
+    :param dask_scheduler: IP address of an existing dask scheduler (for
+        distributed processing).
+    :type dask_scheduler: str
+    :return: a list of tuples (see return type of `upload`)
+    :rtype: list of tuples
+    """
+
+    # start the dask local cluster
+    if dask_scheduler is None:
+        client = Client()
+    else:
+        client = Client(dask_scheduler)
+    logger.info(f"Dask cluster: {client}")
 
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
@@ -267,7 +336,7 @@ def rebuild_issues(
         .starmap(rejoin_articles) \
         .flatten() \
         .starmap(pages_to_article)\
-        .filter(has_problem) \
+        .filter(_article_has_problem) \
         .map(rebuild_for_solr) \
         .groupby(
             lambda x: "{}-{}".format(
@@ -280,12 +349,24 @@ def rebuild_issues(
 
     x = process_bag.persist()
     progress(x)
-    #result = x.compute()
-    return
+    return x.compute()
 
 
 def init_logging(level, file):
-    # Initialise the loggerr
+    """Initialises the root logger.
+
+    :param level: desired level of logging (default: logging.INFO)
+    :type level: int
+    :param file:
+    :type file: str
+    :return: the initialised logger
+    :rtype: `logging.RootLogger`
+
+    ..note::
+    It's basically a duplicate of `impresso_commons.utils.init_logger` but I
+    could not get it to work properly, so keeping this duplicate.
+    """
+    # Initialise the logger
     root_logger = logging.getLogger('')
     root_logger.setLevel(level)
 
@@ -301,30 +382,24 @@ def init_logging(level, file):
     root_logger.addHandler(handler)
     root_logger.info("Logger successfully initialised")
 
+    return root_logger
+
 
 def main():
 
     arguments = docopt(__doc__)
+    print(arguments)
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
     output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
-    # output_format = arguments["--format"]
-    dask_scheduler = arguments["--scheduler"]
+    output_format = arguments["--format"]
+    scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
     init_logging(log_level, log_file)
-
-    logger = logging.getLogger(__name__)
-
-    # start the dask local cluster
-    if dask_scheduler is None:
-        client = Client()
-    else:
-        client = Client(dask_scheduler)
-    logger.info(f"Dask cluster: {client}")
 
     # clean output directory if existing
     if outp_dir is not None and os.path.exists(outp_dir):
@@ -332,7 +407,6 @@ def main():
             shutil.rmtree(outp_dir)
             os.mkdir(outp_dir)
 
-    # there was a connection error issue with s3
     with open(filter_config_file, 'r') as file:
         config = json.load(file)
 
@@ -343,7 +417,7 @@ def main():
         for n, batch in enumerate(config):
             print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
             print('Retrieving issues...')
-            issues = impresso_iter_bucket(
+            input_issues = impresso_iter_bucket(
                 bucket_name,
                 filter_config=batch,
                 # prefix="GDL/1948/09/03",
@@ -351,11 +425,13 @@ def main():
             )
 
             # TODO: add support for `output_format`
-            r = rebuild_issues(
-                issues,
-                bucket,
-                outp_dir,
-                output_bucket_name
+            rebuild_issues(
+                issues=input_issues,
+                input_bucket=bucket,
+                output_dir=outp_dir,
+                output_bucket=output_bucket_name,
+                dask_scheduler=scheduler,
+                format=output_format
             )
 
         if clear_output is not None and clear_output:

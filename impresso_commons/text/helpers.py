@@ -101,3 +101,30 @@ def pages_to_article(article, pages):
     except Exception as e:
         article['has_problem'] = True
         return article
+
+
+def text_apply_breaks(fulltext, breaks):
+    """Apply breaks to the text returned by `rebuild_for_solr`.
+
+    The purpose of this function is to debug (visually) the `rebuild_for_solr`
+    function. It applies to `fulltext` the characte offsets contained in
+    `breaks` (e.g. line breaks, paragraph breaks, etc.).
+
+    :param fulltext: input text
+    :type fulltext: str
+    :param breaks: a list of character offsets
+    :type breaks: list of int
+    :return: a list of text chunks
+    :rtype: list
+    """
+
+    text = []
+    start = 0
+
+    for br in breaks:
+        text.append(fulltext[start:br].strip())
+        start = br
+
+    text.append(fulltext[start:])
+
+    return text

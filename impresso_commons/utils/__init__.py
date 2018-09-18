@@ -7,6 +7,7 @@
 import logging
 import sys
 import time
+import datetime
 from datetime import timedelta
 
 import dask
@@ -85,6 +86,18 @@ def user_confirmation(question, default=None):
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
+def timestamp():
+    """Returns an iso-formatted timestamp.
+
+    :return: a timestamp
+    :rtype: str
+    """
+    utcnow = datetime.datetime.utcnow()
+    ts = int(utcnow.timestamp())
+    d = datetime.datetime.fromtimestamp(ts)
+    return d.isoformat() + "Z"
+
+
 class Timer:
     """ Basic timer"""
     def __init__(self):
@@ -107,6 +120,7 @@ def _get_cores():
         return nb - 10
     else:
         return nb
+
 
 def chunk(list, chunksize):
     """Yield successive n-sized chunks from list."""
