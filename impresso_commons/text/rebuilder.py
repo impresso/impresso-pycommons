@@ -349,7 +349,8 @@ def rebuild_issues(
 
     x = process_bag.persist()
     progress(x)
-    return x.compute()
+    # x.compute()
+    return True
 
 
 def init_logging(level, file):
