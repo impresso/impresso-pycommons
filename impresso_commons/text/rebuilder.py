@@ -33,7 +33,7 @@ from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
-from impresso_commons.utils.s3 import get_bucket, get_s3_resource
+from impresso_commons.utils.s3 import get_s3_resource
 
 logger = logging.getLogger(__name__)
 
@@ -411,8 +411,6 @@ def main():
     with open(filter_config_file, 'r') as file:
         config = json.load(file)
 
-    bucket = get_bucket(bucket_name)
-
     if arguments["rebuild_articles"]:
 
         for n, batch in enumerate(config):
@@ -428,7 +426,7 @@ def main():
             # TODO: add support for `output_format`
             rebuild_issues(
                 issues=input_issues,
-                input_bucket=bucket,
+                input_bucket=bucket_name,
                 output_dir=outp_dir,
                 output_bucket=output_bucket_name,
                 dask_scheduler=scheduler,
