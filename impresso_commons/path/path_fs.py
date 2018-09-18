@@ -44,6 +44,7 @@ KNOWN_JOURNALS = [
     "01_GDL",
     "02_GDL",
     "JDF",
+    "JDV",
     "JDG",
     "01_JDG",
     "02_JDG",
