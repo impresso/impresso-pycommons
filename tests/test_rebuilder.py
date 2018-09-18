@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 def test_rebuild_issues():
     input_bucket_name = "original-canonical-data"
-    bucket = get_bucket(input_bucket_name)
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -23,7 +22,7 @@ def test_rebuild_issues():
 
     result = rebuild_issues(
         issues=input_issues,
-        input_bucket=bucket,
+        input_bucket=input_bucket_name,
         output_dir=outp_dir,
         output_bucket=None,  # do not upload to s3
         dask_scheduler=None,
