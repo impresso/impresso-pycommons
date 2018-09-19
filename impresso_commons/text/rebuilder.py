@@ -52,7 +52,7 @@ def rebuild_text(page, string=None):
         for pages.
     :type page: dict
     :param string: the rebuilt text of the previous page. If `string` is not
-    `None`, then the rebuilt text is appended to it.
+        `None`, then the rebuilt text is appended to it.
     :type string: str
     :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
         [2] coordinates of token regions (dict of lists).
@@ -127,10 +127,10 @@ def rebuild_text(page, string=None):
 def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
 
-    ..note::
+    .. note::
 
-    This rebuild function is thought especially for ingesting the newspaper
-    data into our Solr index.
+        This rebuild function is thought especially for ingesting the newspaper
+        data into our Solr index.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
@@ -207,9 +207,9 @@ def serialize(sort_key, articles, output_dir=None):
     :return: a tuple with: sorting key [0] and path to serialized file [1].
     :rtype: tuple
 
-    ..note::
+    .. note::
 
-    `sort_key` is expected to be the concatenation of newspaper ID and year
+        `sort_key` is expected to be the concatenation of newspaper ID and year
         (e.g. GDL-1900).
     """
     logger.info(f"Serializing {sort_key} (n = {len(articles)})")
@@ -242,9 +242,9 @@ def upload(sort_key, filepath, bucket_name=None):
     :return: a tuple with [0] whether the upload was successful (boolean) and
         [1] the path of the uploaded file (string)
 
-    ..note::
+    .. note::
 
-    `sort_key` is expected to be the concatenation of newspaper ID and year
+        `sort_key` is expected to be the concatenation of newspaper ID and year
         (e.g. GDL-1900).
     """
     # create connection with bucket
@@ -362,9 +362,10 @@ def init_logging(level, file):
     :return: the initialised logger
     :rtype: `logging.RootLogger`
 
-    ..note::
-    It's basically a duplicate of `impresso_commons.utils.init_logger` but I
-    could not get it to work properly, so keeping this duplicate.
+    .. note::
+
+        It's basically a duplicate of `impresso_commons.utils.init_logger` but
+        I could not get it to work properly, so keeping this duplicate.
     """
     # Initialise the logger
     root_logger = logging.getLogger('')

@@ -1,0 +1,410 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Text Rebuild &mdash; Impresso PyCommons  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Utilities" href="utils.html" />
+    <link rel="prev" title="Welcome to Impresso PyCommons’s documentation!" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Impresso PyCommons
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Text Rebuild</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.text.rebuilder">Command Line interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rebuild-functions">Rebuild functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.text.helpers">Helpers</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Impresso PyCommons</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Text Rebuild</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rebuild.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="text-rebuild">
+<h1>Text Rebuild<a class="headerlink" href="#text-rebuild" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-impresso_commons.text.rebuilder">
+<span id="command-line-interface"></span><h2>Command Line interface<a class="headerlink" href="#module-impresso_commons.text.rebuilder" title="Permalink to this headline">¶</a></h2>
+<p>Functions and CLI to rebuild text from impresso’s canonical format.</p>
+<dl class="docutils">
+<dt>Usage:</dt>
+<dd>rebuilder.py rebuild_articles –input-bucket=&lt;b&gt; –log-file=&lt;f&gt; –output-dir=&lt;od&gt; –filter-config=&lt;fc&gt; [–format=&lt;fo&gt; –scheduler=&lt;sch&gt; –output-bucket=&lt;ob&gt; –verbose –clear]</dd>
+</dl>
+<p>Options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--input-bucket=<var>&lt;b&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>S3 bucket where canonical JSON data will be read from</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--output-bucket=<var>&lt;ob&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--log-file=<var>&lt;f&gt;</var></span></kbd></td>
+<td>Path to log file</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--scheduler=<var>&lt;sch&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Tell dask to use an existing scheduler (otherwise it’ll create one)</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">--filter-config=<var>&lt;fc&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>A JSON configuration file specifying which newspaper issues will be rebuilt</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--verbose</span></kbd></td>
+<td>Set logging level to DEBUG (by default is INFO)</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--clear</span></kbd></td>
+<td>Remove output directory before and after rebuilding</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">--format=<var>&lt;fo&gt;</var></span></kbd></td>
+<td>stuff</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rebuild-functions">
+<h2>Rebuild functions<a class="headerlink" href="#rebuild-functions" title="Permalink to this headline">¶</a></h2>
+<p>A set of functions to transform JSON files in <strong>impresso’s canonical format</strong>
+into a number of JSON-based formats for different purposes.</p>
+<dl class="function">
+<dt id="impresso_commons.text.rebuilder.rebuild_for_solr">
+<code class="descclassname">impresso_commons.text.rebuilder.</code><code class="descname">rebuild_for_solr</code><span class="sig-paren">(</span><em>article_metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_solr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebuilds the text of an article given its metadata as input.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This rebuild function is thought especially for ingesting the newspaper
+data into our Solr index.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>article_metadata</strong> (<em>dict</em>) – the article’s metadata</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a dictionary with the following keys: TBD</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.text.rebuilder.rebuild_text">
+<code class="descclassname">impresso_commons.text.rebuilder.</code><code class="descname">rebuild_text</code><span class="sig-paren">(</span><em>page</em>, <em>string=None</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>The text rebuilding function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>page</strong> (<em>dict</em>) – a newspaper page conforming to the impresso JSON schema
+for pages.</li>
+<li><strong>string</strong> (<em>str</em>) – the rebuilt text of the previous page. If <cite>string</cite> is not
+<cite>None</cite>, then the rebuilt text is appended to it.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+[2] coordinates of token regions (dict of lists).</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-impresso_commons.text.helpers">
+<span id="helpers"></span><h2>Helpers<a class="headerlink" href="#module-impresso_commons.text.helpers" title="Permalink to this headline">¶</a></h2>
+<p>TODO</p>
+<dl class="function">
+<dt id="impresso_commons.text.helpers.pages_to_article">
+<code class="descclassname">impresso_commons.text.helpers.</code><code class="descname">pages_to_article</code><span class="sig-paren">(</span><em>article</em>, <em>pages</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.pages_to_article" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all text regions belonging to a given article.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.text.helpers.read_issue">
+<code class="descclassname">impresso_commons.text.helpers.</code><code class="descname">read_issue</code><span class="sig-paren">(</span><em>issue</em>, <em>bucket_name</em>, <em>s3_client=None</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_issue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the data from S3 for a given newspaper issue.</p>
+<p>NB: It injects the s3_version into the returned object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>issue</strong> (<cite>IssueDir</cite>) – input issue</li>
+<li><strong>bucket_name</strong> (<em>str</em>) – bucket’s name</li>
+<li><strong>s3_client</strong> (<cite>boto3.resources.factory.s3.ServiceResource</cite>) – open connection to S3 storage</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a JSON representation of the issue object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.text.helpers.read_issue_pages">
+<code class="descclassname">impresso_commons.text.helpers.</code><code class="descname">read_issue_pages</code><span class="sig-paren">(</span><em>issue</em>, <em>issue_json</em>, <em>bucket=None</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_issue_pages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read all pages of a given issue from S3 in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>issue</strong> (<cite>IssueDir</cite>) – input issue</li>
+<li><strong>issue_json</strong> (<em>dict</em>) – a JSON canonical issue</li>
+<li><strong>bucket</strong> (<em>str</em>) – input bucket’s name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list of tuples: [0] <cite>IssueDir</cite>, [1] JSON canonical issue</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Rytpe:</th><td class="field-body"><p class="first last">list of tuples</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.text.helpers.read_page">
+<code class="descclassname">impresso_commons.text.helpers.</code><code class="descname">read_page</code><span class="sig-paren">(</span><em>page_key</em>, <em>bucket_name</em>, <em>s3_client</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the data from S3 for a given newspaper pages.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.text.helpers.text_apply_breaks">
+<code class="descclassname">impresso_commons.text.helpers.</code><code class="descname">text_apply_breaks</code><span class="sig-paren">(</span><em>fulltext</em>, <em>breaks</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.text_apply_breaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply breaks to the text returned by <cite>rebuild_for_solr</cite>.</p>
+<p>The purpose of this function is to debug (visually) the <cite>rebuild_for_solr</cite>
+function. It applies to <cite>fulltext</cite> the characte offsets contained in
+<cite>breaks</cite> (e.g. line breaks, paragraph breaks, etc.).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fulltext</strong> (<em>str</em>) – input text</li>
+<li><strong>breaks</strong> (<em>list of int</em>) – a list of character offsets</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list of text chunks</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utils.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to Impresso PyCommons’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, impresso team.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
