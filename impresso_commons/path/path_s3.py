@@ -194,3 +194,59 @@ def impresso_iter_bucket(bucket_name,
         result = ci_bag.compute()
 
     return result
+
+
+def s3_iter_bucket(bucket_name, prefix, key_suffix):
+    """
+    Iterate over a bucket and return all keys with `prefix` and `suffix`
+    @param bucket_name:
+    @param prefix:
+    @param key_suffix:
+    @return: array of keys
+    """
+    return _list_bucket_paginator(bucket_name,
+                                  prefix,
+                                  accept_key=lambda key: key.endswith(key_suffix)
+                                   )
+
+
+def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
+    """
+    Iterate over bucket and filter according to config and suffix.
+    Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
+    Example: config = { "GDL" : [1960, 1970], "JDG": []}. Empty array means no filter, all years.
+    @param bucket_name:
+    @param prefix:
+    @param config:
+    @param suffix:
+    @return: array of keys
+    """
+    filtered_keys = []
+    accept_key = lambda k: True
+    keynames = ["allyears"]
+
+    # generate keynames from config (e.g. 'GDL/GDL-1950.jsonl.bz2')
+    for np in config:
+        print(config[np])
+        if config[np]:
+            keynames = [
+                np + "/" + np + "-" + str(item) + suffix
+                for item in range(config[np][0], config[np][1])
+            ]
+            accept_key = lambda k: k in keynames
+
+        # retrieving keys
+        print(f"Detecting items for {np} with suffixes {keynames}")
+        client = get_s3_client()
+        paginator = client.get_paginator("list_objects")
+        page_iterator = paginator.paginate(Bucket=bucket_name, Prefix=np)
+        for page in page_iterator:
+            if "Contents" in page:
+                for key in page["Contents"]:
+                    keyString = key["Key"]
+                    if accept_key(keyString):
+                        filtered_keys.append(keyString)
+
+    return filtered_keys if filtered_keys else []
+
+
