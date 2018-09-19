@@ -1,4 +1,5 @@
 Utilities
 #########
 
-.. autofunction:: impresso_commons.utils.timestamp
+.. automodule:: impresso_commons.utils
+    :members:

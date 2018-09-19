@@ -145,8 +145,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="utilities">
-<h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-impresso_commons.utils">
+<span id="utilities"></span><h1>Utilities<a class="headerlink" href="#module-impresso_commons.utils" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="impresso_commons.utils.Timer">
+<em class="property">class </em><code class="descclassname">impresso_commons.utils.</code><code class="descname">Timer</code><a class="headerlink" href="#impresso_commons.utils.Timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic timer</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.utils.chunk">
+<code class="descclassname">impresso_commons.utils.</code><code class="descname">chunk</code><span class="sig-paren">(</span><em>list</em>, <em>chunksize</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield successive n-sized chunks from list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.utils.executetask">
+<code class="descclassname">impresso_commons.utils.</code><code class="descname">executetask</code><span class="sig-paren">(</span><em>tasks</em>, <em>parallel_execution</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.executetask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Effectively run execution of tasks</p>
+<p>:param tasks                : list of tasks to be executed
+:type tasks                 : xx
+:param parallel_execution   :
+:type parallel_execution    : boolean ?</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.utils.init_logger">
+<code class="descclassname">impresso_commons.utils.</code><code class="descname">init_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>log_level</em>, <em>log_file</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.init_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialise the logger.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="impresso_commons.utils.timestamp">
 <code class="descclassname">impresso_commons.utils.</code><code class="descname">timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.timestamp" title="Permalink to this definition">¶</a></dt>
@@ -161,6 +189,18 @@
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="impresso_commons.utils.user_confirmation">
+<code class="descclassname">impresso_commons.utils.</code><code class="descname">user_confirmation</code><span class="sig-paren">(</span><em>question</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.user_confirmation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ask a yes/no question via raw_input() and return their answer.</p>
+<p>&#64;param question: a string that is presented to the user.
+&#64;param default: the presumed answer if the user just hits &lt;Enter&gt;.</p>
+<blockquote>
+<div>It must be “yes” (the default), “no” or None (meaning
+an answer is required of the user).</div></blockquote>
+<p>&#64;return: True for “yes” or False for “no”.</p>
 </dd></dl>
 
 </div>

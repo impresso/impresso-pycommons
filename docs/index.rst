@@ -13,8 +13,10 @@ Python module with bits of code (objects, functions) highly reusable within impr
    :maxdepth: 2
    :caption: Contents:
 
+   io
    rebuild
    utils
+   images
 
 
 Indices and tables
