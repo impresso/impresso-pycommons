@@ -11,7 +11,6 @@ from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
 
 logger = logging.getLogger(__name__)
 
-
 # a simple data structure to represent input directories
 IssueDir = namedtuple(
     "IssueDirectory", [
@@ -21,6 +20,7 @@ IssueDir = namedtuple(
         'path'
     ]
 )
+
 
 # a data structure to represent content items (articles or pages)
 class s3ContentItem:
@@ -39,9 +39,9 @@ class s3ContentItem:
 def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
     """
     List the content of a bucket using pagination. No filtering besides indicated prefix and accept_key lambda.
-    @param bucket_name: string, e.g. 'original-canonical-data'
-    @param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical structure within the bucket
-    @param accept_key: lambda function, to accept or reject a specific key
+    :param bucket_name: string, e.g. 'original-canonical-data'
+    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical structure within the bucket
+    :param accept_key: lambda function, to accept or reject a specific key
     @return: arrays of keys
     """
     client = get_s3_client()
@@ -60,10 +60,10 @@ def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
 def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: True, config=None):
     """
     List the content of a bucket using pagination, with a filter.
-    @param bucket_name: string, e.g. 'original-canonical-data'
-    @param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical structure within the bucket
-    @param accept_key: lambda function, to accept or reject a specific key
-    @param config: a dict with newspaper acronyms as keys and array of year interval as values:
+    :param bucket_name: string, e.g. 'original-canonical-data'
+    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical structure within the bucket
+    :param accept_key: lambda function, to accept or reject a specific key
+    :param config: a dict with newspaper acronyms as keys and array of year interval as values:
     e.g. { "GDL": [1950, 1960], "JDG": [1890, 1900] }. Last year is excluded.
     @return: arrays of keys
     """
@@ -98,7 +98,7 @@ def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: T
 
 def _key_to_issue(key_info):
     """Instantiate an IssueDir from a key info tuple.
-    @param key_info: tuple (key_name, key_versionid, date_lastupdated)
+    :param key_info: tuple (key_name, key_versionid, date_lastupdated)
     @return: IssueDir
     """
     key = key_info[0]
@@ -118,7 +118,7 @@ def _key_to_issue(key_info):
 def _key_to_contentitem(key_info):
     """
     Instantiate an ContentItem from a key info tuple.
-    @param key_info: tuple (key_name, key_versionid, date_lastupdated)
+    :param key_info: tuple (key_name, key_versionid, date_lastupdated)
     @return: ContentItem
     """
     key = key_info[0]  # GDL/1950/01/06/a/GDL-1950-01-06-a-i0056.json
@@ -141,9 +141,9 @@ def _key_to_contentitem(key_info):
 def _process_keys(key_name, bucket_name, item_type):
     """
     Convert a key in an impresso object: IssueDir or ContentItem
-    @param key_name:
-    @param bucket_name:
-    @param item_type:
+    :param key_name:
+    :param bucket_name:
+    :param item_type:
     @return:
     """
     # choose the type of build to use
@@ -162,12 +162,12 @@ def impresso_iter_bucket(bucket_name,
     """
     Iterate over a bucket, possibly with a filter, and return an array of either IssueDir or ContentItem.
     VALID ONLY for original-canonical data, where there is individual files for issues and content items (articles).
-    @param bucket_name: string, e.g. 'original-canonical-data'
-    @param item_type: 'issue' or 'item'
-    @param prefix: string, e.g. 'GDL/1950', used to filter key. Exclusive of 'filter_config'
-    @param filter_config: a dict with newspaper acronyms as keys and array of year interval as values:
+    :param bucket_name: string, e.g. 'original-canonical-data'
+    :param item_type: 'issue' or 'item'
+    :param prefix: string, e.g. 'GDL/1950', used to filter key. Exclusive of 'filter_config'
+    :param filter_config: a dict with newspaper acronyms as keys and array of year interval as values:
     e.g. { "GDL": [1950, 1960], "JDG": [1890, 1900] }. Last year is excluded.
-    @param partition_size: partition size of dask to build the object (Issuedir or ContentItem)
+    :param partition_size: partition size of dask to build the object (Issuedir or ContentItem)
     @return: an array of (filtered) IssueDir or ContentItems.
     """
     # either prefix or config, but not both
@@ -196,18 +196,25 @@ def impresso_iter_bucket(bucket_name,
     return result
 
 
-def s3_iter_bucket(bucket_name, prefix, key_suffix):
+def s3_iter_bucket(bucket_name, prefix, suffix):
     """
-    Iterate over a bucket and return all keys with `prefix` and `suffix`
-    @param bucket_name:
-    @param prefix:
-    @param key_suffix:
+    Iterate over a bucket and return all keys with `prefix` and `suffix`.
+
+    >>> b = get_bucket("myBucket", create=False)
+    >>> k = s3_iter_bucket(b.name, prefix='GDL', suffix=".bz2")
+    >>>
+    :param bucket_name: the name of the bucket
+    :type bucket_name: str
+    :param prefix: beginning of the key
+    :type prefix: str
+    :param key_suffix: how the key ends
+    :type prefix: str
     @return: array of keys
     """
     return _list_bucket_paginator(bucket_name,
                                   prefix,
-                                  accept_key=lambda key: key.endswith(key_suffix)
-                                   )
+                                  accept_key=lambda key: key.endswith(suffix)
+                                  )
 
 
 def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
@@ -215,10 +222,12 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
     Iterate over bucket and filter according to config and suffix.
     Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
     Example: config = { "GDL" : [1960, 1970], "JDG": []}. Empty array means no filter, all years.
-    @param bucket_name:
-    @param prefix:
-    @param config:
-    @param suffix:
+    :param bucket_name: the name of the bucket
+    :type bucket_name: str
+    :param config: newspaper/years to consider
+    :type config: Dict
+    :param key_suffix: end of the key
+    :type prefix: str
     @return: array of keys
     """
     filtered_keys = []
@@ -227,7 +236,6 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
 
     # generate keynames from config (e.g. 'GDL/GDL-1950.jsonl.bz2')
     for np in config:
-        print(config[np])
         if config[np]:
             keynames = [
                 np + "/" + np + "-" + str(item) + suffix
@@ -248,5 +256,3 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
                         filtered_keys.append(keyString)
 
     return filtered_keys if filtered_keys else []
-
-

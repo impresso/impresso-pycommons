@@ -297,12 +297,11 @@ def get_s3_versions_client(client, bucket_name, key_name):
     return version_ids
 
 
-def read_jsonlines(s3_resource, bucket_name, key_name): # todo add a test
+def read_jsonlines(bucket_name, key_name):
     """
     Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line).
     Usage example:
-    >>> s3r = get_s3_resource()
-    >>> lines = db.from_sequence(read_lines_boto(s3r, key_name , bucket.name))
+    >>> lines = db.from_sequence(read_jsonlines(s3r, key_name , bucket_name))
     >>> print(lines.count().compute())
     >>> lines.map(json.loads).pluck('ft').take(10)
     :param s3_resource:
@@ -313,9 +312,11 @@ def read_jsonlines(s3_resource, bucket_name, key_name): # todo add a test
     :type key_name: str
     :return:
     """
-    body = s3_resource.Object(bucket_name, key_name).get()['Body']
+    s3r = get_s3_resource()
+    body = s3r.Object(bucket_name, key_name).get()['Body']
     data = body.read()
     text = bz2.decompress(data).decode('utf-8')
     for line in text.split('\n'):
         if line != '':
             yield line
+
