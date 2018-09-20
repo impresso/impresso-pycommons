@@ -30,4 +30,6 @@ bokeh = "*"
 pytest = "*"
 tox = "*"
 graphviz = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
