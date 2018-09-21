@@ -1,17 +1,12 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [requires]
-
 python_version = "3.6"
 
-
 [packages]
-
 smart-open = "*"
 dask = {extras = ["complete"]}
 opencv-python = "==3.4.0.12"
@@ -25,9 +20,7 @@ six = "*"
 jsonlines = "*"
 deprecated = "*"
 
-
 [dev-packages]
-
 jupyter = "*"
 ipython = "*"
 ipdb = "*"
@@ -37,3 +30,6 @@ bokeh = "*"
 pytest = "*"
 tox = "*"
 graphviz = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+

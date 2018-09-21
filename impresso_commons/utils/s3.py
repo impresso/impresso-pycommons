@@ -8,6 +8,7 @@ import logging
 import json
 import boto
 import boto3
+import bz2
 from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
 from impresso_commons.utils import _get_cores
@@ -294,3 +295,28 @@ def get_s3_versions_client(client, bucket_name, key_name):
         for v in versions
     ]
     return version_ids
+
+
+def read_jsonlines(key_name, bucket_name):
+    """
+    Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line).
+    Usage example:
+    >>> lines = db.from_sequence(read_jsonlines(s3r, key_name , bucket_name))
+    >>> print(lines.count().compute())
+    >>> lines.map(json.loads).pluck('ft').take(10)
+    :param s3_resource:
+    :type s3_resource: boto3.resources.factory.s3.ServiceResource
+    :param bucket_name: name of bucket
+    :type bucket_name: str
+    :param key_name: name of key, without S3 prefix
+    :type key_name: str
+    :return:
+    """
+    s3r = get_s3_resource()
+    body = s3r.Object(bucket_name, key_name).get()['Body']
+    data = body.read()
+    text = bz2.decompress(data).decode('utf-8')
+    for line in text.split('\n'):
+        if line != '':
+            yield line
+

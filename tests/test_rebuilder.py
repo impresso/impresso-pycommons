@@ -1,8 +1,8 @@
 from impresso_commons.path.path_s3 import impresso_iter_bucket
-from impresso_commons.utils.s3 import get_bucket
 from impresso_commons.text.rebuilder import rebuild_issues
 import pkg_resources
 import logging
+import pytest
 
 logger = logging.getLogger(__name__)
 

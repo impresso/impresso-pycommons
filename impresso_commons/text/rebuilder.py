@@ -52,7 +52,7 @@ def rebuild_text(page, string=None):
         for pages.
     :type page: dict
     :param string: the rebuilt text of the previous page. If `string` is not
-    `None`, then the rebuilt text is appended to it.
+        `None`, then the rebuilt text is appended to it.
     :type string: str
     :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
         [2] coordinates of token regions (dict of lists).
@@ -76,14 +76,14 @@ def rebuild_text(page, string=None):
     # we iterate over a list of lists (lines of tokens)
     for region_n, region in enumerate(page):
 
-        if region_n > 0:
+        if len(string) > 0:
             offsets['region'].append(len(string))
 
         coordinates['regions'].append(region['c'])
 
         for i, para in enumerate(region["p"]):
 
-            if i > 0:
+            if len(string) > 0:
                 offsets['para'].append(len(string))
 
             for line in para["l"]:
@@ -127,10 +127,10 @@ def rebuild_text(page, string=None):
 def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
 
-    ..note::
+    .. note::
 
-    This rebuild function is thought especially for ingesting the newspaper
-    data into our Solr index.
+        This rebuild function is thought especially for ingesting the newspaper
+        data into our Solr index.
 
     :param article_metadata: the article's metadata
     :type article_metadata: dict
@@ -197,6 +197,10 @@ def rebuild_for_solr(article_metadata):
     return article
 
 
+def rebuild_for_passim(article_metadata):
+    pass
+
+
 def serialize(sort_key, articles, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
@@ -207,9 +211,9 @@ def serialize(sort_key, articles, output_dir=None):
     :return: a tuple with: sorting key [0] and path to serialized file [1].
     :rtype: tuple
 
-    ..note::
+    .. note::
 
-    `sort_key` is expected to be the concatenation of newspaper ID and year
+        `sort_key` is expected to be the concatenation of newspaper ID and year
         (e.g. GDL-1900).
     """
     logger.info(f"Serializing {sort_key} (n = {len(articles)})")
@@ -242,9 +246,9 @@ def upload(sort_key, filepath, bucket_name=None):
     :return: a tuple with [0] whether the upload was successful (boolean) and
         [1] the path of the uploaded file (string)
 
-    ..note::
+    .. note::
 
-    `sort_key` is expected to be the concatenation of newspaper ID and year
+        `sort_key` is expected to be the concatenation of newspaper ID and year
         (e.g. GDL-1900).
     """
     # create connection with bucket
@@ -300,7 +304,7 @@ def rebuild_issues(
         output_dir,
         output_bucket,
         dask_scheduler,
-        format
+        format='solr'
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -327,6 +331,14 @@ def rebuild_issues(
         client = Client(dask_scheduler)
     logger.info(f"Dask cluster: {client}")
 
+    # determine which rebuild function to apply
+    if format == 'solr':
+        rebuild_function = rebuild_for_solr
+    elif format == 'passim':
+        rebuild_function = rebuild_for_passim
+    else:
+        raise
+
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
     logger.info(f"Number of partitions: {bag.npartitions}")
@@ -337,7 +349,7 @@ def rebuild_issues(
         .flatten() \
         .starmap(pages_to_article)\
         .filter(_article_has_problem) \
-        .map(rebuild_for_solr) \
+        .map(rebuild_function) \
         .groupby(
             lambda x: "{}-{}".format(
                 parse_canonical_filename(x["id"])[0],  # e.g. GDL
@@ -363,9 +375,10 @@ def init_logging(level, file):
     :return: the initialised logger
     :rtype: `logging.RootLogger`
 
-    ..note::
-    It's basically a duplicate of `impresso_commons.utils.init_logger` but I
-    could not get it to work properly, so keeping this duplicate.
+    .. note::
+
+        It's basically a duplicate of `impresso_commons.utils.init_logger` but
+        I could not get it to work properly, so keeping this duplicate.
     """
     # Initialise the logger
     root_logger = logging.getLogger('')
