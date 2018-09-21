@@ -19,7 +19,7 @@ def test_get_s3_versions():
 def test_read_jsonlines():
     b = get_bucket("canonical-rebuilt-lux", create=False)
     key = "GDL/GDL-1950.jsonl.bz2"
-    lines = db.from_sequence(read_jsonlines(b.name, key))
+    lines = db.from_sequence(read_jsonlines(key, b.name))
     count_lines = lines.count().compute()
     some_lines = lines.map(json.loads).pluck('ft').take(10)
 

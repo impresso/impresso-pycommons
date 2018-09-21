@@ -297,7 +297,7 @@ def get_s3_versions_client(client, bucket_name, key_name):
     return version_ids
 
 
-def read_jsonlines(bucket_name, key_name):
+def read_jsonlines(key_name, bucket_name):
     """
     Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line).
     Usage example:
