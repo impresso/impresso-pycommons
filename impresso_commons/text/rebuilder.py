@@ -76,14 +76,14 @@ def rebuild_text(page, string=None):
     # we iterate over a list of lists (lines of tokens)
     for region_n, region in enumerate(page):
 
-        if region_n > 0:
+        if len(string) > 0:
             offsets['region'].append(len(string))
 
         coordinates['regions'].append(region['c'])
 
         for i, para in enumerate(region["p"]):
 
-            if i > 0:
+            if len(string) > 0:
                 offsets['para'].append(len(string))
 
             for line in para["l"]:
@@ -197,6 +197,10 @@ def rebuild_for_solr(article_metadata):
     return article
 
 
+def rebuild_for_passim(article_metadata):
+    pass
+
+
 def serialize(sort_key, articles, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
@@ -300,7 +304,7 @@ def rebuild_issues(
         output_dir,
         output_bucket,
         dask_scheduler,
-        format
+        format='solr'
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -327,6 +331,14 @@ def rebuild_issues(
         client = Client(dask_scheduler)
     logger.info(f"Dask cluster: {client}")
 
+    # determine which rebuild function to apply
+    if format == 'solr':
+        rebuild_function = rebuild_for_solr
+    elif format == 'passim':
+        rebuild_function = rebuild_for_passim
+    else:
+        raise
+
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
     logger.info(f"Number of partitions: {bag.npartitions}")
@@ -337,7 +349,7 @@ def rebuild_issues(
         .flatten() \
         .starmap(pages_to_article)\
         .filter(_article_has_problem) \
-        .map(rebuild_for_solr) \
+        .map(rebuild_function) \
         .groupby(
             lambda x: "{}-{}".format(
                 parse_canonical_filename(x["id"])[0],  # e.g. GDL
