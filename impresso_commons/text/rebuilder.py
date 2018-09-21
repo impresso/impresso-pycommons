@@ -401,7 +401,6 @@ def init_logging(level, file):
 def main():
 
     arguments = docopt(__doc__)
-    print(arguments)
     clear_output = arguments["--clear"]
     bucket_name = arguments["--input-bucket"]
     output_bucket_name = arguments["--output-bucket"]
@@ -426,24 +425,30 @@ def main():
     if arguments["rebuild_articles"]:
 
         for n, batch in enumerate(config):
-            print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
-            print('Retrieving issues...')
-            input_issues = impresso_iter_bucket(
-                bucket_name,
-                filter_config=batch,
-                # prefix="GDL/1948/09/03",
-                item_type="issue"
-            )
 
-            # TODO: add support for `output_format`
-            rebuild_issues(
-                issues=input_issues,
-                input_bucket=bucket_name,
-                output_dir=outp_dir,
-                output_bucket=output_bucket_name,
-                dask_scheduler=scheduler,
-                format=output_format
-            )
+            print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
+
+            newspaper = list(batch.keys())[0]
+            start_year, end_year = batch[newspaper]
+
+            for year in range(start_year, end_year):
+                print(f'Processing year {year}')
+                print('Retrieving issues...')
+                input_issues = impresso_iter_bucket(
+                    bucket_name,
+                    filter_config={newspaper: [year, year + 1]},
+                    # prefix="GDL/1948/09/03",
+                    item_type="issue"
+                )
+
+                rebuild_issues(
+                    issues=input_issues,
+                    input_bucket=bucket_name,
+                    output_dir=outp_dir,
+                    output_bucket=output_bucket_name,
+                    dask_scheduler=scheduler,
+                    format=output_format
+                )
 
         if clear_output is not None and clear_output:
             shutil.rmtree(outp_dir)
