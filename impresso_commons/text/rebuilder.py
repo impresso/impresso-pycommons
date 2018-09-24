@@ -94,7 +94,7 @@ def rebuild_text(page, string=None):
                     region["s"] = len(string)
 
                     if "hy" in token:
-                        region["l"] = len(token["tx"][:-1])
+                        region["l"] = len(token["tx"][:-1])-1
 
                     elif "nf" in token:
                         region["l"] = len(token["nf"])
@@ -117,7 +117,10 @@ def rebuild_text(page, string=None):
 
                     # if token is the last in a line
                     if n == len(line['t']) - 1:
-                        offsets['line'].append(region["s"] + len(token["tx"]))
+                        if 'hy' in token:
+                            offsets['line'].append(region["s"])
+                        else:
+                            offsets['line'].append(region["s"] + len(token["tx"]))
 
                     coordinates['tokens'].append(region)
 
