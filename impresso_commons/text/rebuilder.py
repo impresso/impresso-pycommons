@@ -204,7 +204,7 @@ def rebuild_for_passim(article_metadata):
     pass
 
 
-def serialize(sort_key, articles, output_dir=None):
+def serialize(articles, sort_key=None, output_dir=None):
     """Serialize a bunch of articles into a compressed JSONLines archive.
 
     :param sort_key: the key used to group articles (e.g. "GDL-1900")
@@ -342,6 +342,9 @@ def rebuild_issues(
     else:
         raise
 
+    issue = IssueDir(**issues[0])
+    sort_key = f'{issue.journal}-{issue.date.year}'
+
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
     logger.info(f"Number of partitions: {bag.npartitions}")
@@ -353,18 +356,16 @@ def rebuild_issues(
         .starmap(pages_to_article)\
         .filter(_article_has_problem) \
         .map(rebuild_function) \
-        .groupby(
-            lambda x: "{}-{}".format(
-                parse_canonical_filename(x["id"])[0],  # e.g. GDL
-                parse_canonical_filename(x["id"])[1][0]  # e.g. 1950
-            )
-        )\
-        .starmap(serialize, output_dir=output_dir)\
-        .starmap(upload, bucket_name=output_bucket)
+        .map(json.dumps) \
+        .to_textfiles('{}/*.json.gz'.format(output_dir))
 
-    x = process_bag.persist()
+    x = client.compute(process_bag)
     progress(x)
-    return x.compute()
+    #articles = client.gather(x)
+    #print(articles[0])
+    #result = serialize(articles, sort_key=sort_key, output_dir=output_dir)
+    #print(result)
+    return True
 
 
 def init_logging(level, file):
@@ -430,7 +431,6 @@ def main():
         for n, batch in enumerate(config):
 
             print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
-
             newspaper = list(batch.keys())[0]
             start_year, end_year = batch[newspaper]
 
@@ -453,8 +453,27 @@ def main():
                     format=output_format
                 )
 
-        if clear_output is not None and clear_output:
-            shutil.rmtree(outp_dir)
+            newspaper = list(batch.keys())[0]
+            start_year, end_year = batch[newspaper]
+
+            for year in range(start_year, end_year):
+                print(f'Processing year {year}')
+                print('Retrieving issues...')
+                input_issues = impresso_iter_bucket(
+                    bucket_name,
+                    filter_config={newspaper: [year, year + 1]},
+                    # prefix="GDL/1948/09/03",
+                    item_type="issue"
+                )
+
+                rebuild_issues(
+                    issues=input_issues,
+                    input_bucket=bucket_name,
+                    output_dir=outp_dir,
+                    output_bucket=output_bucket_name,
+                    dask_scheduler=scheduler,
+                    format=output_format
+                )
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
