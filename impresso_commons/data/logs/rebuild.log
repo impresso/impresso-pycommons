@@ -1,5 +1,11 @@
-2018-09-21 10:17:07,156 root         INFO     Logger successfully initialised
-2018-09-21 10:17:07,157 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
-2018-09-21 10:17:08,227 impresso_commons.path.path_s3 INFO     Start processing key.
-2018-09-21 10:17:17,607 __main__     INFO     Dask cluster: <Client: scheduler='tcp://10.90.38.12:8786' processes=36 cores=36>
-2018-09-21 10:17:17,618 __main__     INFO     Number of partitions: 103
+2018-09-24 11:30:05,678 root         INFO     Logger successfully initialised
+2018-09-24 11:30:05,679 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-09-24 11:30:08,354 impresso_commons.path.path_s3 INFO     Start processing key.
+2018-09-24 11:30:19,486 __main__     INFO     Dask cluster: <Client: scheduler='tcp://127.0.0.1:53215' processes=8 cores=8>
+2018-09-24 11:30:19,501 __main__     INFO     Number of partitions: 101
+2018-09-24 11:42:11,856 __main__     INFO     Compressing 101 JSON files into impresso_commons/data/rebuilt/GDL-1986.jsonl.bz2
+2018-09-24 11:45:54,693 __main__     INFO     Removed temporary directory and files in impresso_commons/data/rebuilt/GDL-1986
+2018-09-24 11:45:54,761 __main__     ERROR    Required parameter name not set
+2018-09-24 11:45:54,761 __main__     ERROR    The upload of impresso_commons/data/rebuilt/GDL-1986.jsonl.bz2 failed with error Required parameter name not set
+2018-09-24 11:45:54,761 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2018-09-24 11:45:59,600 impresso_commons.path.path_s3 INFO     Start processing key.

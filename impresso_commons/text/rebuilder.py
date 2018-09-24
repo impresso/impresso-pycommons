@@ -27,7 +27,6 @@ from dask.distributed import Client, progress
 from docopt import docopt
 from smart_open import smart_open
 
-from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
@@ -120,7 +119,9 @@ def rebuild_text(page, string=None):
                         if 'hy' in token:
                             offsets['line'].append(region["s"])
                         else:
-                            offsets['line'].append(region["s"] + len(token["tx"]))
+                            offsets['line'].append(
+                                region["s"] + len(token["tx"])
+                            )
 
                     coordinates['tokens'].append(region)
 
@@ -204,37 +205,52 @@ def rebuild_for_passim(article_metadata):
     pass
 
 
-def serialize(articles, sort_key=None, output_dir=None):
-    """Serialize a bunch of articles into a compressed JSONLines archive.
+def compress(key, json_files, output_dir):
+    """Merges a set of JSON line files into a single compressed archive.
 
-    :param sort_key: the key used to group articles (e.g. "GDL-1900")
-    :type sort_key: string
-    :param articles: a list of JSON documents, encoded as python dictionaries
-    :type: list of dict
+    :param key: signature of the newspaper issue (e.g. GDL-1900)
+    :type key: str
+    :param json_files: input JSON line files
+    :type json_files: list
+    :param output_dir: directory where to write the output file
+    :type outp_dir: str
     :return: a tuple with: sorting key [0] and path to serialized file [1].
-    :rtype: tuple
+    :rytpe: tuple
 
     .. note::
 
         `sort_key` is expected to be the concatenation of newspaper ID and year
         (e.g. GDL-1900).
     """
-    logger.info(f"Serializing {sort_key} (n = {len(articles)})")
-    print(f"Serializing {sort_key} (n = {len(articles)})")
-    newspaper, year = sort_key.split('-')
+
+    newspaper, year = key.split('-')
     filename = f'{newspaper}-{year}.jsonl.bz2'
     filepath = os.path.join(output_dir, filename)
-
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+    logger.info(f'Compressing {len(json_files)} JSON files into {filepath}')
+    print(f'Compressing {len(json_files)} JSON files into {filepath}')
 
     with smart_open(filepath, 'wb') as fout:
         writer = jsonlines.Writer(fout)
-        writer.write_all(articles)
+
+        for json_file in json_files:
+            with open(json_file, 'r') as inpf:
+                reader = jsonlines.Reader(inpf)
+                articles = list(reader)
+                writer.write(articles)
+            print(
+                f'Written {len(articles)} docs from {json_file} to {filepath}'
+            )
+
         writer.close()
 
-    # return also number of articles?
-    return sort_key, filepath
+    for json_file in json_files:
+        os.remove(json_file)
+
+    temp_dir = os.path.dirname(json_files[0])
+    os.rmdir(temp_dir)
+    logger.info(f'Removed temporary directory and files in {temp_dir}')
+
+    return (key, filepath)
 
 
 def upload(sort_key, filepath, bucket_name=None):
@@ -305,7 +321,6 @@ def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        output_bucket,
         dask_scheduler,
         format='solr'
 ):
@@ -317,9 +332,6 @@ def rebuild_issues(
     :type input_bucket: str
     :param outp_dir: local directory where to store the rebuilt files
     :type outp_dir: str
-    :param output_bucket: name of S3 bucket where to upload the rebuilt files (
-        no upload if None)
-    :type output_bucket: str
     :param dask_scheduler: IP address of an existing dask scheduler (for
         distributed processing).
     :type dask_scheduler: str
@@ -343,7 +355,12 @@ def rebuild_issues(
         raise
 
     issue = IssueDir(**issues[0])
-    sort_key = f'{issue.journal}-{issue.date.year}'
+    key = f'{issue.journal}-{issue.date.year}'
+    issue_dir = os.path.join(output_dir, key)
+    if not os.path.exists(issue_dir):
+        os.mkdir(issue_dir)
+
+    print(issue_dir)
 
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)
@@ -357,15 +374,16 @@ def rebuild_issues(
         .filter(_article_has_problem) \
         .map(rebuild_function) \
         .map(json.dumps) \
-        .to_textfiles('{}/*.json.gz'.format(output_dir))
+        .to_textfiles('{}/*.json'.format(issue_dir))
 
     x = client.compute(process_bag)
     progress(x)
-    #articles = client.gather(x)
-    #print(articles[0])
-    #result = serialize(articles, sort_key=sort_key, output_dir=output_dir)
-    #print(result)
-    return True
+    json_files = [
+        os.path.join(issue_dir, f)
+        for f in os.listdir(issue_dir)
+        if '.json' in f
+    ]
+    return (key, json_files)
 
 
 def init_logging(level, file):
@@ -444,36 +462,28 @@ def main():
                     item_type="issue"
                 )
 
-                rebuild_issues(
+                issue_key, json_files = rebuild_issues(
                     issues=input_issues,
                     input_bucket=bucket_name,
                     output_dir=outp_dir,
-                    output_bucket=output_bucket_name,
                     dask_scheduler=scheduler,
                     format=output_format
                 )
 
-            newspaper = list(batch.keys())[0]
-            start_year, end_year = batch[newspaper]
-
-            for year in range(start_year, end_year):
-                print(f'Processing year {year}')
-                print('Retrieving issues...')
-                input_issues = impresso_iter_bucket(
-                    bucket_name,
-                    filter_config={newspaper: [year, year + 1]},
-                    # prefix="GDL/1948/09/03",
-                    item_type="issue"
+                issue_key, compressed_archive = compress(
+                    issue_key,
+                    json_files,
+                    outp_dir
                 )
 
-                rebuild_issues(
-                    issues=input_issues,
-                    input_bucket=bucket_name,
-                    output_dir=outp_dir,
-                    output_bucket=output_bucket_name,
-                    dask_scheduler=scheduler,
-                    format=output_format
+                success, filepath = upload(
+                    issue_key,
+                    compressed_archive,
+                    output_bucket_name
                 )
+
+                if clear_output:
+                    cleanup(success, filepath)
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
