@@ -165,7 +165,8 @@ def rebuild_for_solr(article_metadata):
         "ts": timestamp(),
         "lg": article_metadata["m"]["l"],
         "tp": mapped_type,
-        "s3v": article_metadata["m"]["s3v"],
+        "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"]
+        else None,
         "ppreb": [],
         "lb": [],
         "cc": article_metadata["m"]["cc"]
@@ -238,7 +239,7 @@ def compress(key, json_files, output_dir):
                 reader = jsonlines.Reader(inpf)
                 articles = list(reader)
                 writer.write(articles)
-            print(
+            logger.info(
                 f'Written {len(articles)} docs from {json_file} to {filepath}'
             )
 
@@ -447,6 +448,8 @@ def main():
 
     if arguments["rebuild_articles"]:
 
+        rebuilt_issues = []
+
         for n, batch in enumerate(config):
 
             print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
@@ -470,21 +473,13 @@ def main():
                     dask_scheduler=scheduler,
                     format=output_format
                 )
+                rebuilt_issues.append((issue_key, json_files))
 
-                issue_key, compressed_archive = compress(
-                    issue_key,
-                    json_files,
-                    outp_dir
-                )
-
-                success, filepath = upload(
-                    issue_key,
-                    compressed_archive,
-                    output_bucket_name
-                )
-
-                if clear_output:
-                    cleanup(success, filepath)
+        b = db.from_sequence(rebuilt_issues) \
+            .starmap(compress, output_dir=outp_dir) \
+            .starmap(upload, bucket_name=output_bucket_name)
+        future = b.persist()
+        progress(future)
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
