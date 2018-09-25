@@ -5,6 +5,8 @@ Status: to be validated and finalized.
 Meaning of keys:
 
 - `id`: ID of the content item (CI)
+- `s3v`: S3 version ID of the corresponding `issue.json` file
+- `cc`: True if the coordinates in **all** pages were converted, False otherwise
 - `pp`: array of page numbers over which the CI spans; it's the physical
     page number issue-based, as we get it from the OCR.
 - `d`: issue date (format: "yyyy-mm-dd")
@@ -28,6 +30,7 @@ Meaning of keys:
 ```json
 {
   "id": "GDL-1950-01-23-a-i0076",
+  "cc": false,
   "pp": [
     6
   ],
