@@ -1,5 +1,5 @@
 from impresso_commons.path.path_s3 import impresso_iter_bucket
-from impresso_commons.text.rebuilder import rebuild_issues
+from impresso_commons.text.rebuilder import rebuild_issues, compress
 import pkg_resources
 import logging
 
@@ -19,7 +19,7 @@ def test_rebuild_issues():
         item_type="issue"
     )
 
-    result = rebuild_issues(
+    issue_key, json_files = rebuild_issues(
         issues=input_issues,
         input_bucket=input_bucket_name,
         output_dir=outp_dir,
@@ -27,5 +27,6 @@ def test_rebuild_issues():
         format='solr'
     )
 
+    result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None

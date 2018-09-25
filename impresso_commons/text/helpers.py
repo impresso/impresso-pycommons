@@ -40,7 +40,7 @@ def read_page(page_key, bucket_name, s3_client):
         content_object = s3_client.Object(bucket_name, page_key)
         file_content = content_object.get()['Body'].read().decode('utf-8')
         page_json = json.loads(file_content)
-        page_json["s3_version"] = get_s3_versions(bucket_name, page_key)[0][0]
+        # page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
         logger.info("Read page {} from bucket {}".format(
             page_key,
             bucket_name
@@ -82,17 +82,20 @@ def read_issue_pages(issue, issue_json, bucket=None):
 
 def rejoin_articles(issue, issue_json):
     logger.info(f"Rejoining pages for issue {issue.path}")
-    return [
-        (
-            article,
-            [
-                issue_json['pp'][page_no - 1]
-                for page_no in article['m']['pp']
-            ]
-        )
-        for article in issue_json['i']
-        if article['m']['tp'] != 'ad'
-    ]
+
+    articles = []
+    for article in issue_json['i']:
+
+        if article['m']['tp'] == 'ad':
+            continue
+
+        article['m']['s3v'] = issue_json['s3_version']
+        pages = [
+            issue_json['pp'][page_no - 1]
+            for page_no in article['m']['pp']
+        ]
+        articles.append((article, pages))
+    return articles
 
 
 def pages_to_article(article, pages):
@@ -107,6 +110,8 @@ def pages_to_article(article, pages):
                 for region in page["r"]
                 if region["pOf"] == art_id
             ])
+        convert_coords = [page['cc'] for page in pages]
+        article['m']['cc'] = sum(convert_coords) / len(convert_coords) == 1.0
         article['has_problem'] = False
         article['pprr'] = regions_by_page
         return article

@@ -160,14 +160,15 @@ def rebuild_for_solr(article_metadata):
 
     article = {
         "id": article_id,
-        # "series": None,
         "pp": article_metadata["m"]["pp"],
         "d": d.isoformat(),
         "ts": timestamp(),
         "lg": article_metadata["m"]["l"],
         "tp": mapped_type,
+        "s3v": article_metadata["m"]["s3v"],
         "ppreb": [],
-        "lb": []
+        "lb": [],
+        "cc": article_metadata["m"]["cc"]
     }
 
     if 't' in article_metadata["m"]:
