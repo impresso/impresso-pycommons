@@ -365,14 +365,15 @@ def readtext_jsonlines(key_name, bucket_name):
 def create_even_partitions(bucket,
                            config_newspapers,
                            output_dir,
+                           partitioned_bucket_name,
                            partitioned_bucket_prefix,
                            nb_partition=500):
     """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
 
     Enables efficient (distributed) processing with dask, bypassing the size discrepancies of newspaper archives.
-    N.B: in resulting partitions articles are all shuffled.
-    Warning: consider well the config_newspapers as it decides what will be in the partitions and
-    what will be loaded in memory.
+    N.B.: in resulting partitions articles are all shuffled.
+    Warning: consider well the config_newspapers as it decides what will be in the partitions and loaded in memory.
+
     @param partitioned_bucket_prefix:
     @param bucket: name of the bucket
     @param config_newspapers: json dict specifying the sources to consider (name of newspaper and year span)
@@ -410,7 +411,7 @@ def create_even_partitions(bucket,
     # upload to S3
     b = db.from_sequence(os.listdir(output_dir))
     with ProgressBar():
-        b.map(upload, newspaper_prefix=partitioned_bucket_prefix, bucket_name=bucket.name)
+        b.map(upload, newspaper_prefix=partitioned_bucket_prefix, bucket_name=partitioned_bucket_name)
     logger.info(f"Total elapsed time: {t.stop()}")
 
 
