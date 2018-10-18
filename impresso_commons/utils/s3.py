@@ -6,12 +6,20 @@ Warning: 2 boto libraries are used, and need to be kept until third party lib de
 import os
 import logging
 import json
+
 import boto
 import boto3
 import bz2
 from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
-from impresso_commons.utils import _get_cores
+
+from dask.diagnostics import ProgressBar
+import dask.bag as db
+import numpy as np
+
+from impresso_commons.utils import _get_cores, Timer
+from impresso_commons.path.path_s3 import s3_filter_archives
+
 
 logger = logging.getLogger(__name__)
 
@@ -304,8 +312,6 @@ def read_jsonlines(key_name, bucket_name):
     >>> lines = db.from_sequence(read_jsonlines(s3r, key_name , bucket_name))
     >>> print(lines.count().compute())
     >>> lines.map(json.loads).pluck('ft').take(10)
-    :param s3_resource:
-    :type s3_resource: boto3.resources.factory.s3.ServiceResource
     :param bucket_name: name of bucket
     :type bucket_name: str
     :param key_name: name of key, without S3 prefix
@@ -320,3 +326,104 @@ def read_jsonlines(key_name, bucket_name):
         if line != '':
             yield line
 
+
+def readtext_jsonlines(key_name, bucket_name):
+    """
+    Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line)
+    with limited textual information, leaving out OCR metadata (box, offsets).
+    This can serve as the starting point for pure textual processing (NE, text-reuse, topics)
+    Usage example:
+    >>> lines = db.from_sequence(readtext_jsonlines(s3r, key_name , bucket_name))
+    >>> print(lines.count().compute())
+    >>> lines.map(json.loads).pluck('ft').take(10)
+    :param bucket_name: name of bucket
+    :type bucket_name: str
+    :param key_name: name of key, without S3 prefix
+    :type key_name: str
+    :return: JSON formatted str
+    """
+    s3r = get_s3_resource()
+    body = s3r.Object(bucket_name, key_name).get()['Body']
+    data = body.read()
+    text = bz2.decompress(data).decode('utf-8')
+    for line in text.split('\n'):
+        if line != '':
+            article_json = json.loads(line)
+            text = article_json["ft"]
+            if len(text) != 0:
+                article_reduced = {k: article_json[k] for k in article_json if k == "id"
+                                   or k == "s3v"
+                                   or k == "ts"
+                                   or k == "ft"
+                                   or k == "tp"
+                                   or k == "pp"
+                                   or k == "lg"
+                                   or k == "t"}
+                yield json.dumps(article_reduced)
+
+
+def create_even_partitions(bucket,
+                           config_newspapers,
+                           output_dir,
+                           partitioned_bucket_prefix,
+                           nb_partition=500):
+    """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
+
+    Enables efficient (distributed) processing with dask, bypassing the size discrepancies of newspaper archives.
+    N.B: in resulting partitions articles are all shuffled.
+    Warning: consider well the config_newspapers as it decides what will be in the partitions and
+    what will be loaded in memory.
+    @param partitioned_bucket_prefix:
+    @param bucket: name of the bucket
+    @param config_newspapers: json dict specifying the sources to consider (name of newspaper and year span)
+    @param output_dir: where to write the produced partitions
+    @param nb_partition:
+    @return: None
+    """
+
+    t = Timer()
+
+    # output setting
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "*.jsonl.bz2")
+    logger.info(f"Will write partitions to {path}")
+
+    # collect (yearly) keys
+    bz2_keys = s3_filter_archives(bucket.name, config=config_newspapers)
+
+    # load all bz2 archives
+    bag_bz2_keys = db.from_sequence(bz2_keys)
+
+    # read and filter lines (1 elem = list of lines, or articles, from a key)
+    bag_articles = bag_bz2_keys.map(readtext_jsonlines, bucket_name=bucket.name).flatten()
+
+    # classical repartition cmd does not produce even partitions => using a group by with a random variable
+    grouped_articles = bag_articles.groupby(lambda x: np.random.randint(1000), npartitions=nb_partition)
+    articles = grouped_articles.map(lambda x: x[1]).flatten()
+
+    # write partitions on disk
+    with ProgressBar():
+        articles.to_textfiles(path)
+
+    # todo: write partitions directly to S3
+    logger.info(f"Partitioning done in {t.tick()}. Starting S3 upload")
+    # upload to S3
+    b = db.from_sequence(os.listdir(output_dir))
+    with ProgressBar():
+        b.map(upload, newspaper_prefix=partitioned_bucket_prefix, bucket_name=bucket.name)
+    logger.info(f"Total elapsed time: {t.stop()}")
+
+
+def upload(key_name, newspaper_prefix, bucket_name=None):
+
+    filename = os.path.join("/", newspaper_prefix, key_name)
+    s3 = get_s3_resource()
+    try:
+        bucket = s3.Bucket(bucket_name)
+        bucket.upload_file(filename, key_name)
+        logger.info(f'Uploaded {key_name} to {filename} to ')
+        return True, filename
+    except Exception as e:
+        logger.error(e)
+        logger.error(f'The upload of {filename} failed with error {e}')
+        return False, filename
