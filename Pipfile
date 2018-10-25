@@ -19,6 +19,8 @@ docopt = "*"
 six = "*"
 jsonlines = "*"
 deprecated = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
 [dev-packages]
 jupyter = "*"
@@ -30,6 +32,3 @@ bokeh = "*"
 pytest = "*"
 tox = "*"
 graphviz = "*"
-sphinx = "*"
-sphinx-rtd-theme = "*"
-
