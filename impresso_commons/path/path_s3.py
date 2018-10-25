@@ -7,7 +7,7 @@ from collections import namedtuple
 from dask.diagnostics import ProgressBar
 import dask.bag as db
 
-from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
+from impresso_commons.utils.s3 import get_s3_client, get_s3_resource
 
 logger = logging.getLogger(__name__)
 
