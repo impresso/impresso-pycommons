@@ -89,6 +89,10 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
 
     Assumes that two environment variables are set: `SE_ACCESS_KEY` and
         `SE_SECRET_KEY`.
+
+     :param host_url: the s3 endpoint's URL
+    :type host_url: string
+    :rtype: `boto.s3.connection`
     """
     try:
         access_key = os.environ["SE_ACCESS_KEY"]
@@ -362,69 +366,17 @@ def readtext_jsonlines(key_name, bucket_name):
                 yield json.dumps(article_reduced)
 
 
-def create_even_partitions(bucket,
-                           config_newspapers,
-                           output_dir,
-                           partitioned_bucket_name,
-                           partitioned_bucket_prefix,
-                           nb_partition=500):
-    """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
+def upload(partition_name, newspaper_prefix, bucket_name=None):
 
-    Enables efficient (distributed) processing with dask, bypassing the size discrepancies of newspaper archives.
-    N.B.: in resulting partitions articles are all shuffled.
-    Warning: consider well the config_newspapers as it decides what will be in the partitions and loaded in memory.
-
-    @param partitioned_bucket_prefix:
-    @param bucket: name of the bucket
-    @param config_newspapers: json dict specifying the sources to consider (name of newspaper and year span)
-    @param output_dir: where to write the produced partitions
-    @param nb_partition:
-    @return: None
-    """
-
-    t = Timer()
-
-    # output setting
-    os.makedirs(output_dir, exist_ok=True)
-    path = os.path.join(output_dir, "*.jsonl.bz2")
-    logger.info(f"Will write partitions to {path}")
-
-    # collect (yearly) keys
-    bz2_keys = s3_filter_archives(bucket.name, config=config_newspapers)
-
-    # load all bz2 archives
-    bag_bz2_keys = db.from_sequence(bz2_keys)
-
-    # read and filter lines (1 elem = list of lines, or articles, from a key)
-    bag_articles = bag_bz2_keys.map(readtext_jsonlines, bucket_name=bucket.name).flatten()
-
-    # classical repartition cmd does not produce even partitions => using a group by with a random variable
-    grouped_articles = bag_articles.groupby(lambda x: np.random.randint(1000), npartitions=nb_partition)
-    articles = grouped_articles.map(lambda x: x[1]).flatten()
-
-    # write partitions on disk
-    with ProgressBar():
-        articles.to_textfiles(path)
-
-    # todo: write partitions directly to S3
-    logger.info(f"Partitioning done in {t.tick()}. Starting S3 upload")
-    # upload to S3
-    b = db.from_sequence(os.listdir(output_dir))
-    with ProgressBar():
-        b.map(upload, newspaper_prefix=partitioned_bucket_prefix, bucket_name=partitioned_bucket_name)
-    logger.info(f"Total elapsed time: {t.stop()}")
-
-
-def upload(key_name, newspaper_prefix, bucket_name=None):
-
-    filename = os.path.join("/", newspaper_prefix, key_name)
+    key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)
-        bucket.upload_file(filename, key_name)
-        logger.info(f'Uploaded {key_name} to {filename} to ')
-        return True, filename
+        logger.info(bucket.name)
+        bucket.upload_file(partition_name, key_name)
+        logger.info(f'Uploaded {partition_name} to {key_name}')
+        return True, partition_name
     except Exception as e:
         logger.error(e)
-        logger.error(f'The upload of {filename} failed with error {e}')
-        return False, filename
+        logger.error(f'The upload of {partition_name} failed with error {e}')
+        return False, partition_name
