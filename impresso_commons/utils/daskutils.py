@@ -5,7 +5,7 @@
 Utility which help preparing data in view of parallel or distributed computing, in a dask-oriented view.
 
 Usage:
-    daskutils.py partition --config-file=<cf> --output-dir=<i> [--log-file=<f> --verbose]
+    daskutils.py partition --config-file=<cf> [--log-file=<f> --verbose]
 
 Options:
     --config-file=<cf>  json configuration dict specifying various arguments
@@ -90,6 +90,7 @@ def create_even_partitions(bucket,
     logger.info(f"Partitioning done in {t.stop()}. Starting S3 upload")
 
     # upload to S3
+    """
     partitions = db.from_sequence([os.path.join(output_dir, file) for file in os.listdir(output_dir)])
     uploaded_partitions = partitions.map(upload,
                                          newspaper_prefix=partitioned_bucket_prefix,
@@ -98,6 +99,7 @@ def create_even_partitions(bucket,
         uploaded_partitions.compute()
 
     logger.info(f"Total elapsed time: {t.stop()}")
+    """
 
 
 def main(args):
@@ -156,7 +158,8 @@ def main(args):
                                config_newspapers,
                                dir_partition,
                                bucket_partition,
-                               "GDL",
+                               "GDL",  # todo: add in params
+                               False,  # todo: add in params
                                nb_partition=number_partitions)
 
 
