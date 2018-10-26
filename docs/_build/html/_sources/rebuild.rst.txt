@@ -10,11 +10,14 @@ Command Line interface
 Config file example
 -------------------
 
-(from file: `cluster.json`)
+(from file: `cluster.json`)::
 
-``
-[{"GDL": [1900, 1999]}]
-``
+
+    [
+        {
+            "GDL": [1900, 1999]
+        }
+    ]
 
 
 Rebuild functions
