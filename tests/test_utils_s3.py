@@ -5,7 +5,7 @@ import pytest
 
 
 def test_get_s3_versions():
-    bucket_name = "canonical-rebuilt-versioned"
+    bucket_name = "original-canonical-data"
     bucket = get_bucket(bucket_name)
     keys = bucket.get_all_keys()[:10]
     info = [
