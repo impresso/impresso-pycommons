@@ -238,7 +238,7 @@ def compress(key, json_files, output_dir):
             with open(json_file, 'r') as inpf:
                 reader = jsonlines.Reader(inpf)
                 articles = list(reader)
-                writer.write(articles)
+                writer.write_all(articles)
             logger.info(
                 f'Written {len(articles)} docs from {json_file} to {filepath}'
             )
@@ -465,7 +465,8 @@ def main():
                     # prefix="GDL/1948/09/03",
                     item_type="issue"
                 )
-
+                if len(input_issues) == 0:
+                    continue
                 issue_key, json_files = rebuild_issues(
                     issues=input_issues,
                     input_bucket=bucket_name,
@@ -474,10 +475,11 @@ def main():
                     format=output_format
                 )
                 rebuilt_issues.append((issue_key, json_files))
-
+        
         b = db.from_sequence(rebuilt_issues) \
             .starmap(compress, output_dir=outp_dir) \
-            .starmap(upload, bucket_name=output_bucket_name)
+            .starmap(upload, bucket_name=output_bucket_name) \
+            .starmap(cleanup)
         future = b.persist()
         progress(future)
 
