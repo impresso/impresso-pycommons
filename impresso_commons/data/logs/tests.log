@@ -1,7 +1,0 @@
-2018-09-25 09:46:41,975 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
-2018-09-25 09:46:42,176 impresso_commons.path.path_s3 INFO     Start processing key.
-2018-09-25 09:46:46,411 impresso_commons.text.rebuilder INFO     Dask cluster: <Client: scheduler='tcp://127.0.0.1:61928' processes=8 cores=8>
-2018-09-25 09:46:46,414 impresso_commons.text.rebuilder INFO     Number of partitions: 26
-2018-09-25 09:47:03,603 impresso_commons.text.rebuilder INFO     Compressing 26 JSON files into /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1950.jsonl.bz2
-2018-09-25 09:47:11,860 impresso_commons.text.rebuilder INFO     Removed temporary directory and files in /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1950
-2018-09-25 09:47:11,869 test_rebuilder INFO     ('GDL-1950', '/Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1950.jsonl.bz2')
