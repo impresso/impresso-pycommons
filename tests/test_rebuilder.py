@@ -18,7 +18,7 @@ def test_rebuild_NZZ():
 
     input_issues = impresso_iter_bucket(
         input_bucket_name,
-        prefix="NZZ/1780/01",
+        prefix="NZZ/1784/12/",
         item_type="issue"
     )
 
