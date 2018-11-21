@@ -40,7 +40,8 @@ logger = logging.getLogger(__name__)
 TYPE_MAPPINGS = {
     "article": "ar",
     "advertisement": "ad",
-    "ad": "ad"
+    "ad": "ad",
+    "pg": None
 }
 
 
@@ -162,6 +163,7 @@ def rebuild_for_solr(article_metadata):
         "id": article_id,
         "pp": article_metadata["m"]["pp"],
         "d": d.isoformat(),
+        "olr": False if mapped_type is None else True,
         "ts": timestamp(),
         "lg": article_metadata["m"]["l"],
         "tp": mapped_type,
@@ -475,7 +477,7 @@ def main():
                     format=output_format
                 )
                 rebuilt_issues.append((issue_key, json_files))
-        
+
         b = db.from_sequence(rebuilt_issues) \
             .starmap(compress, output_dir=outp_dir) \
             .starmap(upload, bucket_name=output_bucket_name) \
