@@ -325,7 +325,7 @@ def rebuild_issues(
         issues,
         input_bucket,
         output_dir,
-        dask_scheduler,
+        dask_client,
         format='solr'
 ):
     """Rebuild a set of newspaper issues into a given format.
@@ -336,19 +336,9 @@ def rebuild_issues(
     :type input_bucket: str
     :param outp_dir: local directory where to store the rebuilt files
     :type outp_dir: str
-    :param dask_scheduler: IP address of an existing dask scheduler (for
-        distributed processing).
-    :type dask_scheduler: str
     :return: a list of tuples (see return type of `upload`)
     :rtype: list of tuples
     """
-
-    # start the dask local cluster
-    if dask_scheduler is None:
-        client = Client()
-    else:
-        client = Client(dask_scheduler)
-    logger.info(f"Dask cluster: {client}")
 
     # determine which rebuild function to apply
     if format == 'solr':
@@ -380,7 +370,7 @@ def rebuild_issues(
         .map(json.dumps) \
         .to_textfiles('{}/*.json'.format(issue_dir))
 
-    x = client.compute(process_bag)
+    x = dask_client.compute(process_bag)
     progress(x)
     json_files = [
         os.path.join(issue_dir, f)
@@ -448,6 +438,13 @@ def main():
     with open(filter_config_file, 'r') as file:
         config = json.load(file)
 
+    # start the dask local cluster
+    if scheduler is None:
+        client = Client(processes=False, n_workers=2, threads_per_worker=1)
+    else:
+        client = Client(scheduler)
+    logger.info(f"Dask cluster: {client}")
+
     if arguments["rebuild_articles"]:
 
         rebuilt_issues = []
@@ -469,11 +466,12 @@ def main():
                 )
                 if len(input_issues) == 0:
                     continue
+
                 issue_key, json_files = rebuild_issues(
                     issues=input_issues,
                     input_bucket=bucket_name,
                     output_dir=outp_dir,
-                    dask_scheduler=scheduler,
+                    dask_client=client,
                     format=output_format
                 )
                 rebuilt_issues.append((issue_key, json_files))
