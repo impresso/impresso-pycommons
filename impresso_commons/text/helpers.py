@@ -40,7 +40,7 @@ def read_page(page_key, bucket_name, s3_client):
         content_object = s3_client.Object(bucket_name, page_key)
         file_content = content_object.get()['Body'].read().decode('utf-8')
         page_json = json.loads(file_content)
-        # page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
+        page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
         logger.info("Read page {} from bucket {}".format(
             page_key,
             bucket_name
