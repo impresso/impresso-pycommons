@@ -56,6 +56,7 @@ KNOWN_JOURNALS = [
     "EVT",
     "JDG",
     "LNQ",
+    "NZZ"
 ]
 
 

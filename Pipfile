@@ -19,6 +19,7 @@ docopt = "*"
 six = "*"
 jsonlines = "*"
 deprecated = "*"
+"e1839a8" = {path = ".", editable = true}
 
 [dev-packages]
 jupyter = "*"
@@ -32,4 +33,3 @@ tox = "*"
 graphviz = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
-
