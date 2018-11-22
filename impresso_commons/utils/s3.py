@@ -12,13 +12,9 @@ import boto3
 import bz2
 from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
-
-from dask.diagnostics import ProgressBar
 import dask.bag as db
-import numpy as np
 
-from impresso_commons.utils import _get_cores, Timer
-from impresso_commons.path.path_s3 import s3_filter_archives
+from impresso_commons.utils import _get_cores
 
 
 logger = logging.getLogger(__name__)
