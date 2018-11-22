@@ -5,7 +5,7 @@ import pytest
 
 
 def test_get_s3_versions():
-    bucket_name = "canonical-rebuilt-versioned"
+    bucket_name = "canonical-rebuilt"
     bucket = get_bucket(bucket_name)
     keys = bucket.get_all_keys()[:10]
     info = [
@@ -17,7 +17,7 @@ def test_get_s3_versions():
 
 
 def test_read_jsonlines():
-    b = get_bucket("canonical-rebuilt-lux", create=False)
+    b = get_bucket("canonical-rebuilt", create=False)
     key = "GDL/GDL-1950.jsonl.bz2"
     lines = db.from_sequence(read_jsonlines(key, b.name))
     count_lines = lines.count().compute()
