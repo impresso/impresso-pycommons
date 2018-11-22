@@ -5,7 +5,7 @@
 Utility which help preparing data in view of parallel or distributed computing, in a dask-oriented view.
 
 Usage:
-    daskutils.py partition --config-file=<cf> [--log-file=<f> --verbose]
+    impresso-partitioner partition --config-file=<cf> [--log-file=<f> --verbose]
 
 Options:
     --config-file=<cf>  json configuration dict specifying various arguments
@@ -25,7 +25,7 @@ import dask.bag as db
 import numpy as np
 
 from impresso_commons.utils import Timer, user_confirmation
-from impresso_commons.path.path_s3 import s3_filter_archives, get_s3_resource
+from impresso_commons.path.path_s3 import s3_filter_archives
 from impresso_commons.utils.s3 import get_bucket, read_jsonlines, readtext_jsonlines, upload
 
 __author__ = "maudehrmann"
@@ -61,7 +61,7 @@ def create_even_partitions(bucket,
 
     t = Timer()
 
-    # set the output (classic filesystem)
+    # set the output (filesystem)
     os.makedirs(output_dir, exist_ok=True)
     path = os.path.join(output_dir, "*.jsonl.bz2")
     logger.info(f"Will write partitions to {path}")
@@ -88,7 +88,6 @@ def create_even_partitions(bucket,
 
     # todo: write partitions directly to S3
     logger.info(f"Partitioning done in {t.stop()}. Starting S3 upload")
-
     # upload to S3
     """
     partitions = db.from_sequence([os.path.join(output_dir, file) for file in os.listdir(output_dir)])
@@ -102,9 +101,10 @@ def create_even_partitions(bucket,
     """
 
 
-def main(args):
+def main():
 
     # get args
+    args = docopt.docopt(__doc__)
     log_file = args["--log-file"]
     log_level = logging.DEBUG if args["--verbose"] else logging.INFO
     config_file = args["--config-file"]
