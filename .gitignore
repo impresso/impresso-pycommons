@@ -3,10 +3,6 @@
 out_data/
 dask-worker-space/
 .tox
-<<<<<<< reuild-schema
 *egg-info
 .pytest_cache
 .ipynb_*
-=======
-data/logs/
->>>>>>> master

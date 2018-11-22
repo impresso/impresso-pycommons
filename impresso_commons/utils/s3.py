@@ -286,6 +286,7 @@ def get_s3_versions(bucket_name, key_name):
             v.get().get('LastModified')
         )
         for v in versions
+        if v.size is not None
     ]
     return version_ids
 
@@ -301,6 +302,7 @@ def get_s3_versions_client(client, bucket_name, key_name):
             v.get().get('LastModified')
         )
         for v in versions
+        if v.size is not None
     ]
     return version_ids
 

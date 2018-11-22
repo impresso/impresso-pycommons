@@ -40,7 +40,7 @@ def read_page(page_key, bucket_name, s3_client):
         content_object = s3_client.Object(bucket_name, page_key)
         file_content = content_object.get()['Body'].read().decode('utf-8')
         page_json = json.loads(file_content)
-        # page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
+        page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
         logger.info("Read page {} from bucket {}".format(
             page_key,
             bucket_name
@@ -90,10 +90,25 @@ def rejoin_articles(issue, issue_json):
             continue
 
         article['m']['s3v'] = issue_json['s3_version']
-        pages = [
-            issue_json['pp'][page_no - 1]
-            for page_no in article['m']['pp']
-        ]
+
+        # the try/except construct below is a workaround the fact that
+        # ingested Olive data do not have an `id` field at the page level
+        # TODO: remove after re-ingestion
+        try:
+            pages = [
+                issue_json['pp'][page_no - 1]
+                for page_no in article['m']['pp']
+            ]
+        except Exception as e:
+            pages = []
+            for page_no in article['m']['pp']:
+                page_no_string = f"p{str(page_no).zfill(4)}"
+                page_idx = [
+                    n
+                    for n, page in enumerate(issue_json['pp'])
+                    if page_no_string in page['id']
+                ][0]
+                pages.append(issue_json['pp'][page_idx])
         articles.append((article, pages))
     return articles
 
