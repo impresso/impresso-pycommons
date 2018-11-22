@@ -6,12 +6,16 @@ Warning: 2 boto libraries are used, and need to be kept until third party lib de
 import os
 import logging
 import json
+
 import boto
 import boto3
 import bz2
 from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
+import dask.bag as db
+
 from impresso_commons.utils import _get_cores
+
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +85,10 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
 
     Assumes that two environment variables are set: `SE_ACCESS_KEY` and
         `SE_SECRET_KEY`.
+
+     :param host_url: the s3 endpoint's URL
+    :type host_url: string
+    :rtype: `boto.s3.connection`
     """
     try:
         access_key = os.environ["SE_ACCESS_KEY"]
@@ -306,8 +314,6 @@ def read_jsonlines(key_name, bucket_name):
     >>> lines = db.from_sequence(read_jsonlines(s3r, key_name , bucket_name))
     >>> print(lines.count().compute())
     >>> lines.map(json.loads).pluck('ft').take(10)
-    :param s3_resource:
-    :type s3_resource: boto3.resources.factory.s3.ServiceResource
     :param bucket_name: name of bucket
     :type bucket_name: str
     :param key_name: name of key, without S3 prefix
@@ -322,3 +328,53 @@ def read_jsonlines(key_name, bucket_name):
         if line != '':
             yield line
 
+
+def readtext_jsonlines(key_name, bucket_name):
+    """
+    Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line)
+    with limited textual information, leaving out OCR metadata (box, offsets).
+    This can serve as the starting point for pure textual processing (NE, text-reuse, topics)
+    Usage example:
+    >>> lines = db.from_sequence(readtext_jsonlines(s3r, key_name , bucket_name))
+    >>> print(lines.count().compute())
+    >>> lines.map(json.loads).pluck('ft').take(10)
+    :param bucket_name: name of bucket
+    :type bucket_name: str
+    :param key_name: name of key, without S3 prefix
+    :type key_name: str
+    :return: JSON formatted str
+    """
+    s3r = get_s3_resource()
+    body = s3r.Object(bucket_name, key_name).get()['Body']
+    data = body.read()
+    text = bz2.decompress(data).decode('utf-8')
+    for line in text.split('\n'):
+        if line != '':
+            article_json = json.loads(line)
+            text = article_json["ft"]
+            if len(text) != 0:
+                article_reduced = {k: article_json[k] for k in article_json if k == "id"
+                                   or k == "s3v"
+                                   or k == "ts"
+                                   or k == "ft"
+                                   or k == "tp"
+                                   or k == "pp"
+                                   or k == "lg"
+                                   or k == "t"}
+                yield json.dumps(article_reduced)
+
+
+def upload(partition_name, newspaper_prefix, bucket_name=None):
+
+    key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
+    s3 = get_s3_resource()
+    try:
+        bucket = s3.Bucket(bucket_name)
+        logger.info(bucket.name)
+        bucket.upload_file(partition_name, key_name)
+        logger.info(f'Uploaded {partition_name} to {key_name}')
+        return True, partition_name
+    except Exception as e:
+        logger.error(e)
+        logger.error(f'The upload of {partition_name} failed with error {e}')
+        return False, partition_name
