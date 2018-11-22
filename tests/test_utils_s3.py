@@ -1,7 +1,12 @@
-from impresso_commons.utils.s3 import get_bucket, get_s3_versions, read_jsonlines
 import dask.bag as db
 import json
 import pytest
+import pkg_resources
+import glob
+import os
+
+from impresso_commons.utils.s3 import get_bucket, get_s3_versions, read_jsonlines
+from impresso_commons.utils.daskutils import create_even_partitions
 
 
 def test_get_s3_versions():
@@ -27,6 +32,34 @@ def test_read_jsonlines():
     assert count_lines > 0
     assert some_lines is not None
     assert len(some_lines) > 0
+
+
+def test_create_even_partitions():
+    dir_partition = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/partitions/'
+    )
+
+    config_newspapers = {
+        "GDL": [1804, 1805]
+    }
+    bucket_partition_name = None
+    bucket_partition_prefix = None
+    keep_full = True,
+    nb_partition = 100  # 500 on all data
+
+    # get the s3 bucket
+    bucket = get_bucket("canonical-rebuilt", create=False)
+    create_even_partitions(bucket,
+                           config_newspapers,
+                           dir_partition,
+                           bucket_partition_name,
+                           bucket_partition_prefix,
+                           keep_full,
+                           nb_partition=nb_partition)
+
+    partitions = glob.glob(os.path.join(dir_partition, "*.bz2"))
+    assert len(partitions) == 100
 
 
 
