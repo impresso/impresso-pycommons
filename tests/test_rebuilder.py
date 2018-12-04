@@ -61,7 +61,6 @@ def test_rebuild_JDG():
     assert result is not None
 
 
-
 def test_rebuild_GDL():
     input_bucket_name = "original-canonical-data"
     outp_dir = pkg_resources.resource_filename(
