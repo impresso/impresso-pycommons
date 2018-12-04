@@ -16,6 +16,16 @@ setup(
     url='https://github.com/impresso/impresso-pycommons',
     version=VERSION,
     packages=find_packages(),
+    package_data={
+        'impresso_commons': [
+            'data/',
+        ]
+    },
+    entry_points={
+        'console_scripts': [
+            'impresso-partitioner = impresso_commons.utils.daskutils:main',
+        ]
+    },
     long_description=DESCRIPTION,
     install_requires=[
         'dask[complete]',

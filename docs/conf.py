@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'Impresso PyCommons'
-copyright = '2018, impresso team - Media Monitoring of the Past - SNSF project CR-SII5_173719.'
+copyright = '2018, impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH.'
 author = 'impresso team'
 
 # The short X.Y version

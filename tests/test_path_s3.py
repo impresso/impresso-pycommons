@@ -34,3 +34,4 @@ def test_s3_filter_archives():
     keys = s3_filter_archives(b.name, config=config)
     assert keys is not None
     assert len(keys) == 9
+
