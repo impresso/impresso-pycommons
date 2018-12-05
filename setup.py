@@ -38,6 +38,8 @@ setup(
         'numpy',
         'smart_open',
         'jsonlines',
-        'ipdb'
+        's3fs'
     ]
 )
+
+# TODO: add dkpro-pycas
