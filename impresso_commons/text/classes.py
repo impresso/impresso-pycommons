@@ -11,6 +11,7 @@ class RebuiltDocument(object):
         self._title = None
         self._fulltext = None
         self._id = None
+        self._text_offsets = {}
 
     def __repr__(self):
         return "<{} id={}>".format(
@@ -25,6 +26,22 @@ class RebuiltDocument(object):
     @id.setter
     def id(self, value):
         self._id = value
+
+    @property
+    def lines(self):
+        return self._text_offsets["line"]
+
+    @lines.setter
+    def lines(self, value):
+        self._text_offsets["line"] = value
+
+    @property
+    def paragraphs(self):
+        return self._text_offsets["paragraphs"]
+
+    @paragraphs.setter
+    def paragraphs(self, value):
+        self._text_offsets["paragraphs"] = value
 
     @property
     def fulltext(self):
@@ -52,6 +69,8 @@ class RebuiltDocument(object):
             doc.title = data['t'] if 't' in data else None
             doc.fulltext = data['ft']
             doc.id = data['id']
+            doc.lines = data['lb'] if 'lb' in data else None
+            doc.paragraphs = data['pb'] if 'pb' in data else None
             return doc
         elif path is not None:
             return

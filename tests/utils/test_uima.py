@@ -23,7 +23,7 @@ def test_rebuilt2xmi():
     )
 
     b = db.read_text(
-        's3://canonical-rebuilt/NZZ/NZZ-1800.jsonl.bz2',
+        's3://canonical-rebuilt/GDL/GDL-1910.jsonl.bz2',
         # replace with `impresso_s3`
         storage_options={
             'client_kwargs': {'endpoint_url': host},
@@ -33,7 +33,7 @@ def test_rebuilt2xmi():
     # .map(lambda x: json.loads(x))
 
     texts = b.compute()
-    text = json.loads(texts[0])
+    text = json.loads(texts[10])
     doc = RebuiltDocument.from_json(data=text)
     print(doc)
     rebuilt2xmi(doc, output_dir, typesystem)
