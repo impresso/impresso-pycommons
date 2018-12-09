@@ -232,15 +232,20 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
     """
     filtered_keys = []
     accept_key = lambda k: True
-    keynames = ["allyears"]
+    keynames = ["allyears"]  # todo
 
     # generate keynames from config (e.g. 'GDL/GDL-1950.jsonl.bz2')
     for np in config:
         if config[np]:
-            keynames = [
+            tmp = [
                 np + "/" + np + "-" + str(item) + suffix
                 for item in range(config[np][0], config[np][1])
             ]
+            if len(config[np]) == 2:
+                keynames = tmp
+            elif len(config[np]) == 3:
+                keynames = tmp[::config[np][2]]
+
             accept_key = lambda k: k in keynames
 
         # retrieving keys
