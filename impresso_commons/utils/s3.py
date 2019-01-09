@@ -20,6 +20,14 @@ from impresso_commons.utils import _get_cores
 logger = logging.getLogger(__name__)
 
 
+def get_storage_options():
+    return {'client_kwargs': {'endpoint_url': 'https://os.zhdk.cloud.switch.ch'},
+            'key': os.environ['SE_ACCESS_KEY'], 'secret': os.environ['SE_SECRET_KEY']}
+
+
+IMPRESSO_STORAGEOPT = get_storage_options()
+
+
 def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
     if host_url is None:
         try:
