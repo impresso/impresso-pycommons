@@ -20,7 +20,8 @@ six = "*"
 jsonlines = "*"
 deprecated = "*"
 "e1839a8" = {path = ".", editable = true}
-
+"s3fs" = "*"
+pycas = {git = "https://github.com/dkpro/dkpro-pycas.git", editable = true}
 
 [dev-packages]
 jupyter = "*"
