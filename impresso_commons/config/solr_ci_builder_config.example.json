@@ -1,0 +1,20 @@
+{
+  "solr_server" : "https://dhlabsrv18.epfl.ch/solr/",
+
+  "solr_core": "impresso_sandbox",
+
+  "s3_bucket_rebuilt": "canonical-rebuilt",
+
+  "key_batches": 3,
+
+  "newspapers" : {
+        "GDL": [1940,1941]
+    }
+
+}
+
+
+
+
+
+
