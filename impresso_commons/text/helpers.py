@@ -86,29 +86,21 @@ def rejoin_articles(issue, issue_json):
     articles = []
     for article in issue_json['i']:
 
-        if article['m']['tp'] == 'ad':
-            continue
-
         article['m']['s3v'] = issue_json['s3_version']
 
-        # the try/except construct below is a workaround the fact that
-        # ingested Olive data do not have an `id` field at the page level
-        # TODO: remove after re-ingestion
-        try:
-            pages = [
-                issue_json['pp'][page_no - 1]
-                for page_no in article['m']['pp']
-            ]
-        except Exception as e:
-            pages = []
-            for page_no in article['m']['pp']:
-                page_no_string = f"p{str(page_no).zfill(4)}"
-                page_idx = [
-                    n
-                    for n, page in enumerate(issue_json['pp'])
-                    if page_no_string in page['id']
-                ][0]
-                pages.append(issue_json['pp'][page_idx])
+        pages = []
+        for page_no in article['m']['pp']:
+            # given a page  number (from issue.json) and its canonical ID
+            # find the position of that page in the array of pages (with text
+            # regions)
+            page_no_string = f"p{str(page_no).zfill(4)}"
+            page_idx = [
+                n
+                for n, page in enumerate(issue_json['pp'])
+                if page_no_string in page['id']
+            ][0]
+            pages.append(issue_json['pp'][page_idx])
+
         articles.append((article, pages))
     return articles
 

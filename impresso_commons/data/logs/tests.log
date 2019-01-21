@@ -1,0 +1,609 @@
+2019-01-21 11:17:43,886 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2019-01-21 11:17:44,064 impresso_commons.path.path_s3 INFO     Start processing key.
+2019-01-21 11:17:49,200 impresso_commons.text.rebuilder INFO     Number of partitions: 9
+2019-01-21 11:17:49,917 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 4), edition='a', path='NZZ/1784/12/04/a/NZZ-1784-12-04-a-issue.json')
+2019-01-21 11:17:49,974 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 1), edition='a', path='NZZ/1784/12/01/a/NZZ-1784-12-01-a-issue.json')
+2019-01-21 11:17:50,520 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/04/a/NZZ-1784-12-04-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:50,736 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/01/a/NZZ-1784-12-01-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:51,102 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/04/a/NZZ-1784-12-04-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:51,305 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/01/a/NZZ-1784-12-01-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:51,733 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/04/a/NZZ-1784-12-04-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:52,039 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/01/a/NZZ-1784-12-01-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:52,420 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/04/a/NZZ-1784-12-04-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:52,423 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/04/a/NZZ-1784-12-04-a-issue.json
+2019-01-21 11:17:52,423 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-04-a-i0001
+2019-01-21 11:17:52,423 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-04-a-i0001
+2019-01-21 11:17:52,424 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-04-a-i0001 (Took 0:00:00.001077)
+2019-01-21 11:17:52,425 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-04-a-i0002
+2019-01-21 11:17:52,425 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-04-a-i0002
+2019-01-21 11:17:52,427 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-04-a-i0002 (Took 0:00:00.001405)
+2019-01-21 11:17:52,430 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-04-a-i0003
+2019-01-21 11:17:52,430 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-04-a-i0003
+2019-01-21 11:17:52,432 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-04-a-i0003 (Took 0:00:00.001468)
+2019-01-21 11:17:52,436 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-04-a-i0004
+2019-01-21 11:17:52,436 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-04-a-i0004
+2019-01-21 11:17:52,437 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-04-a-i0004 (Took 0:00:00.001487)
+2019-01-21 11:17:52,642 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/01/a/NZZ-1784-12-01-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:52,645 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/01/a/NZZ-1784-12-01-a-issue.json
+2019-01-21 11:17:52,645 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-01-a-i0001
+2019-01-21 11:17:52,645 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-01-a-i0001
+2019-01-21 11:17:52,646 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-01-a-i0001 (Took 0:00:00.000988)
+2019-01-21 11:17:52,648 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-01-a-i0002
+2019-01-21 11:17:52,648 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-01-a-i0002
+2019-01-21 11:17:52,649 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-01-a-i0002 (Took 0:00:00.001479)
+2019-01-21 11:17:52,651 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-01-a-i0003
+2019-01-21 11:17:52,651 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-01-a-i0003
+2019-01-21 11:17:52,653 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-01-a-i0003 (Took 0:00:00.001350)
+2019-01-21 11:17:52,655 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-01-a-i0004
+2019-01-21 11:17:52,655 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-01-a-i0004
+2019-01-21 11:17:52,657 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-01-a-i0004 (Took 0:00:00.001379)
+2019-01-21 11:17:53,106 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 11), edition='a', path='NZZ/1784/12/11/a/NZZ-1784-12-11-a-issue.json')
+2019-01-21 11:17:53,532 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 8), edition='a', path='NZZ/1784/12/08/a/NZZ-1784-12-08-a-issue.json')
+2019-01-21 11:17:53,757 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/11/a/NZZ-1784-12-11-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:54,217 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/08/a/NZZ-1784-12-08-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:54,343 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/11/a/NZZ-1784-12-11-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:54,912 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/08/a/NZZ-1784-12-08-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:54,974 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/11/a/NZZ-1784-12-11-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:55,515 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/08/a/NZZ-1784-12-08-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:55,777 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/11/a/NZZ-1784-12-11-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:55,780 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/11/a/NZZ-1784-12-11-a-issue.json
+2019-01-21 11:17:55,780 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-11-a-i0001
+2019-01-21 11:17:55,781 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-11-a-i0001
+2019-01-21 11:17:55,782 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-11-a-i0001 (Took 0:00:00.001110)
+2019-01-21 11:17:55,783 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-11-a-i0002
+2019-01-21 11:17:55,784 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-11-a-i0002
+2019-01-21 11:17:55,785 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-11-a-i0002 (Took 0:00:00.001686)
+2019-01-21 11:17:55,787 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-11-a-i0003
+2019-01-21 11:17:55,787 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-11-a-i0003
+2019-01-21 11:17:55,789 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-11-a-i0003 (Took 0:00:00.001496)
+2019-01-21 11:17:55,791 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-11-a-i0004
+2019-01-21 11:17:55,791 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-11-a-i0004
+2019-01-21 11:17:55,793 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-11-a-i0004 (Took 0:00:00.001487)
+2019-01-21 11:17:56,141 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/08/a/NZZ-1784-12-08-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:56,143 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/08/a/NZZ-1784-12-08-a-issue.json
+2019-01-21 11:17:56,143 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-08-a-i0001
+2019-01-21 11:17:56,143 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-08-a-i0001
+2019-01-21 11:17:56,145 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-08-a-i0001 (Took 0:00:00.001197)
+2019-01-21 11:17:56,146 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-08-a-i0002
+2019-01-21 11:17:56,146 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-08-a-i0002
+2019-01-21 11:17:56,148 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-08-a-i0002 (Took 0:00:00.001721)
+2019-01-21 11:17:56,150 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-08-a-i0003
+2019-01-21 11:17:56,150 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-08-a-i0003
+2019-01-21 11:17:56,154 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-08-a-i0003 (Took 0:00:00.003811)
+2019-01-21 11:17:56,157 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-08-a-i0004
+2019-01-21 11:17:56,157 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-08-a-i0004
+2019-01-21 11:17:56,159 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-08-a-i0004 (Took 0:00:00.001562)
+2019-01-21 11:17:56,435 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 18), edition='a', path='NZZ/1784/12/18/a/NZZ-1784-12-18-a-issue.json')
+2019-01-21 11:17:56,951 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 15), edition='a', path='NZZ/1784/12/15/a/NZZ-1784-12-15-a-issue.json')
+2019-01-21 11:17:57,250 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/18/a/NZZ-1784-12-18-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:57,565 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/15/a/NZZ-1784-12-15-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:17:57,892 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/18/a/NZZ-1784-12-18-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:58,176 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/15/a/NZZ-1784-12-15-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:17:58,472 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/18/a/NZZ-1784-12-18-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:58,828 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/15/a/NZZ-1784-12-15-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:17:59,108 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/18/a/NZZ-1784-12-18-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:59,110 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/18/a/NZZ-1784-12-18-a-issue.json
+2019-01-21 11:17:59,110 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-18-a-i0001
+2019-01-21 11:17:59,110 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-18-a-i0001
+2019-01-21 11:17:59,112 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-18-a-i0001 (Took 0:00:00.001134)
+2019-01-21 11:17:59,113 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-18-a-i0002
+2019-01-21 11:17:59,113 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-18-a-i0002
+2019-01-21 11:17:59,115 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-18-a-i0002 (Took 0:00:00.001551)
+2019-01-21 11:17:59,118 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-18-a-i0003
+2019-01-21 11:17:59,118 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-18-a-i0003
+2019-01-21 11:17:59,120 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-18-a-i0003 (Took 0:00:00.001666)
+2019-01-21 11:17:59,122 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-18-a-i0004
+2019-01-21 11:17:59,122 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-18-a-i0004
+2019-01-21 11:17:59,123 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-18-a-i0004 (Took 0:00:00.001328)
+2019-01-21 11:17:59,622 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/15/a/NZZ-1784-12-15-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:17:59,627 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/15/a/NZZ-1784-12-15-a-issue.json
+2019-01-21 11:17:59,630 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-15-a-i0001
+2019-01-21 11:17:59,630 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-15-a-i0001
+2019-01-21 11:17:59,632 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-15-a-i0001 (Took 0:00:00.002228)
+2019-01-21 11:17:59,634 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-15-a-i0002
+2019-01-21 11:17:59,634 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-15-a-i0002
+2019-01-21 11:17:59,635 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-15-a-i0002 (Took 0:00:00.001689)
+2019-01-21 11:17:59,637 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-15-a-i0003
+2019-01-21 11:17:59,637 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-15-a-i0003
+2019-01-21 11:17:59,639 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-15-a-i0003 (Took 0:00:00.001376)
+2019-01-21 11:17:59,641 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-15-a-i0004
+2019-01-21 11:17:59,641 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-15-a-i0004
+2019-01-21 11:17:59,642 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-15-a-i0004 (Took 0:00:00.001298)
+2019-01-21 11:17:59,873 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 29), edition='a', path='NZZ/1784/12/29/a/NZZ-1784-12-29-a-issue.json')
+2019-01-21 11:18:00,237 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 22), edition='a', path='NZZ/1784/12/22/a/NZZ-1784-12-22-a-issue.json')
+2019-01-21 11:18:00,774 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/a/NZZ-1784-12-29-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:00,974 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/22/a/NZZ-1784-12-22-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:01,472 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/a/NZZ-1784-12-29-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:01,610 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/22/a/NZZ-1784-12-22-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:02,115 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/a/NZZ-1784-12-29-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:02,278 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/22/a/NZZ-1784-12-22-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:02,628 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/a/NZZ-1784-12-29-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:02,630 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/29/a/NZZ-1784-12-29-a-issue.json
+2019-01-21 11:18:02,630 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-a-i0001
+2019-01-21 11:18:02,631 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-a-i0001
+2019-01-21 11:18:02,631 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-a-i0001 (Took 0:00:00.000540)
+2019-01-21 11:18:02,632 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-a-i0002
+2019-01-21 11:18:02,632 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-a-i0002
+2019-01-21 11:18:02,633 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-a-i0002 (Took 0:00:00.001229)
+2019-01-21 11:18:02,635 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-a-i0003
+2019-01-21 11:18:02,635 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-a-i0003
+2019-01-21 11:18:02,637 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-a-i0003 (Took 0:00:00.002526)
+2019-01-21 11:18:02,639 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-a-i0005
+2019-01-21 11:18:02,639 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-a-i0005
+2019-01-21 11:18:02,640 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-a-i0005 (Took 0:00:00.000128)
+2019-01-21 11:18:03,054 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/22/a/NZZ-1784-12-22-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:03,057 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/22/a/NZZ-1784-12-22-a-issue.json
+2019-01-21 11:18:03,057 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-22-a-i0001
+2019-01-21 11:18:03,057 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-22-a-i0001
+2019-01-21 11:18:03,059 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-22-a-i0001 (Took 0:00:00.001262)
+2019-01-21 11:18:03,061 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-22-a-i0002
+2019-01-21 11:18:03,061 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-22-a-i0002
+2019-01-21 11:18:03,064 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-22-a-i0002 (Took 0:00:00.003017)
+2019-01-21 11:18:03,066 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-22-a-i0003
+2019-01-21 11:18:03,066 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-22-a-i0003
+2019-01-21 11:18:03,068 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-22-a-i0003 (Took 0:00:00.001582)
+2019-01-21 11:18:03,070 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-22-a-i0004
+2019-01-21 11:18:03,070 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-22-a-i0004
+2019-01-21 11:18:03,072 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-22-a-i0004 (Took 0:00:00.001438)
+2019-01-21 11:18:03,595 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='NZZ', date=datetime.date(1784, 12, 29), edition='b', path='NZZ/1784/12/29/b/NZZ-1784-12-29-b-issue.json')
+2019-01-21 11:18:04,276 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/b/NZZ-1784-12-29-b-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:05,038 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/b/NZZ-1784-12-29-b-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:05,684 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/b/NZZ-1784-12-29-b-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:06,222 impresso_commons.text.helpers INFO     Read page NZZ/1784/12/29/b/NZZ-1784-12-29-b-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:06,225 impresso_commons.text.helpers INFO     Rejoining pages for issue NZZ/1784/12/29/b/NZZ-1784-12-29-b-issue.json
+2019-01-21 11:18:06,225 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-b-i0001
+2019-01-21 11:18:06,225 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-b-i0001
+2019-01-21 11:18:06,226 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-b-i0001 (Took 0:00:00.000497)
+2019-01-21 11:18:06,226 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-b-i0002
+2019-01-21 11:18:06,226 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-b-i0002
+2019-01-21 11:18:06,227 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-b-i0002 (Took 0:00:00.000621)
+2019-01-21 11:18:06,228 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-b-i0003
+2019-01-21 11:18:06,228 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-b-i0003
+2019-01-21 11:18:06,228 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-b-i0003 (Took 0:00:00.000433)
+2019-01-21 11:18:06,229 impresso_commons.text.helpers INFO     Extracting text regions for article NZZ-1784-12-29-b-i0004
+2019-01-21 11:18:06,229 impresso_commons.text.rebuilder INFO     Started rebuilding article NZZ-1784-12-29-b-i0004
+2019-01-21 11:18:06,230 impresso_commons.text.rebuilder INFO     Done rebuilding article NZZ-1784-12-29-b-i0004 (Took 0:00:00.001200)
+2019-01-21 11:18:06,250 impresso_commons.text.rebuilder INFO     Compressing 9 JSON files into /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,264 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/0.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,277 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/1.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,291 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/2.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,304 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/3.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,402 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/4.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,416 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/5.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,430 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/6.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,436 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/7.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,441 impresso_commons.text.rebuilder INFO     Written 4 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784/8.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2
+2019-01-21 11:18:06,487 impresso_commons.text.rebuilder INFO     Removed temporary directory and files in /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784
+2019-01-21 11:18:06,488 test_rebuilder INFO     ('NZZ-1784', '/Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/NZZ-1784.jsonl.bz2')
+2019-01-21 11:18:06,489 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2019-01-21 11:18:06,549 impresso_commons.path.path_s3 INFO     Start processing key.
+2019-01-21 11:18:08,025 impresso_commons.text.rebuilder INFO     Number of partitions: 4
+2019-01-21 11:18:08,287 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='JDG', date=datetime.date(1830, 1, 14), edition='a', path='JDG/1830/01/14/a/JDG-1830-01-14-a-issue.json')
+2019-01-21 11:18:08,575 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='JDG', date=datetime.date(1830, 1, 7), edition='a', path='JDG/1830/01/07/a/JDG-1830-01-07-a-issue.json')
+2019-01-21 11:18:08,698 impresso_commons.text.helpers INFO     Read page JDG/1830/01/14/a/JDG-1830-01-14-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:09,074 impresso_commons.text.helpers INFO     Read page JDG/1830/01/14/a/JDG-1830-01-14-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:09,270 impresso_commons.text.helpers INFO     Read page JDG/1830/01/07/a/JDG-1830-01-07-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:09,452 impresso_commons.text.helpers INFO     Read page JDG/1830/01/14/a/JDG-1830-01-14-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:09,807 impresso_commons.text.helpers INFO     Read page JDG/1830/01/14/a/JDG-1830-01-14-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:09,811 impresso_commons.text.helpers INFO     Rejoining pages for issue JDG/1830/01/14/a/JDG-1830-01-14-a-issue.json
+2019-01-21 11:18:09,812 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0001
+2019-01-21 11:18:09,812 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0001
+2019-01-21 11:18:09,812 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0001 (Took 0:00:00.000359)
+2019-01-21 11:18:09,813 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0010
+2019-01-21 11:18:09,813 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0010
+2019-01-21 11:18:09,815 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0010 (Took 0:00:00.002556)
+2019-01-21 11:18:09,820 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0017
+2019-01-21 11:18:09,820 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0017
+2019-01-21 11:18:09,822 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0017 (Took 0:00:00.002661)
+2019-01-21 11:18:09,827 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0002
+2019-01-21 11:18:09,827 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0002
+2019-01-21 11:18:09,832 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0002 (Took 0:00:00.005194)
+2019-01-21 11:18:09,837 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0006
+2019-01-21 11:18:09,838 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0006
+2019-01-21 11:18:09,839 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0006 (Took 0:00:00.001594)
+2019-01-21 11:18:09,842 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0011
+2019-01-21 11:18:09,842 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0011
+2019-01-21 11:18:09,842 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0011 (Took 0:00:00.000548)
+2019-01-21 11:18:09,843 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0007
+2019-01-21 11:18:09,843 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0007
+2019-01-21 11:18:09,844 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0007 (Took 0:00:00.000619)
+2019-01-21 11:18:09,844 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0019
+2019-01-21 11:18:09,844 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0019
+2019-01-21 11:18:09,845 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0019 (Took 0:00:00.000731)
+2019-01-21 11:18:09,846 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0020
+2019-01-21 11:18:09,846 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0020
+2019-01-21 11:18:09,847 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0020 (Took 0:00:00.000687)
+2019-01-21 11:18:09,847 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0021
+2019-01-21 11:18:09,847 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0021
+2019-01-21 11:18:09,848 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0021 (Took 0:00:00.000845)
+2019-01-21 11:18:09,849 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0015
+2019-01-21 11:18:09,849 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0015
+2019-01-21 11:18:09,851 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0015 (Took 0:00:00.001215)
+2019-01-21 11:18:09,852 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0022
+2019-01-21 11:18:09,852 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0022
+2019-01-21 11:18:09,853 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0022 (Took 0:00:00.000172)
+2019-01-21 11:18:09,853 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-14-a-i0016
+2019-01-21 11:18:09,853 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-14-a-i0016
+2019-01-21 11:18:09,854 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-14-a-i0016 (Took 0:00:00.001029)
+2019-01-21 11:18:09,947 impresso_commons.text.helpers INFO     Read page JDG/1830/01/07/a/JDG-1830-01-07-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:10,250 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='JDG', date=datetime.date(1830, 1, 28), edition='a', path='JDG/1830/01/28/a/JDG-1830-01-28-a-issue.json')
+2019-01-21 11:18:10,601 impresso_commons.text.helpers INFO     Read page JDG/1830/01/07/a/JDG-1830-01-07-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:10,744 impresso_commons.text.helpers INFO     Read page JDG/1830/01/28/a/JDG-1830-01-28-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:11,265 impresso_commons.text.helpers INFO     Read page JDG/1830/01/07/a/JDG-1830-01-07-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:11,268 impresso_commons.text.helpers INFO     Rejoining pages for issue JDG/1830/01/07/a/JDG-1830-01-07-a-issue.json
+2019-01-21 11:18:11,268 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0001
+2019-01-21 11:18:11,268 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0001
+2019-01-21 11:18:11,268 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0001 (Took 0:00:00.000378)
+2019-01-21 11:18:11,269 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0002
+2019-01-21 11:18:11,269 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0002
+2019-01-21 11:18:11,274 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0002 (Took 0:00:00.004604)
+2019-01-21 11:18:11,280 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0006
+2019-01-21 11:18:11,281 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0006
+2019-01-21 11:18:11,282 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0006 (Took 0:00:00.001360)
+2019-01-21 11:18:11,284 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0011
+2019-01-21 11:18:11,285 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0011
+2019-01-21 11:18:11,286 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0011 (Took 0:00:00.000974)
+2019-01-21 11:18:11,287 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0018
+2019-01-21 11:18:11,287 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0018
+2019-01-21 11:18:11,288 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0018 (Took 0:00:00.001054)
+2019-01-21 11:18:11,289 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0007
+2019-01-21 11:18:11,289 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0007
+2019-01-21 11:18:11,290 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0007 (Took 0:00:00.000603)
+2019-01-21 11:18:11,291 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0012
+2019-01-21 11:18:11,291 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0012
+2019-01-21 11:18:11,292 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0012 (Took 0:00:00.001312)
+2019-01-21 11:18:11,293 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0019
+2019-01-21 11:18:11,294 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0019
+2019-01-21 11:18:11,295 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0019 (Took 0:00:00.001092)
+2019-01-21 11:18:11,296 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0013
+2019-01-21 11:18:11,296 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0013
+2019-01-21 11:18:11,298 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0013 (Took 0:00:00.001914)
+2019-01-21 11:18:11,300 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0020
+2019-01-21 11:18:11,300 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0020
+2019-01-21 11:18:11,301 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0020 (Took 0:00:00.000250)
+2019-01-21 11:18:11,301 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0014
+2019-01-21 11:18:11,301 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0014
+2019-01-21 11:18:11,302 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0014 (Took 0:00:00.000925)
+2019-01-21 11:18:11,303 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0021
+2019-01-21 11:18:11,303 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0021
+2019-01-21 11:18:11,303 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0021 (Took 0:00:00.000202)
+2019-01-21 11:18:11,305 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0022
+2019-01-21 11:18:11,305 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0022
+2019-01-21 11:18:11,307 impresso_commons.text.helpers INFO     Read page JDG/1830/01/28/a/JDG-1830-01-28-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:11,307 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0022 (Took 0:00:00.002434)
+2019-01-21 11:18:11,310 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0023
+2019-01-21 11:18:11,310 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0023
+2019-01-21 11:18:11,311 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0023 (Took 0:00:00.000244)
+2019-01-21 11:18:11,311 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0024
+2019-01-21 11:18:11,311 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0024
+2019-01-21 11:18:11,311 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0024 (Took 0:00:00.000221)
+2019-01-21 11:18:11,312 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-07-a-i0027
+2019-01-21 11:18:11,312 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-07-a-i0027
+2019-01-21 11:18:11,312 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-07-a-i0027 (Took 0:00:00.000296)
+2019-01-21 11:18:11,781 impresso_commons.text.helpers INFO     Read page JDG/1830/01/28/a/JDG-1830-01-28-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:11,906 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='JDG', date=datetime.date(1830, 1, 21), edition='a', path='JDG/1830/01/21/a/JDG-1830-01-21-a-issue.json')
+2019-01-21 11:18:12,161 impresso_commons.text.helpers INFO     Read page JDG/1830/01/28/a/JDG-1830-01-28-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:12,164 impresso_commons.text.helpers INFO     Rejoining pages for issue JDG/1830/01/28/a/JDG-1830-01-28-a-issue.json
+2019-01-21 11:18:12,164 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0001
+2019-01-21 11:18:12,164 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0001
+2019-01-21 11:18:12,164 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0001 (Took 0:00:00.000486)
+2019-01-21 11:18:12,165 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0002
+2019-01-21 11:18:12,165 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0002
+2019-01-21 11:18:12,257 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0002 (Took 0:00:00.091354)
+2019-01-21 11:18:12,265 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0016
+2019-01-21 11:18:12,265 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0016
+2019-01-21 11:18:12,265 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0016 (Took 0:00:00.000317)
+2019-01-21 11:18:12,266 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0017
+2019-01-21 11:18:12,266 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0017
+2019-01-21 11:18:12,267 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0017 (Took 0:00:00.001491)
+2019-01-21 11:18:12,270 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0011
+2019-01-21 11:18:12,270 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0011
+2019-01-21 11:18:12,270 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0011 (Took 0:00:00.000451)
+2019-01-21 11:18:12,271 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0012
+2019-01-21 11:18:12,271 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0012
+2019-01-21 11:18:12,275 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0012 (Took 0:00:00.003479)
+2019-01-21 11:18:12,281 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0019
+2019-01-21 11:18:12,281 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0019
+2019-01-21 11:18:12,281 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0019 (Took 0:00:00.000409)
+2019-01-21 11:18:12,282 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0013
+2019-01-21 11:18:12,282 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0013
+2019-01-21 11:18:12,283 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0013 (Took 0:00:00.000542)
+2019-01-21 11:18:12,283 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0020
+2019-01-21 11:18:12,283 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0020
+2019-01-21 11:18:12,284 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0020 (Took 0:00:00.000368)
+2019-01-21 11:18:12,284 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0014
+2019-01-21 11:18:12,284 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0014
+2019-01-21 11:18:12,285 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0014 (Took 0:00:00.000272)
+2019-01-21 11:18:12,285 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0021
+2019-01-21 11:18:12,285 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0021
+2019-01-21 11:18:12,286 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0021 (Took 0:00:00.000551)
+2019-01-21 11:18:12,286 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0022
+2019-01-21 11:18:12,286 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0022
+2019-01-21 11:18:12,286 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0022 (Took 0:00:00.000170)
+2019-01-21 11:18:12,287 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0023
+2019-01-21 11:18:12,287 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0023
+2019-01-21 11:18:12,287 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0023 (Took 0:00:00.000181)
+2019-01-21 11:18:12,287 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-28-a-i0024
+2019-01-21 11:18:12,287 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-28-a-i0024
+2019-01-21 11:18:12,287 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-28-a-i0024 (Took 0:00:00.000237)
+2019-01-21 11:18:12,623 impresso_commons.text.helpers INFO     Read page JDG/1830/01/21/a/JDG-1830-01-21-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:13,197 impresso_commons.text.helpers INFO     Read page JDG/1830/01/21/a/JDG-1830-01-21-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:13,763 impresso_commons.text.helpers INFO     Read page JDG/1830/01/21/a/JDG-1830-01-21-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:14,333 impresso_commons.text.helpers INFO     Read page JDG/1830/01/21/a/JDG-1830-01-21-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:14,337 impresso_commons.text.helpers INFO     Rejoining pages for issue JDG/1830/01/21/a/JDG-1830-01-21-a-issue.json
+2019-01-21 11:18:14,338 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0001
+2019-01-21 11:18:14,338 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0001
+2019-01-21 11:18:14,341 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0001 (Took 0:00:00.003548)
+2019-01-21 11:18:14,346 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0017
+2019-01-21 11:18:14,346 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0017
+2019-01-21 11:18:14,346 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0017 (Took 0:00:00.000171)
+2019-01-21 11:18:14,346 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0011
+2019-01-21 11:18:14,346 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0011
+2019-01-21 11:18:14,348 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0011 (Took 0:00:00.001794)
+2019-01-21 11:18:14,351 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0018
+2019-01-21 11:18:14,351 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0018
+2019-01-21 11:18:14,352 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0018 (Took 0:00:00.001254)
+2019-01-21 11:18:14,353 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0019
+2019-01-21 11:18:14,353 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0019
+2019-01-21 11:18:14,354 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0019 (Took 0:00:00.000510)
+2019-01-21 11:18:14,354 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0004
+2019-01-21 11:18:14,355 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0004
+2019-01-21 11:18:14,355 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0004 (Took 0:00:00.000300)
+2019-01-21 11:18:14,355 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0008
+2019-01-21 11:18:14,355 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0008
+2019-01-21 11:18:14,356 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0008 (Took 0:00:00.000939)
+2019-01-21 11:18:14,357 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0013
+2019-01-21 11:18:14,358 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0013
+2019-01-21 11:18:14,358 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0013 (Took 0:00:00.000243)
+2019-01-21 11:18:14,358 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0020
+2019-01-21 11:18:14,358 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0020
+2019-01-21 11:18:14,361 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0020 (Took 0:00:00.002460)
+2019-01-21 11:18:14,362 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0009
+2019-01-21 11:18:14,362 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0009
+2019-01-21 11:18:14,363 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0009 (Took 0:00:00.000782)
+2019-01-21 11:18:14,364 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0021
+2019-01-21 11:18:14,364 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0021
+2019-01-21 11:18:14,364 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0021 (Took 0:00:00.000226)
+2019-01-21 11:18:14,365 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0015
+2019-01-21 11:18:14,365 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0015
+2019-01-21 11:18:14,365 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0015 (Took 0:00:00.000279)
+2019-01-21 11:18:14,365 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0022
+2019-01-21 11:18:14,366 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0022
+2019-01-21 11:18:14,366 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0022 (Took 0:00:00.000214)
+2019-01-21 11:18:14,366 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0016
+2019-01-21 11:18:14,366 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0016
+2019-01-21 11:18:14,367 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0016 (Took 0:00:00.001310)
+2019-01-21 11:18:14,369 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0023
+2019-01-21 11:18:14,369 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0023
+2019-01-21 11:18:14,370 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0023 (Took 0:00:00.000277)
+2019-01-21 11:18:14,370 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0024
+2019-01-21 11:18:14,370 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0024
+2019-01-21 11:18:14,370 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0024 (Took 0:00:00.000093)
+2019-01-21 11:18:14,370 impresso_commons.text.helpers INFO     Extracting text regions for article JDG-1830-01-21-a-i0025
+2019-01-21 11:18:14,370 impresso_commons.text.rebuilder INFO     Started rebuilding article JDG-1830-01-21-a-i0025
+2019-01-21 11:18:14,371 impresso_commons.text.rebuilder INFO     Done rebuilding article JDG-1830-01-21-a-i0025 (Took 0:00:00.000093)
+2019-01-21 11:18:14,397 impresso_commons.text.rebuilder INFO     Compressing 4 JSON files into /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2
+2019-01-21 11:18:14,436 impresso_commons.text.rebuilder INFO     Written 16 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830/0.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2
+2019-01-21 11:18:14,567 impresso_commons.text.rebuilder INFO     Written 13 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830/1.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2
+2019-01-21 11:18:14,669 impresso_commons.text.rebuilder INFO     Written 17 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830/2.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2
+2019-01-21 11:18:14,794 impresso_commons.text.rebuilder INFO     Written 14 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830/3.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2
+2019-01-21 11:18:14,798 impresso_commons.text.rebuilder INFO     Removed temporary directory and files in /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830
+2019-01-21 11:18:14,799 test_rebuilder INFO     ('JDG-1830', '/Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/JDG-1830.jsonl.bz2')
+2019-01-21 11:18:14,801 impresso_commons.path.path_s3 INFO     Start collecting key from s3 (not parallel)
+2019-01-21 11:18:14,889 impresso_commons.path.path_s3 INFO     Start processing key.
+2019-01-21 11:18:17,512 impresso_commons.text.rebuilder INFO     Number of partitions: 7
+2019-01-21 11:18:18,196 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 3), edition='a', path='GDL/1799/01/03/a/GDL-1799-01-03-a-issue.json')
+2019-01-21 11:18:18,282 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 2), edition='a', path='GDL/1799/01/02/a/GDL-1799-01-02-a-issue.json')
+2019-01-21 11:18:18,631 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:18,750 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:19,122 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:19,473 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:19,758 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:19,999 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:20,222 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:20,512 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:20,649 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:20,924 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:21,185 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:21,422 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:21,586 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:21,837 impresso_commons.text.helpers INFO     Read page GDL/1799/01/02/a/GDL-1799-01-02-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:21,840 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/02/a/GDL-1799-01-02-a-issue.json
+2019-01-21 11:18:21,841 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-02-a-i0001
+2019-01-21 11:18:21,841 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-02-a-i0001
+2019-01-21 11:18:21,841 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-02-a-i0001 (Took 0:00:00.000288)
+2019-01-21 11:18:21,841 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-02-a-i0002
+2019-01-21 11:18:21,841 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-02-a-i0002
+2019-01-21 11:18:21,842 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-02-a-i0002 (Took 0:00:00.000170)
+2019-01-21 11:18:21,842 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-02-a-i0007
+2019-01-21 11:18:21,842 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-02-a-i0007
+2019-01-21 11:18:21,843 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-02-a-i0007 (Took 0:00:00.000692)
+2019-01-21 11:18:21,844 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-02-a-i0010
+2019-01-21 11:18:21,844 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-02-a-i0010
+2019-01-21 11:18:21,844 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-02-a-i0010 (Took 0:00:00.000845)
+2019-01-21 11:18:21,846 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-02-a-i0003
+2019-01-21 11:18:21,846 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-02-a-i0003
+2019-01-21 11:18:21,846 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-02-a-i0003 (Took 0:00:00.000418)
+2019-01-21 11:18:22,129 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:22,203 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 4), edition='a', path='GDL/1799/01/04/a/GDL-1799-01-04-a-issue.json')
+2019-01-21 11:18:22,588 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:22,630 impresso_commons.text.helpers INFO     Read page GDL/1799/01/03/a/GDL-1799-01-03-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:22,633 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/03/a/GDL-1799-01-03-a-issue.json
+2019-01-21 11:18:22,634 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-03-a-i0001
+2019-01-21 11:18:22,634 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-03-a-i0001
+2019-01-21 11:18:22,634 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-03-a-i0001 (Took 0:00:00.000590)
+2019-01-21 11:18:22,635 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-03-a-i0007
+2019-01-21 11:18:22,635 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-03-a-i0007
+2019-01-21 11:18:22,636 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-03-a-i0007 (Took 0:00:00.000579)
+2019-01-21 11:18:22,637 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-03-a-i0002
+2019-01-21 11:18:22,637 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-03-a-i0002
+2019-01-21 11:18:22,637 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-03-a-i0002 (Took 0:00:00.000199)
+2019-01-21 11:18:22,637 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-03-a-i0005
+2019-01-21 11:18:22,637 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-03-a-i0005
+2019-01-21 11:18:22,639 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-03-a-i0005 (Took 0:00:00.001069)
+2019-01-21 11:18:22,639 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-03-a-i0010
+2019-01-21 11:18:22,639 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-03-a-i0010
+2019-01-21 11:18:22,640 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-03-a-i0010 (Took 0:00:00.000634)
+2019-01-21 11:18:22,918 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:23,263 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 5), edition='a', path='GDL/1799/01/05/a/GDL-1799-01-05-a-issue.json')
+2019-01-21 11:18:23,307 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:23,669 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:23,744 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:23,972 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:24,167 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:24,423 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:24,548 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:24,687 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:24,992 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:25,001 impresso_commons.text.helpers INFO     Read page GDL/1799/01/04/a/GDL-1799-01-04-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:25,004 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/04/a/GDL-1799-01-04-a-issue.json
+2019-01-21 11:18:25,004 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0001
+2019-01-21 11:18:25,004 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0001
+2019-01-21 11:18:25,004 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0001 (Took 0:00:00.000172)
+2019-01-21 11:18:25,004 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0002
+2019-01-21 11:18:25,005 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0002
+2019-01-21 11:18:25,005 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0002 (Took 0:00:00.000607)
+2019-01-21 11:18:25,006 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0005
+2019-01-21 11:18:25,006 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0005
+2019-01-21 11:18:25,007 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0005 (Took 0:00:00.000355)
+2019-01-21 11:18:25,008 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0007
+2019-01-21 11:18:25,008 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0007
+2019-01-21 11:18:25,009 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0007 (Took 0:00:00.000804)
+2019-01-21 11:18:25,009 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0009
+2019-01-21 11:18:25,010 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0009
+2019-01-21 11:18:25,010 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0009 (Took 0:00:00.000201)
+2019-01-21 11:18:25,010 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-04-a-i0003
+2019-01-21 11:18:25,010 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-04-a-i0003
+2019-01-21 11:18:25,010 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-04-a-i0003 (Took 0:00:00.000141)
+2019-01-21 11:18:25,331 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 6), edition='a', path='GDL/1799/01/06/a/GDL-1799-01-06-a-issue.json')
+2019-01-21 11:18:25,397 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:25,678 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:25,779 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:25,993 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:26,173 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:26,382 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:26,702 impresso_commons.text.helpers INFO     Read page GDL/1799/01/05/a/GDL-1799-01-05-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:26,705 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/05/a/GDL-1799-01-05-a-issue.json
+2019-01-21 11:18:26,705 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0001
+2019-01-21 11:18:26,705 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0001
+2019-01-21 11:18:26,707 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0001 (Took 0:00:00.001325)
+2019-01-21 11:18:26,708 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0010
+2019-01-21 11:18:26,708 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0010
+2019-01-21 11:18:26,709 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0010 (Took 0:00:00.001415)
+2019-01-21 11:18:26,711 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0002
+2019-01-21 11:18:26,712 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0002
+2019-01-21 11:18:26,712 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0002 (Took 0:00:00.000168)
+2019-01-21 11:18:26,712 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0005
+2019-01-21 11:18:26,712 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0005
+2019-01-21 11:18:26,712 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0005 (Took 0:00:00.000362)
+2019-01-21 11:18:26,713 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0007
+2019-01-21 11:18:26,713 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0007
+2019-01-21 11:18:26,713 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0007 (Took 0:00:00.000181)
+2019-01-21 11:18:26,714 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0011
+2019-01-21 11:18:26,714 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0011
+2019-01-21 11:18:26,714 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0011 (Took 0:00:00.000382)
+2019-01-21 11:18:26,714 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-05-a-i0003
+2019-01-21 11:18:26,715 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-05-a-i0003
+2019-01-21 11:18:26,715 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-05-a-i0003 (Took 0:00:00.000183)
+2019-01-21 11:18:26,734 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:27,037 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:27,337 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:27,404 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 8), edition='a', path='GDL/1799/01/08/a/GDL-1799-01-08-a-issue.json')
+2019-01-21 11:18:27,656 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:27,885 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:27,953 impresso_commons.text.helpers INFO     Read page GDL/1799/01/06/a/GDL-1799-01-06-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:27,955 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/06/a/GDL-1799-01-06-a-issue.json
+2019-01-21 11:18:27,955 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0001
+2019-01-21 11:18:27,955 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0001
+2019-01-21 11:18:27,956 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0001 (Took 0:00:00.000510)
+2019-01-21 11:18:27,956 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0008
+2019-01-21 11:18:27,956 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0008
+2019-01-21 11:18:27,957 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0008 (Took 0:00:00.000291)
+2019-01-21 11:18:27,957 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0002
+2019-01-21 11:18:27,957 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0002
+2019-01-21 11:18:27,958 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0002 (Took 0:00:00.000532)
+2019-01-21 11:18:27,959 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0009
+2019-01-21 11:18:27,959 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0009
+2019-01-21 11:18:27,960 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0009 (Took 0:00:00.001100)
+2019-01-21 11:18:27,961 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0003
+2019-01-21 11:18:27,961 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0003
+2019-01-21 11:18:27,962 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0003 (Took 0:00:00.000148)
+2019-01-21 11:18:27,962 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-06-a-i0004
+2019-01-21 11:18:27,962 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-06-a-i0004
+2019-01-21 11:18:27,962 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-06-a-i0004 (Took 0:00:00.000119)
+2019-01-21 11:18:28,382 impresso_commons.text.helpers INFO     Read JSON of IssueDirectory(journal='GDL', date=datetime.date(1799, 1, 9), edition='a', path='GDL/1799/01/09/a/GDL-1799-01-09-a-issue.json')
+2019-01-21 11:18:28,527 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:28,804 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0001.json from bucket original-canonical-data
+2019-01-21 11:18:29,092 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:29,354 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0002.json from bucket original-canonical-data
+2019-01-21 11:18:29,454 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:29,812 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0003.json from bucket original-canonical-data
+2019-01-21 11:18:29,938 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:30,196 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0004.json from bucket original-canonical-data
+2019-01-21 11:18:30,288 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:30,600 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0005.json from bucket original-canonical-data
+2019-01-21 11:18:30,872 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:30,977 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0006.json from bucket original-canonical-data
+2019-01-21 11:18:31,314 impresso_commons.text.helpers INFO     Read page GDL/1799/01/08/a/GDL-1799-01-08-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:31,316 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/08/a/GDL-1799-01-08-a-issue.json
+2019-01-21 11:18:31,316 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0001
+2019-01-21 11:18:31,316 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0001
+2019-01-21 11:18:31,316 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0001 (Took 0:00:00.000159)
+2019-01-21 11:18:31,317 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0002
+2019-01-21 11:18:31,317 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0002
+2019-01-21 11:18:31,317 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0002 (Took 0:00:00.000614)
+2019-01-21 11:18:31,318 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0006
+2019-01-21 11:18:31,318 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0006
+2019-01-21 11:18:31,319 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0006 (Took 0:00:00.000321)
+2019-01-21 11:18:31,319 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0010
+2019-01-21 11:18:31,319 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0010
+2019-01-21 11:18:31,320 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0010 (Took 0:00:00.000824)
+2019-01-21 11:18:31,321 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0012
+2019-01-21 11:18:31,321 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0012
+2019-01-21 11:18:31,322 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0012 (Took 0:00:00.000897)
+2019-01-21 11:18:31,323 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0003
+2019-01-21 11:18:31,323 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0003
+2019-01-21 11:18:31,323 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0003 (Took 0:00:00.000160)
+2019-01-21 11:18:31,323 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0007
+2019-01-21 11:18:31,323 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0007
+2019-01-21 11:18:31,324 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0007 (Took 0:00:00.000342)
+2019-01-21 11:18:31,324 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-08-a-i0004
+2019-01-21 11:18:31,324 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-08-a-i0004
+2019-01-21 11:18:31,324 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-08-a-i0004 (Took 0:00:00.000139)
+2019-01-21 11:18:31,400 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0007.json from bucket original-canonical-data
+2019-01-21 11:18:31,844 impresso_commons.text.helpers INFO     Read page GDL/1799/01/09/a/GDL-1799-01-09-a-p0008.json from bucket original-canonical-data
+2019-01-21 11:18:31,846 impresso_commons.text.helpers INFO     Rejoining pages for issue GDL/1799/01/09/a/GDL-1799-01-09-a-issue.json
+2019-01-21 11:18:31,847 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0001
+2019-01-21 11:18:31,847 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0001
+2019-01-21 11:18:31,847 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0001 (Took 0:00:00.000667)
+2019-01-21 11:18:31,848 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0013
+2019-01-21 11:18:31,848 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0013
+2019-01-21 11:18:31,849 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0013 (Took 0:00:00.001018)
+2019-01-21 11:18:31,850 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0002
+2019-01-21 11:18:31,850 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0002
+2019-01-21 11:18:31,851 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0002 (Took 0:00:00.000162)
+2019-01-21 11:18:31,851 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0004
+2019-01-21 11:18:31,851 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0004
+2019-01-21 11:18:31,851 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0004 (Took 0:00:00.000424)
+2019-01-21 11:18:31,852 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0009
+2019-01-21 11:18:31,852 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0009
+2019-01-21 11:18:31,852 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0009 (Took 0:00:00.000474)
+2019-01-21 11:18:31,853 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0012
+2019-01-21 11:18:31,853 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0012
+2019-01-21 11:18:31,853 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0012 (Took 0:00:00.000420)
+2019-01-21 11:18:31,854 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0005
+2019-01-21 11:18:31,854 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0005
+2019-01-21 11:18:31,854 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0005 (Took 0:00:00.000238)
+2019-01-21 11:18:31,854 impresso_commons.text.helpers INFO     Extracting text regions for article GDL-1799-01-09-a-i0010
+2019-01-21 11:18:31,855 impresso_commons.text.rebuilder INFO     Started rebuilding article GDL-1799-01-09-a-i0010
+2019-01-21 11:18:31,855 impresso_commons.text.rebuilder INFO     Done rebuilding article GDL-1799-01-09-a-i0010 (Took 0:00:00.000197)
+2019-01-21 11:18:31,874 impresso_commons.text.rebuilder INFO     Compressing 7 JSON files into /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,882 impresso_commons.text.rebuilder INFO     Written 5 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/0.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,887 impresso_commons.text.rebuilder INFO     Written 5 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/1.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,892 impresso_commons.text.rebuilder INFO     Written 6 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/2.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,896 impresso_commons.text.rebuilder INFO     Written 7 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/3.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,899 impresso_commons.text.rebuilder INFO     Written 6 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/4.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,903 impresso_commons.text.rebuilder INFO     Written 8 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/5.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,912 impresso_commons.text.rebuilder INFO     Written 8 docs from /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799/6.json to /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2
+2019-01-21 11:18:31,948 impresso_commons.text.rebuilder INFO     Removed temporary directory and files in /Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799
+2019-01-21 11:18:31,948 test_rebuilder INFO     ('GDL-1799', '/Users/rromanello/Documents/impresso/impresso-pycommons/impresso_commons/data/rebuilt/GDL-1799.jsonl.bz2')
