@@ -27,8 +27,9 @@ from dask.distributed import Client, progress
 from docopt import docopt
 from smart_open import smart_open
 
+from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
 from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket
+from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
@@ -348,21 +349,49 @@ def rebuild_issues(
     else:
         raise
 
-    issue = IssueDir(**issues[0])
+    issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
+    json_files = []
     issue_dir = os.path.join(output_dir, key)
     if not os.path.exists(issue_dir):
         os.mkdir(issue_dir)
 
     print(issue_dir)
 
-    print(f'There are {len(issues)} issues to rebuild')
+    # fetch pages for this newspaper-year from s3
+    newspaper = issue.journal
+    year = issue.date.year
+    pages_bag = db.read_text(
+        f'{input_bucket}/{newspaper}/{newspaper}-{year}-pages.jsonl.bz2',
+        storage_options=IMPRESSO_STORAGEOPT
+    ).map(lambda x: json.loads(x)).persist()
+    print(f"Reading pages for {key} from S3")
+    progress(pages_bag)
+    print("done.")
+
+    # reattach the pages to the issue object they belong
+    n_pages = pages_bag.count().compute()
+    print(f"Adding {n_pages} pages to {len(issues)} issues...")
+    for n, item in enumerate(issues):
+        metadata, issue = item
+
+        filtered_pages = pages_bag\
+            .filter(lambda p: issue["id"] in p["id"])\
+            .compute()
+
+        sorted_pages = sorted(
+            filtered_pages,
+            key=lambda p: int(p["id"].split("-")[-1].replace('p', ""))
+        )
+
+        # replace the `pp` field with the actual JSON pages
+        issue["pp"] = sorted_pages
+    print("done.")
+
+    print("Rebuilding articles...")
     bag = db.from_sequence(issues)
     logger.info(f"Number of partitions: {bag.npartitions}")
-    process_bag = bag.map(lambda x: IssueDir(**x)) \
-        .map(read_issue, input_bucket) \
-        .starmap(read_issue_pages, bucket=input_bucket) \
-        .starmap(rejoin_articles) \
+    process_bag = bag.starmap(rejoin_articles) \
         .flatten() \
         .starmap(pages_to_article)\
         .filter(_article_has_problem) \
@@ -372,6 +401,7 @@ def rebuild_issues(
 
     x = dask_client.compute(process_bag)
     progress(x)
+    print("done.")
     json_files = [
         os.path.join(issue_dir, f)
         for f in os.listdir(issue_dir)
@@ -418,7 +448,7 @@ def main():
 
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
-    bucket_name = arguments["--input-bucket"]
+    bucket_name = f's3://{arguments["--input-bucket"]}'
     output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
@@ -440,7 +470,7 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        client = Client(processes=False, n_workers=2, threads_per_worker=1)
+        client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
@@ -458,11 +488,10 @@ def main():
             for year in range(start_year, end_year):
                 print(f'Processing year {year}')
                 print('Retrieving issues...')
-                input_issues = impresso_iter_bucket(
-                    bucket_name,
-                    filter_config={newspaper: [year, year + 1]},
-                    # prefix="GDL/1948/09/03",
-                    item_type="issue"
+                input_issues = read_s3_issues(
+                    newspaper,
+                    year,
+                    bucket_name
                 )
                 if len(input_issues) == 0:
                     continue

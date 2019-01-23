@@ -8,7 +8,7 @@ python_version = "3.6"
 
 [packages]
 smart-open = "*"
-dask = {extras = ["complete"]}
+dask = {extras = ["complete"],version = "*"}
 opencv-python = "==3.4.0.12"
 boto = "*"
 lxml = "*"
@@ -19,9 +19,9 @@ docopt = "*"
 six = "*"
 jsonlines = "*"
 deprecated = "*"
-"e1839a8" = {path = ".", editable = true}
+e1839a8 = {path = ".",editable = true}
 "s3fs" = "*"
-pycas = {git = "https://github.com/dkpro/dkpro-pycas.git", editable = true}
+pycas = {git = "https://github.com/dkpro/dkpro-pycas.git",editable = true}
 
 [dev-packages]
 jupyter = "*"
