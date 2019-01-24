@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-client = Client(processes=False, n_workers=2, threads_per_worker=1)
+client = Client(processes=False, n_workers=8, threads_per_worker=1)
 
 
 def test_rebuild_NZZ():
