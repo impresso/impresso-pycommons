@@ -361,7 +361,8 @@ def rebuild_issues(
     print("Fleshing out articles by issue...")
     issues_bag = db.from_sequence(issues)
     print(f"Number of partitions: {issues_bag.npartitions}")
-    articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
+    articles_bag = issues_bag.map_partitions(read_issue_pages, bucket=input_bucket)\
+        .flatten()\
         .starmap(rejoin_articles) \
         .flatten()\
         .repartition(npartitions=500)\
