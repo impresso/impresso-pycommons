@@ -53,7 +53,7 @@ def read_page(page_key, bucket_name, s3_client):
         return None
 
 
-def read_issue_pages(issue, issue_json, bucket=None):
+def read_issue_pages(issues, bucket=None):
     """Read all pages of a given issue from S3 in parallel.
 
     :param issue: input issue
@@ -65,24 +65,31 @@ def read_issue_pages(issue, issue_json, bucket=None):
     :return: a list of tuples: [0] `IssueDir`, [1] JSON canonical issue
     :rytpe: list of tuples
     """
-
+    issues_with_pages = []
+    issue, issue_json = issues[0]
     newspaper = issue.journal
     year = issue.date.year
-    filtered_pages = db.read_text(
-        f'{bucket}/{newspaper}/{newspaper}-{year}-pages.jsonl.bz2',
+    filename = f'{bucket}/{newspaper}/{newspaper}-{year}-pages.jsonl.bz2'
+    pages = db.read_text(
+        filename,
         storage_options=IMPRESSO_STORAGEOPT
-    ).map(lambda x: json.loads(x))\
-    .filter(lambda p: issue_json["id"] in p["id"])\
-    .compute()
+    ).map(lambda x: json.loads(x)).persist()
+    print(filename)
 
-    sorted_pages = sorted(
-        filtered_pages,
-        key=lambda p: int(p["id"].split("-")[-1].replace('p', ""))
-    )
+    for issue, issue_json in issues:
+        filtered_pages = pages.filter(lambda p: issue_json["id"] in p["id"])\
+        .compute()
 
-    # replace the `pp` field with the actual JSON pages
-    issue_json["pp"] = sorted_pages
-    return (issue, issue_json)
+        sorted_pages = sorted(
+            filtered_pages,
+            key=lambda p: int(p["id"].split("-")[-1].replace('p', ""))
+        )
+
+        # replace the `pp` field with the actual JSON pages
+        issue_json["pp"] = sorted_pages
+        issues_with_pages.append((issue, issue_json))
+    del pages
+    return issues_with_pages
 
 
 def rejoin_articles(issue, issue_json):
