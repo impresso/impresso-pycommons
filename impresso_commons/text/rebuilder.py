@@ -358,50 +358,24 @@ def rebuild_issues(
 
     print(issue_dir)
 
-    # fetch pages for this newspaper-year from s3
-    newspaper = issue.journal
-    year = issue.date.year
-    pages_bag = db.read_text(
-        f'{input_bucket}/{newspaper}/{newspaper}-{year}-pages.jsonl.bz2',
-        storage_options=IMPRESSO_STORAGEOPT
-    ).map(lambda x: json.loads(x)).persist()
-    print(f"Reading pages for {key} from S3")
-    progress(pages_bag)
-    print("done.")
+    print("Fleshing out articles by issue...")
+    issues_bag = db.from_sequence(issues)
+    print(f"Number of partitions: {issues_bag.npartitions}")
+    articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
+        .starmap(rejoin_articles) \
+        .flatten()\
+        .repartition(npartitions=500)\
+        .filter(_article_has_problem) \
+        .persist()
 
-    # reattach the pages to the issue object they belong
-    n_pages = pages_bag.count().compute()
-    print(f"Adding {n_pages} pages to {len(issues)} issues...")
-    for n, item in enumerate(issues):
-        metadata, issue = item
+    print(articles_bag.count().compute())
 
-        filtered_pages = pages_bag\
-            .filter(lambda p: issue["id"] in p["id"])\
-            .compute()
-
-        sorted_pages = sorted(
-            filtered_pages,
-            key=lambda p: int(p["id"].split("-")[-1].replace('p', ""))
-        )
-
-        # replace the `pp` field with the actual JSON pages
-        issue["pp"] = sorted_pages
-    print("done.")
 
     print("Rebuilding articles...")
-    bag = db.from_sequence(issues)
-    logger.info(f"Number of partitions: {bag.npartitions}")
-    process_bag = bag.starmap(rejoin_articles) \
-        .flatten() \
-        .starmap(pages_to_article)\
-        .filter(_article_has_problem) \
-        .map(rebuild_function) \
-        .map(json.dumps) \
+    articles_bag.map(json.dumps) \
         .to_textfiles('{}/*.json'.format(issue_dir))
-
-    x = dask_client.compute(process_bag)
-    progress(x)
     print("done.")
+
     json_files = [
         os.path.join(issue_dir, f)
         for f in os.listdir(issue_dir)

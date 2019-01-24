@@ -4,6 +4,8 @@ import json
 import logging
 import os
 
+from dask import bag as db
+from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
 from impresso_commons.utils.s3 import get_s3_versions, get_s3_resource
 
 logger = logging.getLogger(__name__)
@@ -64,29 +66,33 @@ def read_issue_pages(issue, issue_json, bucket=None):
     :rytpe: list of tuples
     """
 
-    pages = []
-    # create one S3 connection and use it for all pages in the issue
-    s3 = get_s3_resource()
+    newspaper = issue.journal
+    year = issue.date.year
+    filtered_pages = db.read_text(
+        f'{bucket}/{newspaper}/{newspaper}-{year}-pages.jsonl.bz2',
+        storage_options=IMPRESSO_STORAGEOPT
+    ).map(lambda x: json.loads(x))\
+    .filter(lambda p: issue_json["id"] in p["id"])\
+    .compute()
 
-    # reconstruct the page key from an IssueDir object and the list of int
-    # contained in `issue_json['pp']`
-    for page in issue_json["pp"]:
-        page_key = os.path.join(
-            "/".join(issue.path.split('/')[:-1]),
-            f"{page}.json"
-        )
-        pages.append(read_page(page_key, bucket_name=bucket, s3_client=s3))
-    issue_json['pp'] = pages
+    sorted_pages = sorted(
+        filtered_pages,
+        key=lambda p: int(p["id"].split("-")[-1].replace('p', ""))
+    )
+
+    # replace the `pp` field with the actual JSON pages
+    issue_json["pp"] = sorted_pages
     return (issue, issue_json)
 
 
 def rejoin_articles(issue, issue_json):
-    logger.info(f"Rejoining pages for issue {issue.path}")
-
+    print(f"Rejoining pages for issue {issue.path}")
     articles = []
     for article in issue_json['i']:
 
+        art_id = article['m']['id']
         article['m']['s3v'] = issue_json['s3_version']
+        article['has_problem'] = False
 
         pages = []
         for page_no in article['m']['pp']:
@@ -101,7 +107,18 @@ def rejoin_articles(issue, issue_json):
             ][0]
             pages.append(issue_json['pp'][page_idx])
 
-        articles.append((article, pages))
+        regions_by_page = []
+        for page in pages:
+            regions_by_page.append([
+                region
+                for region in page["r"]
+                if region["pOf"] == art_id
+            ])
+        article['pprr'] = regions_by_page
+        convert_coords = [p['cc'] for p in pages]
+        article['m']['cc'] = sum(convert_coords) / len(convert_coords) == 1.0
+
+        articles.append(article)
     return articles
 
 
@@ -109,7 +126,7 @@ def pages_to_article(article, pages):
     """Return all text regions belonging to a given article."""
     try:
         art_id = article['m']['id']
-        logger.info("Extracting text regions for article {}".format(art_id))
+        print("Extracting text regions for article {}".format(art_id))
         regions_by_page = []
         for page in pages:
             regions_by_page.append([
