@@ -117,6 +117,7 @@ def rejoin_articles(issue, issue_json):
         article['pprr'] = regions_by_page
         convert_coords = [p['cc'] for p in pages]
         article['m']['cc'] = sum(convert_coords) / len(convert_coords) == 1.0
+        del pages
 
         articles.append(article)
     return articles
