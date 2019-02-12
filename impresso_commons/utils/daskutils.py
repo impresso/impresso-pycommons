@@ -38,7 +38,7 @@ def create_even_partitions(bucket,
                            output_dir,
                            partitioned_bucket_name,
                            partitioned_bucket_prefix,
-                           keep_full=True,
+                           keep_full=False,
                            nb_partition=500):
     """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
 
@@ -134,10 +134,10 @@ def main():
         config_dict = json.load(f)
     try:
         bucket_rebuilt = config_dict["s3_bucket_rebuilt"]
-        bucket_partition = config_dict["s3_bucket_partitions"]
         dir_partition = config_dict["fs_partitions"]
         number_partitions = config_dict["number_partitions"]
         config_newspapers = config_dict["newspapers"]
+        keep_full = config_dict["keep_full"]
     except KeyError:
         logger.critical(f"Not possible to parse config file.")
 
@@ -157,9 +157,9 @@ def main():
         create_even_partitions(bucket,
                                config_newspapers,
                                dir_partition,
-                               bucket_partition,
-                               "GDL",  # todo: add in params
-                               False,  # todo: add in params
+                               None,
+                               None,
+                               keep_full,  
                                nb_partition=number_partitions)
 
 
