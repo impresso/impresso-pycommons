@@ -149,6 +149,26 @@ class ContentItem:
             return False
 
 
+    # TODO: implement
+    def _index_coordinates(self):
+        """Creates an index of coordinates by text offsets.
+
+        Gets called by `self.from_json()`.
+        """"
+        pass
+
+
+    # TODO: implement
+    def get_coordinates(self, start_offset, end_offset):
+        """Enables access to image coordinates by means of text offsets.
+
+        returns a dictionary like
+        {
+            'page_id': '....',
+            'coordinates': [x,y,w,h]
+        }
+        """
+        pass
 
 
     def __str__(self):
