@@ -27,6 +27,7 @@ from dask.distributed import Client, progress
 from docopt import docopt
 from smart_open import smart_open
 
+from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import impresso_iter_bucket
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
@@ -206,7 +207,15 @@ def rebuild_for_solr(article_metadata):
 
 
 def rebuild_for_passim(article_metadata):
-    pass
+    np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
+        article_metadata['m']['id']
+    )
+    passim_document = {
+        "series": np,
+        "date": date[0],
+        "id": article_metadata['m']['id']
+    }
+    return passim_document
 
 
 def compress(key, json_files, output_dir):
@@ -355,6 +364,11 @@ def rebuild_issues(
         os.mkdir(issue_dir)
 
     print(issue_dir)
+
+    """
+    Notes: `.filter(_article_has_problem)` should be more general; when
+    format==passim we want to filer out advertisements.
+    """
 
     print(f'There are {len(issues)} issues to rebuild')
     bag = db.from_sequence(issues)

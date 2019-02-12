@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-client = Client(processes=False, n_workers=2, threads_per_worker=1)
+client = Client(processes=False, n_workers=4, threads_per_worker=1)
 
 
 def test_rebuild_NZZ():
@@ -88,4 +88,22 @@ def test_rebuild_GDL():
 
 
 def test_rebuild_for_passim():
-    pass
+    input_bucket_name = "original-canonical-temp"
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt-passim'
+    )
+
+    input_issues = impresso_iter_bucket(
+        input_bucket_name,
+        prefix="GDL/1799/01/0",
+        item_type="issue"
+    )
+
+    issue_key, json_files = rebuild_issues(
+        issues=input_issues,
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=client,
+        format='passim'
+    )
