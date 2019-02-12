@@ -85,3 +85,7 @@ def test_rebuild_GDL():
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
+
+
+def test_rebuild_for_passim():
+    pass
