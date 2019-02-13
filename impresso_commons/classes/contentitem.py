@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
+import json
 import datetime
 from enum import Enum
 
@@ -118,6 +120,36 @@ class ContentItem:
             return doc
         elif path is not None:
             return
+
+
+    def to_json(self, path, case=ContentItemCase.LIGHT):
+        data = {
+            "id": self.id,
+            "lg": self.lg,
+            "tp": self.type
+        }
+
+        if case == ContentItemCase.TEXT or case == ContentItemCase.FULL:
+            data['t'] = self.__title
+            data['ft'] = self.__fulltext
+
+        if case == ContentItemCase.FULL:
+            data['lb'] = self.__lines
+            data['pb'] = self.__paragraphs
+            data['rb'] = self.__regions
+            data['ppreb'] = self.__pages
+
+        json_output_path = os.path.join(path, f'{self.id}.json')
+        try:
+            with open(json_output_path, 'w') as out_file:
+                json.dump(data, out_file)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+
+
 
     def __str__(self):
         s = f'{self.__class__.__name__}:\n\t' \
