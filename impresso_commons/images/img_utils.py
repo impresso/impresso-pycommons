@@ -7,6 +7,7 @@ from collections import defaultdict
 import os
 import cv2 as cv
 import numpy as np
+import re
 
 __author__ = "maudehrmann"
 
@@ -65,7 +66,7 @@ def get_png(pngs, page_digit):
     if not pngs:
         return None
     else:
-        # group by pages (there can be several images per pages)
+        # group by pages (there can be several images per page)
         d = defaultdict(list)
         for i in pngs:
             elems = i.split("/", 1)
@@ -78,8 +79,16 @@ def get_png(pngs, page_digit):
         if len(png_paths) > 1:
             # get pages with different resolutions (i.e. having "_": 'Img/Pg006_180.png')
             pngs_with_res = [x for x in png_paths if "_" in x]
-            # return the highest resolution
-            return pngs_with_res[-1]
+            # build dict with k = res and v = path
+            reso = {}
+            for png in pngs_with_res:
+                r = re.search(r'_(.+)\.', png).group(1)
+                reso[int(r)] = png
+            # sort the dict keys
+            sorted_reso = sorted(reso)
+            # take the highest res and get the corresponding path
+            return reso[sorted_reso[-1]]
+
         # there is only one png
         elif len(png_paths) == 1:
             return png_paths[0]
