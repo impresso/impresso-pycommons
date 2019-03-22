@@ -103,10 +103,10 @@ def get_png(pngs, page_digit):
             res = {}
             composite = []
             for png in pngs_with_res:
-                if "_p" or "_t" in png:
+                if '_p.' in png or '_t.' in png:
                     composite.append(png)
                     continue
-                    
+
                 r = re.search(r'_(.+)\.', png).group(1)
                 res[int(r)] = png
 
