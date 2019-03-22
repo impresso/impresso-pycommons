@@ -1,5 +1,5 @@
 from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
-from impresso_commons.text.rebuilder import rebuild_issues, compress
+from impresso_commons.text.rebuilder import rebuild_issues, compress, upload
 from dask.distributed import Client
 import pkg_resources
 import logging
@@ -105,22 +105,19 @@ def test_rebuild_IMP():
 
 
 def test_rebuild_for_passim():
-    input_bucket_name = "original-canonical-temp"
+    input_bucket_name = "s3://original-canonical-compressed"
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt-passim'
     )
 
-    input_issues = impresso_iter_bucket(
-        input_bucket_name,
-        prefix="GDL/1799/01/0",
-        item_type="issue"
-    )
+    input_issues = read_s3_issues("IMP", "1982", input_bucket_name)
 
     issue_key, json_files = rebuild_issues(
-        issues=input_issues,
+        issues=input_issues[:50],
         input_bucket=input_bucket_name,
         output_dir=outp_dir,
         dask_client=client,
         format='passim'
     )
+    logger.info(f'{issue_key}: {json_files}')

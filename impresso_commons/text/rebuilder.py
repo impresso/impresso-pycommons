@@ -130,6 +130,69 @@ def rebuild_text(page, string=None):
     return (string, coordinates, offsets)
 
 
+def rebuild_text_passim(page, string=None):
+    """The text rebuilding function.
+
+    :param page: a newspaper page conforming to the impresso JSON schema
+        for pages.
+    :type page: dict
+    :param string: the rebuilt text of the previous page. If `string` is not
+        `None`, then the rebuilt text is appended to it.
+    :type string: str
+    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+        [2] coordinates of token regions (dict of lists).
+    """
+
+    regions = []
+
+    if string is None:
+        string = ""
+
+    # in order to be able to keep line break information
+    # we iterate over a list of lists (lines of tokens)
+
+    for region_n, region in enumerate(page):
+
+        output_region = {
+            "start": None,
+            "length": None,
+            'coords': region['c']
+        }
+
+        region_string = ""
+
+        if len(string) == 0:
+            output_region['start'] = 0
+        else:
+            output_region['start'] = len(string)
+
+        for i, para in enumerate(region["p"]):
+
+            for line in para["l"]:
+
+                for n, token in enumerate(line['t']):
+
+                    #if "hy" in token:
+                    #    region["l"] = len(token["tx"][:-1])-1
+
+                    # if token is the last in a line
+                    if n == len(line['t']) - 1:
+                        tmp = "{}\n".format(token["tx"])
+                        region_string += tmp
+                    elif "gn" in token and token["gn"]:
+                        tmp = "{}".format(token["tx"])
+                        region_string += tmp
+                    else:
+                        tmp = "{} ".format(token["tx"])
+                        region_string += tmp
+
+        string += region_string
+        output_region['length'] = len(region_string)
+        regions.append(output_region)
+
+    return (string, regions)
+
+
 def rebuild_for_solr(article_metadata):
     """Rebuilds the text of an article given its metadata as input.
 
@@ -210,11 +273,46 @@ def rebuild_for_passim(article_metadata):
     np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
         article_metadata['m']['id']
     )
+
+    article_id = article_metadata["m"]["id"]
+    logger.info(f'Started rebuilding article {article_id}')
+    issue_id = "-".join(article_id.split('-')[:-1])
+
+    page_file_names = {
+        p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
+        for p in article_metadata["m"]["pp"]
+    }
+
     passim_document = {
         "series": np,
         "date": date[0],
-        "id": article_metadata['m']['id']
+        "id": article_metadata['m']['id'],
+        "cc": article_metadata["m"]["cc"],
+        "pages": []
     }
+
+    if 't' in article_metadata["m"]:
+        passim_document['title'] = article_metadata["m"]["t"]
+
+    fulltext = ""
+    for n, page_no in enumerate(article_metadata['m']['pp']):
+
+        page = article_metadata['pprr'][n]
+
+        if fulltext == "":
+            fulltext, regions = rebuild_text_passim(page)
+        else:
+            fulltext, regions = rebuild_text_passim(page, fulltext)
+
+        page_doc = {
+            "id": page_file_names[page_no].replace('.json', ''),
+            "seq": page_no,
+            "regions": regions
+        }
+        passim_document["pages"].append(page_doc)
+
+    passim_document["text"] = fulltext
+
     return passim_document
 
 
@@ -373,30 +471,14 @@ def rebuild_issues(
     articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
         .flatten()\
-        .repartition(npartitions=500)\
         .filter(_article_has_problem) \
         .map(rebuild_function) \
         .map(json.dumps).persist()
 
-    """
-    articles_bag = issues_bag.map_partitions(read_issue_pages, bucket=input_bucket)\
-        .flatten()\
-        .starmap(rejoin_articles) \
-        .flatten()\
-        .repartition(npartitions=500)\
-        .filter(_article_has_problem) \
-        .map(rebuild_function) \
-        .map(json.dumps).persist()
-    """
+    json_files = articles_bag.to_textfiles(
+        f'{output_dir}/{issue.journal}-*.jsonl.bz2'
+    )
 
-    articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
-    print("done.")
-
-    json_files = [
-        os.path.join(issue_dir, f)
-        for f in os.listdir(issue_dir)
-        if '.json' in f
-    ]
     return (key, json_files)
 
 
