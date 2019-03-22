@@ -57,6 +57,7 @@ def test_rebuild_JDG():
     logger.info(result)
     assert result is not None
 
+
 def test_rebuild_GDL():
     input_bucket_name = "s3://original-canonical-compressed"
     outp_dir = pkg_resources.resource_filename(
@@ -79,6 +80,7 @@ def test_rebuild_GDL():
     logger.info(result)
     assert result is not None
 
+
 def test_rebuild_IMP():
     input_bucket_name = "s3://original-canonical-compressed"
     outp_dir = pkg_resources.resource_filename(
@@ -100,4 +102,3 @@ def test_rebuild_IMP():
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
-

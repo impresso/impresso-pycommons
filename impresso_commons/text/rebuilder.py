@@ -361,6 +361,16 @@ def rebuild_issues(
     print("Fleshing out articles by issue...")
     issues_bag = db.from_sequence(issues)
     print(f"Number of partitions: {issues_bag.npartitions}")
+
+    articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
+        .starmap(rejoin_articles) \
+        .flatten()\
+        .repartition(npartitions=500)\
+        .filter(_article_has_problem) \
+        .map(rebuild_function) \
+        .map(json.dumps).persist()
+
+    """
     articles_bag = issues_bag.map_partitions(read_issue_pages, bucket=input_bucket)\
         .flatten()\
         .starmap(rejoin_articles) \
@@ -369,6 +379,7 @@ def rebuild_issues(
         .filter(_article_has_problem) \
         .map(rebuild_function) \
         .map(json.dumps).persist()
+    """
 
     articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
     print("done.")
