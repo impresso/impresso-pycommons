@@ -111,7 +111,7 @@ def get_png(pngs, page_digit):
                 res[int(r)] = png
 
             # sort the dict keys
-            if not composite and len(res) > 1:
+            if not composite and len(res) >= 1:
                 sorted_reso = sorted(res)
                 # take the highest res and get the corresponding path
                 return [res[sorted_reso[-1]]]
