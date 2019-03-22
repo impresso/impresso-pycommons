@@ -29,7 +29,7 @@ from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket
+from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
@@ -357,35 +357,41 @@ def rebuild_issues(
     else:
         raise
 
-    issue = IssueDir(**issues[0])
+    issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
+    json_files = []
     issue_dir = os.path.join(output_dir, key)
     if not os.path.exists(issue_dir):
         os.mkdir(issue_dir)
 
     print(issue_dir)
 
-    """
-    Notes: `.filter(_article_has_problem)` should be more general; when
-    format==passim we want to filer out advertisements.
-    """
+    print("Fleshing out articles by issue...")
+    issues_bag = db.from_sequence(issues)
+    print(f"Number of partitions: {issues_bag.npartitions}")
 
-    print(f'There are {len(issues)} issues to rebuild')
-    bag = db.from_sequence(issues)
-    logger.info(f"Number of partitions: {bag.npartitions}")
-    process_bag = bag.map(lambda x: IssueDir(**x)) \
-        .map(read_issue, input_bucket) \
-        .starmap(read_issue_pages, bucket=input_bucket) \
+    articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
-        .flatten() \
-        .starmap(pages_to_article)\
+        .flatten()\
+        .repartition(npartitions=500)\
         .filter(_article_has_problem) \
         .map(rebuild_function) \
-        .map(json.dumps) \
-        .to_textfiles('{}/*.json'.format(issue_dir))
+        .map(json.dumps).persist()
 
-    x = dask_client.compute(process_bag)
-    progress(x)
+    """
+    articles_bag = issues_bag.map_partitions(read_issue_pages, bucket=input_bucket)\
+        .flatten()\
+        .starmap(rejoin_articles) \
+        .flatten()\
+        .repartition(npartitions=500)\
+        .filter(_article_has_problem) \
+        .map(rebuild_function) \
+        .map(json.dumps).persist()
+    """
+
+    articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
+    print("done.")
+
     json_files = [
         os.path.join(issue_dir, f)
         for f in os.listdir(issue_dir)
@@ -432,7 +438,7 @@ def main():
 
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
-    bucket_name = arguments["--input-bucket"]
+    bucket_name = f's3://{arguments["--input-bucket"]}'
     output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
@@ -454,7 +460,7 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        client = Client(processes=False, n_workers=2, threads_per_worker=1)
+        client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
@@ -472,11 +478,10 @@ def main():
             for year in range(start_year, end_year):
                 print(f'Processing year {year}')
                 print('Retrieving issues...')
-                input_issues = impresso_iter_bucket(
-                    bucket_name,
-                    filter_config={newspaper: [year, year + 1]},
-                    # prefix="GDL/1948/09/03",
-                    item_type="issue"
+                input_issues = read_s3_issues(
+                    newspaper,
+                    year,
+                    bucket_name
                 )
                 if len(input_issues) == 0:
                     continue
