@@ -153,10 +153,17 @@ def rebuild_text_passim(page, string=None):
 
     for region_n, region in enumerate(page):
 
+        coords_dict = {
+            "x": region['c'][0],
+            "y": region['c'][1],
+            "w": region['c'][2],
+            "h": region['c'][3]
+        }
+
         output_region = {
             "start": None,
             "length": None,
-            'coords': region['c']
+            'coords': coords_dict
         }
 
         region_string = ""
@@ -171,9 +178,6 @@ def rebuild_text_passim(page, string=None):
             for line in para["l"]:
 
                 for n, token in enumerate(line['t']):
-
-                    #if "hy" in token:
-                    #    region["l"] = len(token["tx"][:-1])-1
 
                     # if token is the last in a line
                     if n == len(line['t']) - 1:
@@ -285,7 +289,7 @@ def rebuild_for_passim(article_metadata):
 
     passim_document = {
         "series": np,
-        "date": date[0],
+        "date": f'{date[0]}-{date[1]}-{date[2]}',
         "id": article_metadata['m']['id'],
         "cc": article_metadata["m"]["cc"],
         "pages": []
@@ -458,6 +462,7 @@ def rebuild_issues(
     issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
     json_files = []
+
     issue_dir = os.path.join(output_dir, key)
     if not os.path.exists(issue_dir):
         os.mkdir(issue_dir)
@@ -471,13 +476,20 @@ def rebuild_issues(
     articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
         .flatten()\
+        .repartition(npartitions=500)\
         .filter(_article_has_problem) \
         .map(rebuild_function) \
         .map(json.dumps).persist()
 
-    json_files = articles_bag.to_textfiles(
-        f'{output_dir}/{issue.journal}-*.jsonl.bz2'
-    )
+    articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
+
+    print("done.")
+
+    json_files = [
+        os.path.join(issue_dir, f)
+        for f in os.listdir(issue_dir)
+        if '.json' in f
+    ]
 
     return (key, json_files)
 
