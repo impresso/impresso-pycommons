@@ -153,31 +153,30 @@ def rebuild_text_passim(page, string=None):
 
     for region_n, region in enumerate(page):
 
-        coords_dict = {
-            "x": region['c'][0],
-            "y": region['c'][1],
-            "w": region['c'][2],
-            "h": region['c'][3]
-        }
-
-        output_region = {
-            "start": None,
-            "length": None,
-            'coords': coords_dict
-        }
-
-        region_string = ""
-
-        if len(string) == 0:
-            output_region['start'] = 0
-        else:
-            output_region['start'] = len(string)
-
         for i, para in enumerate(region["p"]):
 
             for line in para["l"]:
 
                 for n, token in enumerate(line['t']):
+
+                    region_string = ""
+
+                    # each page region is a token
+                    output_region = {
+                        "start": None,
+                        "length": None,
+                        'coords': {
+                            "x": token['c'][0],
+                            "y": token['c'][1],
+                            "w": token['c'][2],
+                            "h": token['c'][3]
+                        }
+                    }
+
+                    if len(string) == 0:
+                        output_region['start'] = 0
+                    else:
+                        output_region['start'] = len(string)
 
                     # if token is the last in a line
                     if n == len(line['t']) - 1:
@@ -190,9 +189,9 @@ def rebuild_text_passim(page, string=None):
                         tmp = "{} ".format(token["tx"])
                         region_string += tmp
 
-        string += region_string
-        output_region['length'] = len(region_string)
-        regions.append(output_region)
+                    string += region_string
+                    output_region['length'] = len(region_string)
+                    regions.append(output_region)
 
     return (string, regions)
 
