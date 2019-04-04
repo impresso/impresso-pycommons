@@ -571,12 +571,14 @@ def main():
             for year in range(start_year, end_year):
                 print(f'Processing year {year}')
                 print('Retrieving issues...')
-                input_issues = read_s3_issues(
-                    newspaper,
-                    year,
-                    bucket_name
-                )
-                if len(input_issues) == 0:
+                try:
+                    input_issues = read_s3_issues(
+                        newspaper,
+                        year,
+                        bucket_name
+                    )
+                except FileNotFoundError:
+                    print(f'{newspaper}-{year} not found in {bucket_name}')
                     continue
 
                 issue_key, json_files = rebuild_issues(
