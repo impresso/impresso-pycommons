@@ -122,7 +122,7 @@ def get_png(pngs, page_digit):
 
         # there is only one png
         elif len(png_paths) == 1:
-            return png_paths[0]
+            return [png_paths[0]]
         else:
             return None
 
