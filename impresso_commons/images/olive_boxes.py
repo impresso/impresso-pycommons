@@ -18,7 +18,7 @@ __author__ = "maudehrmann"
 logger = logging.getLogger(__name__)
 
 
-def get_iiif_url(page_id, box):
+def get_iiif_url(page_id, box, base="http://dhlabsrv17.epfl.ch/iiif_impresso"):
     """ Returns impresso iiif url given a page id and a box
 
     :param page_id: impresso page id, e.g. EXP-1930-06-10-a-p0001
@@ -28,7 +28,6 @@ def get_iiif_url(page_id, box):
     :return: iiif url of the box
     :rtype: str
     """
-    base = "http://dhlabsrv17.epfl.ch/iiif_impresso"
     suffix = "full/0/default.jpg"
     return os.path.join(base, page_id, box.replace(" ", ","), suffix)
 
