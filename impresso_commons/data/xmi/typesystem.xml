@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <typeSystemDescription xmlns="http://uima.apache.org/resourceSpecifier">
     <types>
         <typeDescription>
@@ -11,56 +10,6 @@
                     <name>language</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
-                </featureDescription>
-            </features>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.Anomaly</name>
-            <description/>
-            <supertypeName>uima.tcas.Annotation</supertypeName>
-            <features>
-                <featureDescription>
-                    <name>description</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.String</rangeTypeName>
-                </featureDescription>
-                <featureDescription>
-                    <name>suggestions</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
-                    <elementType>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.SuggestedAction</elementType>
-                </featureDescription>
-                <featureDescription>
-                    <name>category</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.String</rangeTypeName>
-                </featureDescription>
-            </features>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.GrammarAnomaly</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.Anomaly</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.SpellingAnomaly</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.Anomaly</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.anomaly.type.SuggestedAction</name>
-            <description/>
-            <supertypeName>uima.tcas.Annotation</supertypeName>
-            <features>
-                <featureDescription>
-                    <name>replacement</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.String</rangeTypeName>
-                </featureDescription>
-                <featureDescription>
-                    <name>certainty</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.Float</rangeTypeName>
                 </featureDescription>
             </features>
         </typeDescription>
@@ -93,23 +42,6 @@
                 </featureDescription>
                 <featureDescription>
                     <name>referenceRelation</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.String</rangeTypeName>
-                </featureDescription>
-            </features>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.frequency.tfidf.type.Tfidf</name>
-            <description/>
-            <supertypeName>uima.tcas.Annotation</supertypeName>
-            <features>
-                <featureDescription>
-                    <name>tfidfValue</name>
-                    <description/>
-                    <rangeTypeName>uima.cas.Double</rangeTypeName>
-                </featureDescription>
-                <featureDescription>
-                    <name>term</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
@@ -222,6 +154,11 @@
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
+                <featureDescription>
+                    <name>transitivity</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
             </features>
         </typeDescription>
         <typeDescription>
@@ -234,32 +171,137 @@
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
+                <featureDescription>
+                    <name>coarseValue</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
             </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.PP</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_ADJ</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.PR</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_ADP</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.PRT</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_ADV</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.PUNC</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_AUX</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.V</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_CONJ</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_DET</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_INTJ</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_NOUN</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_NUM</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_PART</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_PRON</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_PROPN</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_PUNCT</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_SCONJ</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_SYM</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_VERB</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_AT</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_DM</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_EMO</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_HASH</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_INT</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_NNV</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_NOUN</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_NPV</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_NOUN</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.POS_URL</name>
+            <description/>
+            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS_X</supertypeName>
         </typeDescription>
         <typeDescription>
             <name>de.tudarmstadt.ukp.dkpro.core.api.metadata.type.DocumentMetaData</name>
@@ -348,6 +390,36 @@
                     <rangeTypeName>uima.cas.FSArray</rangeTypeName>
                     <elementType>de.tudarmstadt.ukp.dkpro.core.api.metadata.type.TagDescription</elementType>
                 </featureDescription>
+                <featureDescription>
+                    <name>componentName</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>modelLocation</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>modelVariant</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>modelLanguage</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>modelVersion</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>input</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
             </features>
         </typeDescription>
         <typeDescription>
@@ -357,6 +429,11 @@
             <features>
                 <featureDescription>
                     <name>value</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>identifier</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
@@ -490,6 +567,18 @@
             </features>
         </typeDescription>
         <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.LexicalPhrase</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>text</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
             <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.NGram</name>
             <description/>
             <supertypeName>uima.tcas.Annotation</supertypeName>
@@ -549,6 +638,18 @@
             <supertypeName>uima.tcas.Annotation</supertypeName>
         </typeDescription>
         <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.SurfaceForm</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>value</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
             <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token</name>
             <description/>
             <supertypeName>uima.tcas.Annotation</supertypeName>
@@ -580,6 +681,68 @@
                 </featureDescription>
                 <featureDescription>
                     <name>id</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>form</name>
+                    <description/>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.TokenForm</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>syntacticFunction</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.TokenForm</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>value</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.semantics.type.SemArg</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.semantics.type.SemArgLink</name>
+            <description/>
+            <supertypeName>uima.cas.TOP</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>role</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>target</name>
+                    <description/>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.semantics.type.SemArg</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+        <typeDescription>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.semantics.type.SemPred</name>
+            <description/>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>arguments</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+                    <elementType>de.tudarmstadt.ukp.dkpro.core.api.semantics.type.SemArgLink</elementType>
+                </featureDescription>
+                <featureDescription>
+                    <name>category</name>
                     <description/>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
@@ -774,12 +937,12 @@
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.PP</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.PARN</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent</supertypeName>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.PRN</name>
+            <name>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.PP</name>
             <description/>
             <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent</supertypeName>
         </typeDescription>
@@ -1093,89 +1256,148 @@
             </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.ADJ</name>
+            <name>de.tudarmstadt.ukp.inception.api.kb.type.Fact</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>predicate</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>subject</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+                    <elementType>de.tudarmstadt.ukp.inception.api.kb.type.FactSubjectLink</elementType>
+                </featureDescription>
+                <featureDescription>
+                    <name>object</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+                    <elementType>de.tudarmstadt.ukp.inception.api.kb.type.FactObjectLink</elementType>
+                </featureDescription>
+                <featureDescription>
+                    <name>qualifiers</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.FSArray</rangeTypeName>
+                    <elementType>de.tudarmstadt.ukp.inception.api.kb.type.FactQualifierLink</elementType>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.ADV</name>
+            <name>de.tudarmstadt.ukp.inception.api.kb.type.FactObjectLink</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.cas.TOP</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>role</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>target</name>
+                    <description/>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.ART</name>
+            <name>de.tudarmstadt.ukp.inception.api.kb.type.FactQualifierLink</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.cas.TOP</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>role</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>target</name>
+                    <description/>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.CARD</name>
+            <name>de.tudarmstadt.ukp.inception.api.kb.type.FactSubjectLink</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.cas.TOP</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>role</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>target</name>
+                    <description/>
+                    <rangeTypeName>de.tudarmstadt.ukp.dkpro.core.api.ner.type.NamedEntity</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.CONJ</name>
+            <name>de.tudarmstadt.ukp.inception.recommendation.api.type.PredictedSpan</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>label</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>score</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.Double</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.N</name>
+            <name>webanno.custom.Images</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>image_link</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.NN</name>
+            <name>webanno.custom.ImpressoImages</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.N</supertypeName>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>link</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.NP</name>
+            <name>webanno.custom.ImpressoNamedEntity</name>
             <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.N</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.POS</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.AT</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.DM</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.EMO</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.HASH</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.INT</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.NNV</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.N</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.NPV</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.N</supertypeName>
-        </typeDescription>
-        <typeDescription>
-            <name>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.tweet.URL</name>
-            <description/>
-            <supertypeName>de.tudarmstadt.ukp.dkpro.core.api.lexmorph.type.pos.O</supertypeName>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>literal</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>unsolvable</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.Boolean</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>value</name>
+                    <description/>
+                    <rangeTypeName>uima.cas.String</rangeTypeName>
+                </featureDescription>
+            </features>
         </typeDescription>
         <typeDescription>
             <name>de.tudarmstadt.ukp.dkpro.core.api.ner.type.Animal</name>
