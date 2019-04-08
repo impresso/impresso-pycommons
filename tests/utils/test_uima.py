@@ -30,5 +30,4 @@ def test_rebuilt2xmi():
     texts = b.compute()
     text = json.loads(texts[10])
     doc = ContentItem.from_json(data=text, case=ContentItemCase.FULL)
-    print(doc)
     rebuilt2xmi(doc, output_dir, typesystem)

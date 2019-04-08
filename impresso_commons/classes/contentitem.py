@@ -1,17 +1,36 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
-import json
 import datetime
+import json
+import os
 from enum import Enum
 
+
+# TODO: implement
+def index_coordinates(pages):
+    """Creates an index of coordinates by text offsets.
+
+    Gets called by `self.from_json()`.
+    """
+    coords = []
+    for page in pages:
+
+        for token in page['t']:
+            item = {
+                'page_id': page['id'],
+                'coords': token['c'],
+                'start_offset': token['s'],
+                'end_offset': token['s'] + token['l']
+            }
+            coords.append(item)
+
+    return coords
 
 class ContentItemCase(Enum):
     FULL = "FULL"  # all info
     TEXT = "TEXT"  # min info + text
     LIGHT = "LIGHT"  # min info
-
 
 class ContentItem:
     """
@@ -35,6 +54,7 @@ class ContentItem:
         self.date = self.build_date(ci_id)
         self.journal = self.build_journal(ci_id)
         self._text_offsets = {}
+        self.__coordinates = []
 
     @staticmethod
     def build_date(ci_id):
@@ -82,7 +102,7 @@ class ContentItem:
         return self.__regions
 
     @regions.setter
-    def pages(self, value):
+    def regions(self, value):
         self.__regions = value
 
     @property
@@ -103,6 +123,7 @@ class ContentItem:
         """
 
         assert data is not None or path is not None
+
         if data is not None:
             doc = ContentItem(data['id'], data['lg'], data['tp'])
             doc.case = case
@@ -116,6 +137,7 @@ class ContentItem:
                 doc.__paragraphs = data['pb'] if 'pb' in data else None
                 doc.__regions = data['rb'] if 'pb' in data else None
                 doc.__pages = data['ppreb'] if 'ppreb' in data else None
+                doc.__coordinates = index_coordinates(doc.__pages)
 
             return doc
         elif path is not None:
@@ -149,16 +171,6 @@ class ContentItem:
             return False
 
 
-    # TODO: implement
-    def _index_coordinates(self):
-        """Creates an index of coordinates by text offsets.
-
-        Gets called by `self.from_json()`.
-        """"
-        pass
-
-
-    # TODO: implement
     def get_coordinates(self, start_offset, end_offset):
         """Enables access to image coordinates by means of text offsets.
 
@@ -168,7 +180,10 @@ class ContentItem:
             'coordinates': [x,y,w,h]
         }
         """
-        pass
+        return list(filter(
+            lambda c: c['start_offset'] >= start_offset and c['end_offset'] <= end_offset,
+            self.__coordinates
+        ))
 
 
     def __str__(self):
