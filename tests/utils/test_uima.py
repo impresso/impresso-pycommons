@@ -20,10 +20,17 @@ def test_rebuilt2xmi():
         'impresso_commons',
         'data/xmi/typesystem.xml'
     )
-
+    """
     b = db.read_text(
         's3://canonical-rebuilt/GDL/GDL-1910.jsonl.bz2',
         storage_options=impresso_s3
+    )
+    """
+    b = db.read_text(
+        pkg_resources.resource_filename(
+            'impresso_commons',
+            'data/rebuilt/GDL-1799.jsonl.bz2'
+        )
     )
     # .map(lambda x: json.loads(x))
 

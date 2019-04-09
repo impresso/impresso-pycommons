@@ -23,6 +23,10 @@ def index_coordinates(pages):
                 'start_offset': token['s'],
                 'end_offset': token['s'] + token['l']
             }
+            if "hy1" in token:
+                item['hy1'] = token['hy1']
+            if "hy2" in token:
+                item['hy2'] = token['hy2']
             coords.append(item)
 
     return coords

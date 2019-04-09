@@ -96,9 +96,11 @@ def rebuild_text(page, string=None):
 
                     if "hy" in token:
                         region["l"] = len(token["tx"][:-1])-1
+                        region['hy1'] = True
 
                     elif "nf" in token:
                         region["l"] = len(token["nf"])
+                        region['hy2'] = True
 
                         if "gn" in token and token["gn"]:
                             tmp = "{}".format(token["nf"])

@@ -11,20 +11,51 @@ from impresso_commons.images.olive_boxes import get_iiif_url
 IMPRESSO_IIIF_ENDPOINT = 'http://pub.cl.uzh.ch/service/iiif_impresso'
 
 
-def compute_image_link(ci, start_offset, end_offset, padding=20):
+def compute_image_links(ci, padding=20):
+    """Short summary.
 
-    tokens = ci.get_coordinates(start_offset, end_offset)
-    page_id = tokens[0]['page_id']
-    first_token = tokens[0]
-    last_token = tokens[-1]
+    :param type ci: Description of parameter `ci`.
+    :param type padding: Description of parameter `padding`.
+    :return: Description of returned object.
+    :rtype: type
 
-    # compute box coordinates of line
-    x1, y1, w1, h1 = first_token['coords']
-    x2, y2, w2, h2 = last_token['coords']
-    x3, y3, w3, h3 = x1, y1 - padding, w2 + (x2 - x1), h1 + padding
-    box = " ".join([str(coord) for coord in [x3, y3, w3, h3]])
-    import ipdb; ipdb.set_trace()
-    return get_iiif_url(page_id, box, IMPRESSO_IIIF_ENDPOINT)
+    """
+
+    iiif_links = []
+    start_offset = 0
+
+    for line_n, break_offset in enumerate(ci.lines):
+        start = start_offset
+        end = break_offset
+        start_offset = break_offset
+
+        tokens = ci.get_coordinates(start, end)
+
+        page_id = tokens[0]['page_id']
+
+        if 'hy1' in tokens[0]:
+            first_token = tokens[1]
+        else:
+            first_token = tokens[0]
+
+        last_token = tokens[-1]
+
+        if line_n + 1 < len(ci.lines):
+            next_offset = ci.lines[line_n + 1]
+            next_line_tokens = ci.get_coordinates(start_offset, next_offset)
+            if 'hy1' in next_line_tokens[0]:
+                last_token = next_line_tokens[0]
+            else:
+                last_token = tokens[-1]
+
+        # compute box coordinates of line
+        x1, y1, w1, h1 = first_token['coords']
+        x2, y2, w2, h2 = last_token['coords']
+        x3, y3, w3, h3 = x1, y1 - padding, w2 + (x2 - x1), h1 + padding
+        box = " ".join([str(coord) for coord in [x3, y3, w3, h3]])
+        iiif_links.append(get_iiif_url(page_id, box, IMPRESSO_IIIF_ENDPOINT))
+
+    return iiif_links
 
 
 def rebuilt2xmi(ci, output_dir, typesystem_path):
@@ -57,12 +88,14 @@ def rebuilt2xmi(ci, output_dir, typesystem_path):
         end = break_offset
         start_offset = break_offset
         sntc = cas.createAnnotation(sentType, {'begin': start, 'end': end})
-        iiif_link = compute_image_link(ci, start, end)
+        cas.addToIndex(sntc)
+
+    iiif_links = compute_image_links(ci)
+    for iiif_link in iiif_links:
         imglink = cas.createAnnotation(
             imgLinkType,
             {'begin': start, 'end': end, 'link': iiif_link}
         )
-        cas.addToIndex(sntc)
         cas.addToIndex(imglink)
 
     writer = XmiWriter()
