@@ -1,5 +1,6 @@
 """Code for parsing impresso's S3 directory structures."""
 
+import json
 import logging
 from datetime import date
 from collections import namedtuple
@@ -7,7 +8,9 @@ from collections import namedtuple
 from dask.diagnostics import ProgressBar
 import dask.bag as db
 
+from impresso_commons.path import id2IssueDir
 from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
+from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
 
 logger = logging.getLogger(__name__)
 
@@ -223,7 +226,7 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
     Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
     Example: config = { "GDL" : [1960, 1970], => will take all years in interval
                         "JDG": [], => Empty array means no filter, all years.
-                        "GDL": [1798, 1999, 10] => take each 10th item within sequence of years 
+                        "GDL": [1798, 1999, 10] => take each 10th item within sequence of years
                         }.
     :param bucket_name: the name of the bucket
     :type bucket_name: str
@@ -264,3 +267,19 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
                         filtered_keys.append(keyString)
 
     return filtered_keys if filtered_keys else []
+
+def read_s3_issues(newspaper, year, input_bucket):
+
+    def add_version(issue):
+        issue["s3_version"] = None
+        return issue
+
+    issue_path_ons3 = f'{input_bucket}/{newspaper}/{newspaper}-{year}-issues.jsonl.bz2'
+    issues = db.read_text(
+        issue_path_ons3,
+        storage_options=IMPRESSO_STORAGEOPT
+    ).map(lambda x: json.loads(x))\
+    .map(add_version)\
+    .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))\
+    .compute()
+    return issues

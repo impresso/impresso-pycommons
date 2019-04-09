@@ -42,6 +42,7 @@ KNOWN_JOURNALS = [
     "IMP",
     "GDL",
     "JDF",
+    "JDV",
     "LBP",
     "LCE",
     "LCG",
