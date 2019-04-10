@@ -31,6 +31,9 @@ def compute_image_links(ci, padding=20):
 
         tokens = ci.get_coordinates(start, end)
 
+        if len(tokens) == 0:
+            continue
+
         page_id = tokens[0]['page_id']
 
         if 'hy1' in tokens[0] and len(tokens) > 1:
