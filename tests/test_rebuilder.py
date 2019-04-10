@@ -66,7 +66,7 @@ def test_rebuild_GDL():
         'data/rebuilt'
     )
 
-    input_issues = read_s3_issues("GDL", "1799", input_bucket_name)
+    input_issues = read_s3_issues("GDL", "1806", input_bucket_name)
     print(f'{len(input_issues)} issues to rebuild')
 
     issue_key, json_files = rebuild_issues(

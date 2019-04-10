@@ -42,7 +42,8 @@ TYPE_MAPPINGS = {
     "article": "ar",
     "advertisement": "ad",
     "ad": "ad",
-    "pg": None
+    "pg": None,
+    "image": "img"
 }
 
 
@@ -234,7 +235,8 @@ def rebuild_for_solr(article_metadata):
         "d": d.isoformat(),
         "olr": False if mapped_type is None else True,
         "ts": timestamp(),
-        "lg": article_metadata["m"]["l"],
+        "lg": article_metadata["m"]["l"] if "l" in article_metadata["m"]
+        else None,
         "tp": mapped_type,
         "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"]
         else None,
