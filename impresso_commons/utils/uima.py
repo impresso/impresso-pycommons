@@ -21,7 +21,7 @@ def compute_image_links(ci, padding=20):
 
     """
 
-    iiif_links = []
+    image_links = []
     start_offset = 0
 
     for line_n, break_offset in enumerate(ci.lines):
@@ -53,9 +53,10 @@ def compute_image_links(ci, padding=20):
         x2, y2, w2, h2 = last_token['coords']
         x3, y3, w3, h3 = x1, y1 - padding, w2 + (x2 - x1), h1 + padding
         box = " ".join([str(coord) for coord in [x3, y3, w3, h3]])
-        iiif_links.append(get_iiif_url(page_id, box, IMPRESSO_IIIF_ENDPOINT))
+        iiif_link = get_iiif_url(page_id, box, IMPRESSO_IIIF_ENDPOINT)
+        image_links.append((iiif_link, start, end))
 
-    return iiif_links
+    return image_links
 
 
 def rebuilt2xmi(ci, output_dir, typesystem_path):
@@ -91,7 +92,7 @@ def rebuilt2xmi(ci, output_dir, typesystem_path):
         cas.addToIndex(sntc)
 
     iiif_links = compute_image_links(ci)
-    for iiif_link in iiif_links:
+    for iiif_link, start, end in iiif_links:
         imglink = cas.createAnnotation(
             imgLinkType,
             {'begin': start, 'end': end, 'link': iiif_link}
