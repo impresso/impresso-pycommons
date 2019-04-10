@@ -11,6 +11,7 @@ from impresso_commons.utils.uima import rebuilt2xmi
 
 
 def test_rebuilt2xmi():
+    """Tests that the UIMA/XMI of rebuilt data works as expected."""
 
     output_dir = pkg_resources.resource_filename(
         'impresso_commons',
@@ -20,21 +21,16 @@ def test_rebuilt2xmi():
         'impresso_commons',
         'data/xmi/typesystem.xml'
     )
-    """
+
+    # we need to read (temporarily) data from this bucket as hyphenation
+    # required a slightly different format of the solr rebuilt
     b = db.read_text(
-        's3://canonical-rebuilt/GDL/GDL-1910.jsonl.bz2',
+        's3://TRANSFER/IMP/IMP-1998.jsonl.bz2',
         storage_options=impresso_s3
     )
-    """
-    b = db.read_text(
-        pkg_resources.resource_filename(
-            'impresso_commons',
-            'data/rebuilt/GDL-1799.jsonl.bz2'
-        )
-    )
-    # .map(lambda x: json.loads(x))
 
     texts = b.compute()
     text = json.loads(texts[10])
     doc = ContentItem.from_json(data=text, case=ContentItemCase.FULL)
     rebuilt2xmi(doc, output_dir, typesystem)
+    # TODO: check that file exists
