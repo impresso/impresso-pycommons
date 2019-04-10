@@ -7,8 +7,8 @@ from pycas.type.cas.TypeSystemFactory import TypeSystemFactory
 from impresso_commons.images.olive_boxes import get_iiif_url
 
 
-# IMPRESSO_IIIF_ENDPOINT = 'https://dhlabsrv17.epfl.ch/iiif_impresso/'
-IMPRESSO_IIIF_ENDPOINT = 'http://pub.cl.uzh.ch/service/iiif_impresso'
+IMPRESSO_IIIF_ENDPOINT = 'https://dhlabsrv17.epfl.ch/iiif_impresso/'
+# IMPRESSO_IIIF_ENDPOINT = 'http://pub.cl.uzh.ch/service/iiif_impresso'
 
 
 def compute_image_links(ci, padding=20):
