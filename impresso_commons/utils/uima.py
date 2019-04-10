@@ -33,7 +33,7 @@ def compute_image_links(ci, padding=20):
 
         page_id = tokens[0]['page_id']
 
-        if 'hy1' in tokens[0]:
+        if 'hy1' in tokens[0] and len(tokens) > 1:
             first_token = tokens[1]
         else:
             first_token = tokens[0]
