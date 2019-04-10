@@ -43,7 +43,8 @@ def compute_image_links(ci, padding=20):
         if line_n + 1 < len(ci.lines):
             next_offset = ci.lines[line_n + 1]
             next_line_tokens = ci.get_coordinates(start_offset, next_offset)
-            if 'hy1' in next_line_tokens[0]:
+
+            if len(next_line_tokens) > 0 and 'hy1' in next_line_tokens[0]:
                 last_token = next_line_tokens[0]
             else:
                 last_token = tokens[-1]
