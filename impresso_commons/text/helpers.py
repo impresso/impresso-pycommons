@@ -96,11 +96,15 @@ def rejoin_articles(issue, issue_json):
             regions_by_page.append([
                 region
                 for region in page["r"]
-                if region["pOf"] == art_id
+                if "pOf" in region and region["pOf"] == art_id
             ])
         article['pprr'] = regions_by_page
-        convert_coords = [p['cc'] for p in pages]
-        article['m']['cc'] = sum(convert_coords) / len(convert_coords) == 1.0
+        try:
+            convert_coords = [p['cc'] for p in pages]
+            article['m']['cc'] = sum(convert_coords) / len(convert_coords) == 1.0
+        except Exception:
+            # it just means there was no CC field in the pages
+            article['m']['cc'] = None
         del pages
 
         articles.append(article)

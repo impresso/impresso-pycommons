@@ -40,10 +40,12 @@ logger = logging.getLogger(__name__)
 
 TYPE_MAPPINGS = {
     "article": "ar",
+    "ar": "ar",
     "advertisement": "ad",
     "ad": "ad",
     "pg": None,
-    "image": "img"
+    "image": "img",
+    "table": "tb"
 }
 
 
@@ -245,34 +247,44 @@ def rebuild_for_solr(article_metadata):
         "cc": article_metadata["m"]["cc"]
     }
 
+    if mapped_type == "img":
+        suffix = "full/0/default.jpg"
+        iiif_link = article_metadata["m"]["iiif_link"]
+        article['iiif_link'] = os.path.join(
+            os.path.dirname(iiif_link),
+            ",".join([str(c) for c in article_metadata["c"]]),
+            suffix
+        )
+
     if 't' in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]
 
-    for n, page_no in enumerate(article['pp']):
+    if mapped_type != "img":
+        for n, page_no in enumerate(article['pp']):
 
-        page = article_metadata['pprr'][n]
+            page = article_metadata['pprr'][n]
 
-        if fulltext == "":
-            fulltext, coords, offsets = rebuild_text(page)
-        else:
-            fulltext, coords, offsets = rebuild_text(page, fulltext)
+            if fulltext == "":
+                fulltext, coords, offsets = rebuild_text(page)
+            else:
+                fulltext, coords, offsets = rebuild_text(page, fulltext)
 
-        linebreaks += offsets['line']
-        parabreaks += offsets['para']
-        regionbreaks += offsets['region']
+            linebreaks += offsets['line']
+            parabreaks += offsets['para']
+            regionbreaks += offsets['region']
 
-        page_doc = {
-            "id": page_file_names[page_no].replace('.json', ''),
-            "n": page_no,
-            "t": coords['tokens'],
-            "r": coords['regions']
-        }
-        article["ppreb"].append(page_doc)
-    article["lb"] = linebreaks
-    article["pb"] = parabreaks
-    article["rb"] = regionbreaks
-    logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
-    article["ft"] = fulltext
+            page_doc = {
+                "id": page_file_names[page_no].replace('.json', ''),
+                "n": page_no,
+                "t": coords['tokens'],
+                "r": coords['regions']
+            }
+            article["ppreb"].append(page_doc)
+        article["lb"] = linebreaks
+        article["pb"] = parabreaks
+        article["rb"] = regionbreaks
+        logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
+        article["ft"] = fulltext
     return article
 
 

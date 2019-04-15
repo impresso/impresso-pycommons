@@ -105,6 +105,29 @@ def test_rebuild_IMP():
     assert result is not None
 
 
+def test_rebuild_luxzeit1858():
+    input_bucket_name = "s3://original-canonical-data"
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt'
+    )
+
+    input_issues = read_s3_issues("luxzeit1858", "1858", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
+
+    issue_key, json_files = rebuild_issues(
+        issues=input_issues[:50],
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=client,
+        format='solr'
+    )
+
+    result = compress(issue_key, json_files, outp_dir)
+    logger.info(result)
+    assert result is not None
+
+
 def test_rebuild_for_passim():
     input_bucket_name = "s3://original-canonical-compressed"
     outp_dir = pkg_resources.resource_filename(
