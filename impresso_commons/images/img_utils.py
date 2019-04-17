@@ -7,6 +7,10 @@ from collections import defaultdict
 import os
 import cv2 as cv
 import numpy as np
+import re
+import subprocess
+import sys
+from subprocess import Popen, PIPE, STDOUT
 
 __author__ = "maudehrmann"
 
@@ -17,6 +21,23 @@ class BoxStrategy(Enum):
     png_uniq = "png_uniq"
     jpg_uniq = "jpg_uniq"
     jpg_highest = "jpg_highest"
+
+
+def run_cmd(cmd):
+    """Execute 'cmd' in the shell and return result (stdout and stderr)."""
+    try:
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=STDOUT, shell=True)
+        result = p.communicate()
+
+    except subprocess.CalledProcessError as e:
+        sys.stderr.write(
+            "common::run_command() : [ERROR]: output = %s, error code = %s\n"
+            % (e.output, e.returncode))
+    return result
+
+
+def compose(path_img_one, path_img_two, path_img_three):
+    run_cmd("composite -blend 30 " + path_img_one + " " + path_img_two + " " + path_img_three)
 
 
 def get_img_from_archive(archive, path_checker, ext_checker, name_checker=None):
@@ -65,7 +86,7 @@ def get_png(pngs, page_digit):
     if not pngs:
         return None
     else:
-        # group by pages (there can be several images per pages)
+        # group by pages (there can be several images per page)
         d = defaultdict(list)
         for i in pngs:
             elems = i.split("/", 1)
@@ -78,11 +99,30 @@ def get_png(pngs, page_digit):
         if len(png_paths) > 1:
             # get pages with different resolutions (i.e. having "_": 'Img/Pg006_180.png')
             pngs_with_res = [x for x in png_paths if "_" in x]
-            # return the highest resolution
-            return pngs_with_res[-1]
+            # build dict with k = res and v = path
+            res = {}
+            composite = []
+            for png in pngs_with_res:
+                if '_p.' in png or '_t.' in png:
+                    composite.append(png)
+                    continue
+
+                r = re.search(r'_(.+)\.', png).group(1)
+                res[int(r)] = png
+
+            # sort the dict keys
+            if not composite and len(res) >= 1:
+                sorted_reso = sorted(res)
+                # take the highest res and get the corresponding path
+                return [res[sorted_reso[-1]]]
+
+            if composite:
+                sorted_composite = sorted(composite)
+                return sorted_composite
+
         # there is only one png
         elif len(png_paths) == 1:
-            return png_paths[0]
+            return [png_paths[0]]
         else:
             return None
 

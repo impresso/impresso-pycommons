@@ -27,8 +27,9 @@ from dask.distributed import Client, progress
 from docopt import docopt
 from smart_open import smart_open
 
+from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket
+from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
@@ -39,9 +40,12 @@ logger = logging.getLogger(__name__)
 
 TYPE_MAPPINGS = {
     "article": "ar",
+    "ar": "ar",
     "advertisement": "ad",
     "ad": "ad",
-    "pg": None
+    "pg": None,
+    "image": "img",
+    "table": "tb"
 }
 
 
@@ -95,9 +99,11 @@ def rebuild_text(page, string=None):
 
                     if "hy" in token:
                         region["l"] = len(token["tx"][:-1])-1
+                        region['hy1'] = True
 
                     elif "nf" in token:
                         region["l"] = len(token["nf"])
+                        region['hy2'] = True
 
                         if "gn" in token and token["gn"]:
                             tmp = "{}".format(token["nf"])
@@ -127,6 +133,72 @@ def rebuild_text(page, string=None):
                     coordinates['tokens'].append(region)
 
     return (string, coordinates, offsets)
+
+
+def rebuild_text_passim(page, string=None):
+    """The text rebuilding function.
+
+    :param page: a newspaper page conforming to the impresso JSON schema
+        for pages.
+    :type page: dict
+    :param string: the rebuilt text of the previous page. If `string` is not
+        `None`, then the rebuilt text is appended to it.
+    :type string: str
+    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+        [2] coordinates of token regions (dict of lists).
+    """
+
+    regions = []
+
+    if string is None:
+        string = ""
+
+    # in order to be able to keep line break information
+    # we iterate over a list of lists (lines of tokens)
+
+    for region_n, region in enumerate(page):
+
+        for i, para in enumerate(region["p"]):
+
+            for line in para["l"]:
+
+                for n, token in enumerate(line['t']):
+
+                    region_string = ""
+
+                    # each page region is a token
+                    output_region = {
+                        "start": None,
+                        "length": None,
+                        'coords': {
+                            "x": token['c'][0],
+                            "y": token['c'][1],
+                            "w": token['c'][2],
+                            "h": token['c'][3]
+                        }
+                    }
+
+                    if len(string) == 0:
+                        output_region['start'] = 0
+                    else:
+                        output_region['start'] = len(string)
+
+                    # if token is the last in a line
+                    if n == len(line['t']) - 1:
+                        tmp = "{}\n".format(token["tx"])
+                        region_string += tmp
+                    elif "gn" in token and token["gn"]:
+                        tmp = "{}".format(token["tx"])
+                        region_string += tmp
+                    else:
+                        tmp = "{} ".format(token["tx"])
+                        region_string += tmp
+
+                    string += region_string
+                    output_region['length'] = len(region_string)
+                    regions.append(output_region)
+
+    return (string, regions)
 
 
 def rebuild_for_solr(article_metadata):
@@ -165,7 +237,8 @@ def rebuild_for_solr(article_metadata):
         "d": d.isoformat(),
         "olr": False if mapped_type is None else True,
         "ts": timestamp(),
-        "lg": article_metadata["m"]["l"],
+        "lg": article_metadata["m"]["l"] if "l" in article_metadata["m"]
+        else None,
         "tp": mapped_type,
         "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"]
         else None,
@@ -174,39 +247,92 @@ def rebuild_for_solr(article_metadata):
         "cc": article_metadata["m"]["cc"]
     }
 
+    if mapped_type == "img":
+        suffix = "full/0/default.jpg"
+        iiif_link = article_metadata["m"]["iiif_link"]
+        article['iiif_link'] = os.path.join(
+            os.path.dirname(iiif_link),
+            ",".join([str(c) for c in article_metadata["c"]]),
+            suffix
+        )
+
     if 't' in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]
 
-    for n, page_no in enumerate(article['pp']):
+    if mapped_type != "img":
+        for n, page_no in enumerate(article['pp']):
 
-        page = article_metadata['pprr'][n]
+            page = article_metadata['pprr'][n]
 
-        if fulltext == "":
-            fulltext, coords, offsets = rebuild_text(page)
-        else:
-            fulltext, coords, offsets = rebuild_text(page, fulltext)
+            if fulltext == "":
+                fulltext, coords, offsets = rebuild_text(page)
+            else:
+                fulltext, coords, offsets = rebuild_text(page, fulltext)
 
-        linebreaks += offsets['line']
-        parabreaks += offsets['para']
-        regionbreaks += offsets['region']
+            linebreaks += offsets['line']
+            parabreaks += offsets['para']
+            regionbreaks += offsets['region']
 
-        page_doc = {
-            "id": page_file_names[page_no].replace('.json', ''),
-            "n": page_no,
-            "t": coords['tokens'],
-            "r": coords['regions']
-        }
-        article["ppreb"].append(page_doc)
-    article["lb"] = linebreaks
-    article["pb"] = parabreaks
-    article["rb"] = regionbreaks
-    logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
-    article["ft"] = fulltext
+            page_doc = {
+                "id": page_file_names[page_no].replace('.json', ''),
+                "n": page_no,
+                "t": coords['tokens'],
+                "r": coords['regions']
+            }
+            article["ppreb"].append(page_doc)
+        article["lb"] = linebreaks
+        article["pb"] = parabreaks
+        article["rb"] = regionbreaks
+        logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
+        article["ft"] = fulltext
     return article
 
 
 def rebuild_for_passim(article_metadata):
-    pass
+    np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
+        article_metadata['m']['id']
+    )
+
+    article_id = article_metadata["m"]["id"]
+    logger.info(f'Started rebuilding article {article_id}')
+    issue_id = "-".join(article_id.split('-')[:-1])
+
+    page_file_names = {
+        p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
+        for p in article_metadata["m"]["pp"]
+    }
+
+    passim_document = {
+        "series": np,
+        "date": f'{date[0]}-{date[1]}-{date[2]}',
+        "id": article_metadata['m']['id'],
+        "cc": article_metadata["m"]["cc"],
+        "pages": []
+    }
+
+    if 't' in article_metadata["m"]:
+        passim_document['title'] = article_metadata["m"]["t"]
+
+    fulltext = ""
+    for n, page_no in enumerate(article_metadata['m']['pp']):
+
+        page = article_metadata['pprr'][n]
+
+        if fulltext == "":
+            fulltext, regions = rebuild_text_passim(page)
+        else:
+            fulltext, regions = rebuild_text_passim(page, fulltext)
+
+        page_doc = {
+            "id": page_file_names[page_no].replace('.json', ''),
+            "seq": page_no,
+            "regions": regions
+        }
+        passim_document["pages"].append(page_doc)
+
+    passim_document["text"] = fulltext
+
+    return passim_document
 
 
 def compress(key, json_files, output_dir):
@@ -348,35 +474,38 @@ def rebuild_issues(
     else:
         raise
 
-    issue = IssueDir(**issues[0])
+    issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
+    json_files = []
+
     issue_dir = os.path.join(output_dir, key)
     if not os.path.exists(issue_dir):
         os.mkdir(issue_dir)
 
     print(issue_dir)
 
-    print(f'There are {len(issues)} issues to rebuild')
-    bag = db.from_sequence(issues)
-    logger.info(f"Number of partitions: {bag.npartitions}")
-    process_bag = bag.map(lambda x: IssueDir(**x)) \
-        .map(read_issue, input_bucket) \
-        .starmap(read_issue_pages, bucket=input_bucket) \
+    print("Fleshing out articles by issue...")
+    issues_bag = db.from_sequence(issues)
+    print(f"Number of partitions: {issues_bag.npartitions}")
+
+    articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
-        .flatten() \
-        .starmap(pages_to_article)\
+        .flatten()\
+        .repartition(npartitions=500)\
         .filter(_article_has_problem) \
         .map(rebuild_function) \
-        .map(json.dumps) \
-        .to_textfiles('{}/*.json'.format(issue_dir))
+        .map(json.dumps).persist()
 
-    x = dask_client.compute(process_bag)
-    progress(x)
+    articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
+
+    print("done.")
+
     json_files = [
         os.path.join(issue_dir, f)
         for f in os.listdir(issue_dir)
         if '.json' in f
     ]
+
     return (key, json_files)
 
 
@@ -418,7 +547,7 @@ def main():
 
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
-    bucket_name = arguments["--input-bucket"]
+    bucket_name = f's3://{arguments["--input-bucket"]}'
     output_bucket_name = arguments["--output-bucket"]
     outp_dir = arguments["--output-dir"]
     filter_config_file = arguments["--filter-config"]
@@ -440,7 +569,7 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        client = Client(processes=False, n_workers=2, threads_per_worker=1)
+        client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
@@ -458,13 +587,14 @@ def main():
             for year in range(start_year, end_year):
                 print(f'Processing year {year}')
                 print('Retrieving issues...')
-                input_issues = impresso_iter_bucket(
-                    bucket_name,
-                    filter_config={newspaper: [year, year + 1]},
-                    # prefix="GDL/1948/09/03",
-                    item_type="issue"
-                )
-                if len(input_issues) == 0:
+                try:
+                    input_issues = read_s3_issues(
+                        newspaper,
+                        year,
+                        bucket_name
+                    )
+                except FileNotFoundError:
+                    print(f'{newspaper}-{year} not found in {bucket_name}')
                     continue
 
                 issue_key, json_files = rebuild_issues(

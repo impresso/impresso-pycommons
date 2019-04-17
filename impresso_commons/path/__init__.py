@@ -1,5 +1,6 @@
 import re
-
+from impresso_commons.path.path_fs import IssueDir
+from datetime import date
 
 def parse_canonical_filename(filename):
     """Parse a canonical page names into its components.
@@ -34,3 +35,14 @@ def parse_canonical_filename(filename):
         page_number,
         extension
     )
+
+
+def id2IssueDir(id, path):
+    """
+    TODO: documentation
+    """
+    newspaper, year, month, day, edition = id.split("-")
+    year = int(year)
+    month = int(month)
+    day = int(day)
+    return IssueDir(newspaper, date(year, month, day), edition, path)
