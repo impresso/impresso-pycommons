@@ -18,7 +18,7 @@ __author__ = "maudehrmann"
 logger = logging.getLogger(__name__)
 
 
-def get_iiif_url(page_id, box):
+def get_iiif_url(page_id, box, base="http://dhlabsrv17.epfl.ch/iiif_impresso"):
     """ Returns impresso iiif url given a page id and a box
 
     :param page_id: impresso page id, e.g. EXP-1930-06-10-a-p0001
@@ -28,7 +28,6 @@ def get_iiif_url(page_id, box):
     :return: iiif url of the box
     :rtype: str
     """
-    base = "http://dhlabsrv17.epfl.ch/iiif_impresso"
     suffix = "full/0/default.jpg"
     return os.path.join(base, page_id, box.replace(" ", ","), suffix)
 
@@ -114,14 +113,14 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
 
     Background information
     ======================
-
-    Olive box coordinates were computed according to an image source which we have to identify.
+    Impresso converts library images to JP2, taking the best image available: tif > highest png > jpg.
+    Olive box coordinates were computed according to an image source which we have to identify among several.
     Image format coverage is different from issue to issue, and we have to devise strategies.
 
     Case 1: tif
     -----------
     The tif is present and is the file from which the jp2 was converted.
-    Dest: Tif dimensions can therfore be used as jp2 dimensions, no need to read the jp2 file.
+    Dest: Tif dimensions can therefore be used as jp2 dimensions, no need to read the jp2 file.
     Source: Image source dimension is present in the page.xml (normally).
 
     Case 2: several png
@@ -204,48 +203,34 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
 
 
 def test():
-    """ a testing function """
+    """ a testing function - to be moved in proper test unit..."""
     base_dir = "/Users/maudehrmann/work/work-projects/impresso/code/impresso-image-acquisition/sample-data"
 
     # tifs
-    # box = "262 624 335 650"  # 'Centenaire' in p1 Ar00100.xml
-    # archive = os.path.join(base_dir, "TEST/1900/01/10/Document.zip")
-    # working_archive = zipfile.ZipFile(archive)
-    # data = working_archive.read("1/Pg001.xml")
-    # sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.tif.name, None)
-    # newbox = compute_box(sf, box)
-    # iiif = get_iiif_url("GDL-1900-01-10-a-p0001", newbox)
-    # print("\nCASE: tif - word 'Centenaire'")
-    # print(f"Scale factor: {sf}")
-    # print(f"Newbox: {newbox}")
-    # print(f"IIIF: {iiif}")
-
-    # png_highest
-    # box = "1047 1006 1173 1036"  # 'NEUCHATEL' in p1 Ad00103.xml
-    # archive = os.path.join(base_dir, "TEST/1900/01/11/Document.zip")
-    # working_archive = zipfile.ZipFile(archive)
-    # data = working_archive.read("1/Pg001.xml")
-    # sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.png_highest.name, "Img/Pg001_180.png")
-    # print(sf)
-    # newbox = compute_box(sf, box)
-    # iiif = get_iiif_url("EXP-1889-07-01-a-p0001", newbox)
-    # print("\nCASE: png_highest - word 'NEUCHATEL'")
-    # print(f"Scale factor: {sf}")
-    # print(f"Newbox: {newbox}")
-    # print(f"IIIF: {iiif}")
+    box = "262 624 335 650"  # 'Centenaire' in p1 Ar00100.xml
+    archive = os.path.join(base_dir, "TEST/1900/01/10/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.tif.name, None)
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("GDL-1900-01-10-a-p0001", newbox)
+    print("\nCASE: tif - word 'Centenaire'")
+    print(f"Scale factor: {sf}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}")
 
     # jpg_uniq
-    # box = "483 502 556 517"  # Hambourg in p1 Ar00100.xml
-    # archive = os.path.join(base_dir, "TEST/1900/01/12/Document.zip")
-    # working_archive = zipfile.ZipFile(archive)
-    # page_data = working_archive.read("1/Pg001.xml")
-    # sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg")
-    # newbox = compute_box(sf, box)
-    # iiif = get_iiif_url("LCE-1868-08-02-a-p0001", newbox)
-    # print("\nCASE: jpj uniq - word 'hambourg'")
-    # print(f"Scale factor: {sf}")
-    # print(f"Newbox: {newbox}")
-    # print(f"IIIF: {iiif}")
+    box = "483 502 556 517"  # Hambourg in p1 Ar00100.xml
+    archive = os.path.join(base_dir, "TEST/1900/01/12/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("LCE-1868-08-02-a-p0001", newbox)
+    print("\nCASE: jpj uniq - word 'hambourg'")
+    print(f"Scale factor: {sf}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}")
 
     # JDG 1973-10-06 tif
     box = "282 85 320 1007"  # NEW in p6 Ar00600.xml
@@ -275,8 +260,93 @@ def test():
     print(f"Newbox: {newbox}")
     print(f"IIIF: {iiif}")
 
+    # png_highest
+    box = "1047 1006 1173 1036"  # 'NEUCHATEL' in p1 Ad00103.xml
+    archive = os.path.join(base_dir, "TEST/1900/01/11/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg001_180.png")
+    print(sf)
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("EXP-1889-07-01-a-p0001", newbox)
+    print(f"CASE: png_highest - 'NEUCHATEL'\nScale factor: {sf}\nNewbox: {newbox}\nIIIF: {iiif}\n")
+
+    # IMP-1985-12-17;  pages 25,26,27 png highest
+    box = "97 312 253 408"  # Cerf in p25 Ar02500.xml
+    archive = os.path.join(base_dir, "TEST/IMP-1985-12-17/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("25/Pg025.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg025_100.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("IMP-1985-12-17-a-p0025", newbox)
+    print("CASE: png highest - word 'Cerf'")
+    print(f"Scale factor: {sf}")
+    print(f"Oldbox: {box}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}\n")
+
+    # JDG 1877-12-08;  pages 1,2,3,4
+    box = "212 555 315 576"  # graphique in p1 Ar00104.xml
+    archive = os.path.join(base_dir, "TEST/JDG-1877-12-08/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg001_120.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("JDG-1877-12-08-a-p0001", newbox)
+    print("CASE: png highest - word 'graphique'")
+    print(f"Scale factor: {sf}")
+    print(f"Oldbox: {box}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}\n")
+
+    # JDG 1887-08-26;  pages 1,2,3,4
+    box = "1568 579 1612 595"  # terrain in p1 Ar00108.xml
+    archive = os.path.join(base_dir, "TEST/JDG-1887-08-26/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg001_60.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("JDG-1887-08-26-a-p0001", newbox)
+    print("CASE: png highest - word 'terrain'")
+    print(f"Scale factor: {sf}")
+    print(f"Oldbox: {box}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}\n")
+
+    # JDG 1860-02-08;  pages 1,2,3,4 png highest
+    box = "580 77 625 99"  # POST in p1 Ar00104.xml
+    archive = os.path.join(base_dir, "TEST/JDG-1860-02-08/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg001_120.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("JDG-1860-02-08-a-p0001", newbox)
+    print("CASE: png highest - word 'POST'")
+    print(f"Scale factor: {sf}")
+    print(f"Oldbox: {box}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}\n")
+
+    # LBP/1880/04/30;  pages 1,2,3,4 png highest
+    box = "1616 416 1859 513"  # Dimanche in p1 Ar00104.xml
+    archive = os.path.join(base_dir, "TEST/LBP-1880-04-30/Document.zip")
+    working_archive = zipfile.ZipFile(archive)
+    page_data = working_archive.read("1/Pg001.xml")
+    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
+                          "Img/Pg001_60.png")
+    newbox = compute_box(sf, box)
+    iiif = get_iiif_url("LBP-1880-04-30-a-p0001", newbox)
+    print("CASE: png highest - word 'Dimanche'")
+    print(f"Scale factor: {sf}")
+    print(f"Oldbox: {box}")
+    print(f"Newbox: {newbox}")
+    print(f"IIIF: {iiif}\n")
+
 
 if __name__ == '__main__':
     test()
-    #box = "1096 454 1200 470"
-    #print(convert_box(box))
