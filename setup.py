@@ -34,7 +34,7 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        'opencv-python==3.4',
+        'opencv-python>=3.4,<4',
         'numpy',
         'smart_open',
         'jsonlines',
