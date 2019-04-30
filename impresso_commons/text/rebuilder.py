@@ -249,7 +249,10 @@ def rebuild_for_solr(article_metadata):
 
     if mapped_type == "img":
         suffix = "full/0/default.jpg"
-        iiif_link = article_metadata["m"]["iiif_link"]
+        if "iiif_link" in article_metadata["m"]:
+            iiif_link = article_metadata["m"]["iiif_link"]
+        else:
+            iiif_link = 'None'
         article['iiif_link'] = os.path.join(
             os.path.dirname(iiif_link),
             ",".join([str(c) for c in article_metadata["c"]]),
