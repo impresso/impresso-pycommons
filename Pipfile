@@ -22,6 +22,7 @@ deprecated = "*"
 e1839a8 = {path = ".",editable = true}
 "s3fs" = "*"
 pycas = {git = "https://github.com/dkpro/dkpro-pycas.git",editable = true}
+bokeh = "*"
 
 [dev-packages]
 jupyter = "*"
@@ -29,7 +30,6 @@ ipython = "*"
 ipdb = "*"
 isort = "*"
 "flake8" = "*"
-bokeh = "*"
 pytest = "*"
 tox = "*"
 graphviz = "*"
