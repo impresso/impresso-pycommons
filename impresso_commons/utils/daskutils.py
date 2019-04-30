@@ -159,7 +159,7 @@ def main():
                                dir_partition,
                                None,
                                None,
-                               keep_full,  
+                               keep_full,
                                nb_partition=number_partitions)
 
 
