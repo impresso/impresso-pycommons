@@ -93,13 +93,13 @@ def test_rebuild_IMP():
     print(f'{len(input_issues)} issues to rebuild')
 
     issue_key, json_files = rebuild_issues(
-        issues=input_issues,
+        issues=input_issues[:50],
         input_bucket=input_bucket_name,
         output_dir=outp_dir,
         dask_client=client,
         format='solr'
     )
-
+    logger.info(json_files)
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None

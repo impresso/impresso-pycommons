@@ -470,6 +470,13 @@ def rebuild_issues(
     :rtype: list of tuples
     """
 
+    def mkdir(path):
+        if not os.path.exists(path):
+            os.mkdir(path)
+        else:
+            for f in os.listdir(path):
+                os.remove(os.path.join(path, f))
+
     # determine which rebuild function to apply
     if format == 'solr':
         rebuild_function = rebuild_for_solr
@@ -478,15 +485,12 @@ def rebuild_issues(
     else:
         raise
 
+    # create a temporary output directory named after newspaper and year
+    # e.g. IMP-1994
     issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
-    json_files = []
-
     issue_dir = os.path.join(output_dir, key)
-    if not os.path.exists(issue_dir):
-        os.mkdir(issue_dir)
-
-    print(issue_dir)
+    db.from_sequence([issue_dir]).map(mkdir).compute()
 
     print("Fleshing out articles by issue...")
     issues_bag = db.from_sequence(issues, partition_size=3)
@@ -502,13 +506,7 @@ def rebuild_issues(
 
     print("done.")
 
-    json_files = [
-        os.path.join(issue_dir, f)
-        for f in os.listdir(issue_dir)
-        if '.json' in f
-    ]
-
-    return (key, json_files)
+    return (key, list(articles_bag))
 
 
 def init_logging(level, file):
