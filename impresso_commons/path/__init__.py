@@ -2,6 +2,7 @@ import re
 from impresso_commons.path.path_fs import IssueDir
 from datetime import date
 
+
 def parse_canonical_filename(filename):
     """Parse a canonical page names into its components.
 
@@ -15,7 +16,7 @@ def parse_canonical_filename(filename):
     """
     regex = re.compile(
         (
-            r'^(?P<np>[A-Z]+)-(?P<year>\d{4})'
+            r'^(?P<np>[A-Za-z0-9]+)-(?P<year>\d{4})'
             r'-(?P<month>\d{2})-(?P<day>\d{2})'
             r'-(?P<ed>[a-z])-(?P<type>[p|i])(?P<pgnb>\d{4})(?P<ext>.*)?$'
         )
