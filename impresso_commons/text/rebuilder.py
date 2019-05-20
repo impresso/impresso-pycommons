@@ -45,7 +45,9 @@ TYPE_MAPPINGS = {
     "ad": "ad",
     "pg": None,
     "image": "img",
-    "table": "tb"
+    "table": "tb",
+    "death_notice": "ob",
+    "weather": "w"
 }
 
 
