@@ -224,7 +224,12 @@ def rebuild_for_solr(article_metadata):
     }
     year, month, day = article_id.split('-')[1:4]
     d = datetime.date(int(year), int(month), int(day))
-    mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
+    raw_type = article_metadata["m"]["tp"]
+
+    if raw_type in TYPE_MAPPINGS:
+        mapped_type = TYPE_MAPPINGS[raw_type]
+    else:
+        mapped_type = raw_type
 
     fulltext = ""
     linebreaks = []
