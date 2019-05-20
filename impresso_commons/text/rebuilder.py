@@ -259,7 +259,6 @@ def rebuild_for_solr(article_metadata):
         else:
             article['iiif_link'] = None
 
-
     if 't' in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]
 

@@ -268,18 +268,19 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
 
     return filtered_keys if filtered_keys else []
 
+
 def read_s3_issues(newspaper, year, input_bucket):
 
     def add_version(issue):
         issue["s3_version"] = None
         return issue
 
-    issue_path_ons3 = f'{input_bucket}/{newspaper}/{newspaper}-{year}-issues.jsonl.bz2'
+    issue_path_ons3 = f'{input_bucket}/{newspaper}/issues/{newspaper}-{year}-issues.jsonl.bz2'
     issues = db.read_text(
         issue_path_ons3,
         storage_options=IMPRESSO_STORAGEOPT
     ).map(lambda x: json.loads(x))\
-    .map(add_version)\
-    .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))\
-    .compute()
+        .map(add_version)\
+        .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))\
+        .compute()
     return issues
