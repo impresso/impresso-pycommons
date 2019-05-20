@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'impresso-partitioner = impresso_commons.utils.daskutils:main',
+            'impresso-rebuilder = impresso_commons.text.rebuilder:main'
         ]
     },
     long_description=DESCRIPTION,
