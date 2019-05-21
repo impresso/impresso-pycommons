@@ -84,12 +84,17 @@ def rejoin_articles(issue, issue_json):
             # find the position of that page in the array of pages (with text
             # regions)
             page_no_string = f"p{str(page_no).zfill(4)}"
-            page_idx = [
-                n
-                for n, page in enumerate(issue_json['pp'])
-                if page_no_string in page['id']
-            ][0]
-            pages.append(issue_json['pp'][page_idx])
+            try:
+                page_idx = [
+                    n
+                    for n, page in enumerate(issue_json['pp'])
+                    if page_no_string in page['id']
+                ][0]
+                pages.append(issue_json['pp'][page_idx])
+            except IndexError:
+                article['has_problem'] = True
+                articles.append(article)
+                continue
 
         regions_by_page = []
         for page in pages:
@@ -105,7 +110,6 @@ def rejoin_articles(issue, issue_json):
         except Exception:
             # it just means there was no CC field in the pages
             article['m']['cc'] = None
-        del pages
 
         articles.append(article)
     return articles

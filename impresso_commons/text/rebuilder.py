@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs>]
 
 Options:
 
@@ -452,6 +452,17 @@ def _article_has_problem(article):
     :return: `True` or `False`
     :rtype: boolean
     """
+    return article['has_problem']
+
+
+def _article_wihtout_problem(article):
+    """Helper function to filter out articles with problems.
+
+    :param article: input article
+    :type article: dict
+    :return: `True` or `False`
+    :rtype: boolean
+    """
     if article['has_problem']:
         logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
     return not article['has_problem']
@@ -462,7 +473,8 @@ def rebuild_issues(
         input_bucket,
         output_dir,
         dask_client,
-        format='solr'
+        format='solr',
+        filter_language=None
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -504,15 +516,30 @@ def rebuild_issues(
 
     articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
-        .flatten()\
-        .filter(_article_has_problem) \
-        .map(rebuild_function) \
-        .map(json.dumps)\
-        .to_textfiles('{}/*.json'.format(issue_dir))
+        .flatten().persist()
+
+    faulty_articles_n = articles_bag\
+        .filter(_article_has_problem)\
+        .pluck('m')\
+        .pluck('id')\
+        .compute()
+    print(f'Skipped articles: {faulty_articles_n}')
+
+    articles_bag = articles_bag.filter(_article_wihtout_problem)\
+        .map(rebuild_function)\
+        .persist()
+
+    if filter_language:
+        result = articles_bag.filter(lambda ci: ci['lg'] in filter_language)\
+            .map(json.dumps)\
+            .to_textfiles('{}/*.json'.format(issue_dir))
+    else:
+        result = articles_bag.map(json.dumps)\
+            .to_textfiles('{}/*.json'.format(issue_dir))
 
     print("done.")
 
-    return (key, list(articles_bag))
+    return (key, result)
 
 
 def init_logging(level, file):
@@ -561,6 +588,10 @@ def main():
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
+    languages = arguments["--languages"]
+
+    if languages:
+        languages = languages.split(',')
 
     init_logging(log_level, log_file)
 
@@ -608,7 +639,8 @@ def main():
                     input_bucket=bucket_name,
                     output_dir=outp_dir,
                     dask_client=client,
-                    format=output_format
+                    format=output_format,
+                    filter_languages=languages
                 )
                 rebuilt_issues.append((issue_key, json_files))
 
