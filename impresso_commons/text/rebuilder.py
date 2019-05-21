@@ -640,7 +640,7 @@ def main():
                     output_dir=outp_dir,
                     dask_client=client,
                     format=output_format,
-                    filter_languages=languages
+                    filter_language=languages
                 )
                 rebuilt_issues.append((issue_key, json_files))
 
