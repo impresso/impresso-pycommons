@@ -530,7 +530,9 @@ def rebuild_issues(
         .persist()
 
     if filter_language:
-        result = articles_bag.filter(lambda ci: ci['lg'] in filter_language)\
+        result = articles_bag.filter(
+            lambda ci: ci['lg'] in filter_language if 'lg' in ci else False
+        )\
             .map(json.dumps)\
             .to_textfiles('{}/*.json'.format(issue_dir))
     else:
