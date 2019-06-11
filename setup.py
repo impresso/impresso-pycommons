@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'impresso-partitioner = impresso_commons.utils.daskutils:main',
+            'impresso-rebuilder = impresso_commons.text.rebuilder:main'
         ]
     },
     long_description=DESCRIPTION,
@@ -34,7 +35,7 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        'opencv-python==3.4',
+        'opencv-python>=3.4,<4',
         'numpy',
         'smart_open',
         'jsonlines',

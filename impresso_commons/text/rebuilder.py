@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs>]
 
 Options:
 
@@ -45,7 +45,9 @@ TYPE_MAPPINGS = {
     "ad": "ad",
     "pg": None,
     "image": "img",
-    "table": "tb"
+    "table": "tb",
+    "death_notice": "ob",
+    "weather": "w"
 }
 
 
@@ -224,7 +226,12 @@ def rebuild_for_solr(article_metadata):
     }
     year, month, day = article_id.split('-')[1:4]
     d = datetime.date(int(year), int(month), int(day))
-    mapped_type = TYPE_MAPPINGS[article_metadata["m"]["tp"]]
+    raw_type = article_metadata["m"]["tp"]
+
+    if raw_type in TYPE_MAPPINGS:
+        mapped_type = TYPE_MAPPINGS[raw_type]
+    else:
+        mapped_type = raw_type
 
     fulltext = ""
     linebreaks = []
@@ -249,12 +256,15 @@ def rebuild_for_solr(article_metadata):
 
     if mapped_type == "img":
         suffix = "full/0/default.jpg"
-        iiif_link = article_metadata["m"]["iiif_link"]
-        article['iiif_link'] = os.path.join(
-            os.path.dirname(iiif_link),
-            ",".join([str(c) for c in article_metadata["c"]]),
-            suffix
-        )
+        if "iiif_link" in article_metadata["m"]:
+            iiif_link = article_metadata["m"]["iiif_link"]
+            article['iiif_link'] = os.path.join(
+                os.path.dirname(iiif_link),
+                ",".join([str(c) for c in article_metadata["c"]]),
+                suffix
+            )
+        else:
+            article['iiif_link'] = None
 
     if 't' in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]
@@ -442,6 +452,17 @@ def _article_has_problem(article):
     :return: `True` or `False`
     :rtype: boolean
     """
+    return article['has_problem']
+
+
+def _article_wihtout_problem(article):
+    """Helper function to filter out articles with problems.
+
+    :param article: input article
+    :type article: dict
+    :return: `True` or `False`
+    :rtype: boolean
+    """
     if article['has_problem']:
         logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
     return not article['has_problem']
@@ -452,7 +473,8 @@ def rebuild_issues(
         input_bucket,
         output_dir,
         dask_client,
-        format='solr'
+        format='solr',
+        filter_language=None
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -466,6 +488,13 @@ def rebuild_issues(
     :rtype: list of tuples
     """
 
+    def mkdir(path):
+        if not os.path.exists(path):
+            os.mkdir(path)
+        else:
+            for f in os.listdir(path):
+                os.remove(os.path.join(path, f))
+
     # determine which rebuild function to apply
     if format == 'solr':
         rebuild_function = rebuild_for_solr
@@ -474,39 +503,45 @@ def rebuild_issues(
     else:
         raise
 
+    # create a temporary output directory named after newspaper and year
+    # e.g. IMP-1994
     issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
-    json_files = []
-
     issue_dir = os.path.join(output_dir, key)
-    if not os.path.exists(issue_dir):
-        os.mkdir(issue_dir)
-
-    print(issue_dir)
+    db.from_sequence([issue_dir]).map(mkdir).compute()
 
     print("Fleshing out articles by issue...")
-    issues_bag = db.from_sequence(issues)
+    issues_bag = db.from_sequence(issues, partition_size=3)
     print(f"Number of partitions: {issues_bag.npartitions}")
 
     articles_bag = issues_bag.starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
-        .flatten()\
-        .repartition(npartitions=500)\
-        .filter(_article_has_problem) \
-        .map(rebuild_function) \
-        .map(json.dumps).persist()
+        .flatten().persist()
 
-    articles_bag.to_textfiles('{}/*.json'.format(issue_dir))
+    faulty_articles_n = articles_bag\
+        .filter(_article_has_problem)\
+        .pluck('m')\
+        .pluck('id')\
+        .compute()
+    print(f'Skipped articles: {faulty_articles_n}')
+
+    articles_bag = articles_bag.filter(_article_wihtout_problem)\
+        .map(rebuild_function)\
+        .persist()
+
+    if filter_language:
+        result = articles_bag.filter(
+            lambda ci: ci['lg'] in filter_language if 'lg' in ci else False
+        )\
+            .map(json.dumps)\
+            .to_textfiles('{}/*.json'.format(issue_dir))
+    else:
+        result = articles_bag.map(json.dumps)\
+            .to_textfiles('{}/*.json'.format(issue_dir))
 
     print("done.")
 
-    json_files = [
-        os.path.join(issue_dir, f)
-        for f in os.listdir(issue_dir)
-        if '.json' in f
-    ]
-
-    return (key, json_files)
+    return (key, result)
 
 
 def init_logging(level, file):
@@ -555,6 +590,10 @@ def main():
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
+    languages = arguments["--languages"]
+
+    if languages:
+        languages = languages.split(',')
 
     init_logging(log_level, log_file)
 
@@ -602,7 +641,8 @@ def main():
                     input_bucket=bucket_name,
                     output_dir=outp_dir,
                     dask_client=client,
-                    format=output_format
+                    format=output_format,
+                    filter_language=languages
                 )
                 rebuilt_issues.append((issue_key, json_files))
 
