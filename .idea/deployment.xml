@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="pycommons">
+    <serverData>
+      <paths name="pycommons">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/ehrmann/impresso/code/impresso-pycommons" local="$PROJECT_DIR$" web="/home/ehrmann/impresso/code/impresso-pycommons" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/impresso_commons.egg-info" />
+            <excludedPath local="true" path="$PROJECT_DIR$/tests" />
+            <excludedPath local="true" path="$PROJECT_DIR$/dask-worker-space" />
+            <excludedPath local="true" path="$PROJECT_DIR$/docs" />
+            <excludedPath local="true" path="$PROJECT_DIR$/README.md" />
+            <excludedPath local="true" path="$PROJECT_DIR$/mr_NOTES.md" />
+            <excludedPath local="true" path="$PROJECT_DIR$/LICENSE" />
+            <excludedPath local="true" path="$PROJECT_DIR$/tox.ini" />
+            <excludedPath local="true" path="$PROJECT_DIR$/compress_canonical.ipynb" />
+            <excludedPath local="true" path="$PROJECT_DIR$/_Pipfile.lock" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.git" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.tox" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.idea" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.ipynb_checkpoints/" />
+            <excludedPath local="true" path="$PROJECT_DIR$/.pytest_cache/" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ON_EXPLICIT_SAVE" />
+  </component>
+</project>
