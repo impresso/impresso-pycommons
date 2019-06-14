@@ -386,3 +386,31 @@ def upload(partition_name, newspaper_prefix, bucket_name=None):
         logger.error(e)
         logger.error(f'The upload of {partition_name} failed with error {e}')
         return False, partition_name
+
+
+def get_boto3_bucket(bucket_name: str):
+    s3 = get_s3_resource()
+    return s3.Bucket(bucket_name)
+
+
+def fixed_s3fs_glob(path: str, boto3_bucket=None):
+    """
+    From Benoit, impresso-pyimages package
+    A custom glob function as the s3fs one seems to be unable to list more than 1000 elements on the switch S3
+    :param path:
+    :return:
+    """
+    if boto3_bucket is None:
+        if path.startswith("s3://"):
+            path = path[len("s3://"):]
+        bucket_name = path.split("/")[0]
+        base_path = "/".join(path.split("/")[1:])  # Remove bucket name
+        boto3_bucket = get_boto3_bucket(bucket_name)
+    else:
+        bucket_name = boto3_bucket.name
+        base_path = path
+    base_path, suffix_path = base_path.split("*")
+    filenames = ["s3://"+os.path.join(bucket_name, o.key)  # prepend bucket-name as it is necessary for s3fs
+                 for o in boto3_bucket.objects.filter(Prefix=base_path)
+                 if o.key.endswith(suffix_path)]
+    return filenames
