@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-DASK_WORKERS_NUMBER = 4
+DASK_WORKERS_NUMBER = 36
 DASK_MEMORY_LIMIT = "1G"
 
 # Use an env var to determine the type of dask scheduling to run:
@@ -85,6 +85,27 @@ def test_rebuild_JDG():
     logger.info(result)
     assert result is not None
 
+def test_rebuild_JDG2():
+    input_bucket_name = "s3://original-canonical-fixed"
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt'
+    )
+    
+    input_issues = read_s3_issues("JDG", "1862", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
+
+    issue_key, json_files = rebuild_issues(
+        issues=input_issues,
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=client,
+        format='solr'
+    )
+    
+    result = compress(issue_key, json_files, outp_dir)
+    logger.info(result)
+    assert result is not None
 
 def test_rebuild_GDL():
     input_bucket_name = "s3://original-canonical-data"
