@@ -34,6 +34,15 @@ __author__ = "maudehrmann"
 logger = logging.getLogger(__name__)
 
 
+def partitioner(bag, path, nbpart):
+    """Partition a bag into n partitions and write each partition in a file"""
+    grouped_items = bag.groupby(lambda x: np.random.randint(500), npartitions=nbpart)
+    items = grouped_items.map(lambda x: x[1]).flatten()
+    path = os.path.join(path, "*.jsonl.bz2")
+    with ProgressBar():
+        items.to_textfiles(path)
+
+
 def create_even_partitions(bucket,
                            config_newspapers,
                            output_dir,
