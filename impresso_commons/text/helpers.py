@@ -79,6 +79,10 @@ def rejoin_articles(issue, issue_json):
         article['has_problem'] = False
 
         pages = []
+        page_ids = [
+            page['id']
+            for page in issue_json['pp']
+        ]
         for page_no in article['m']['pp']:
             # given a page  number (from issue.json) and its canonical ID
             # find the position of that page in the array of pages (with text
@@ -94,6 +98,10 @@ def rejoin_articles(issue, issue_json):
             except IndexError:
                 article['has_problem'] = True
                 articles.append(article)
+                logger.error(
+                    f'Page {page_no_string} not found for item {art_id}'
+                    f"Issue {issue_json['id']} has pages {page_ids}"
+                )
                 continue
 
         regions_by_page = []

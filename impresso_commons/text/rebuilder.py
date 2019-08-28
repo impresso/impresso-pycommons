@@ -317,6 +317,8 @@ def rebuild_for_passim(article_metadata):
         "date": f'{date[0]}-{date[1]}-{date[2]}',
         "id": article_metadata['m']['id'],
         "cc": article_metadata["m"]["cc"],
+        "lg": article_metadata["m"]['l'] if "l" in article_metadata["m"]
+        else None,
         "pages": []
     }
 
@@ -529,11 +531,16 @@ def rebuild_issues(
         .map(rebuild_function)\
         .persist()
 
+    def has_language(ci):
+        if 'lg' not in ci:
+            return False
+        else:
+            return ci['lg'] in filter_language
+
     if filter_language:
-        result = articles_bag.filter(
-            lambda ci: ci['lg'] in filter_language if 'lg' in ci else False
-        )\
-            .map(json.dumps)\
+        filtered_articles = articles_bag.filter(has_language).persist()
+        print(filtered_articles.count().compute())
+        result = filtered_articles.map(json.dumps)\
             .to_textfiles('{}/*.json'.format(issue_dir))
     else:
         result = articles_bag.map(json.dumps)\

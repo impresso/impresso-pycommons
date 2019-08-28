@@ -202,20 +202,44 @@ def test_rebuild_luxwort():
     assert result is not None
 
 
+def test_rebuild_buergerbeamten():
+    input_bucket_name = "s3://original-canonical-data"
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt'
+    )
+
+    input_issues = read_s3_issues("buergerbeamten", "1909", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
+
+    issue_key, json_files = rebuild_issues(
+        issues=input_issues,
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=None,
+        format='solr'
+    )
+
+    result = compress(issue_key, json_files, outp_dir)
+    logger.info(result)
+    assert result is not None
+
+
 def test_rebuild_for_passim():
-    input_bucket_name = "s3://original-canonical-compressed"
+    input_bucket_name = "s3://original-canonical-data"
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt-passim'
     )
 
-    input_issues = read_s3_issues("IMP", "1982", input_bucket_name)
+    input_issues = read_s3_issues("luxwort", "1848", input_bucket_name)
 
     issue_key, json_files = rebuild_issues(
         issues=input_issues[:50],
         input_bucket=input_bucket_name,
         output_dir=outp_dir,
         dask_client=client,
-        format='passim'
+        format='passim',
+        filter_language=['fr']
     )
     logger.info(f'{issue_key}: {json_files}')
