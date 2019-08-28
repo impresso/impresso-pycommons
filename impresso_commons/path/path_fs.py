@@ -407,7 +407,7 @@ def check_filenaming(file_basename):
     :param file_basename: page file (txt or image)
     :type file_basename: str
     """
-    page_pattern = re.compile("^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
+    page_pattern = re.compile(r"^[A-Z]+-\d{4}-\d{2}-\d{2}-[a-z]-p\d{4}$")
     return page_pattern.match(file_basename)
 
 

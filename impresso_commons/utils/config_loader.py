@@ -34,71 +34,22 @@ class Base:
         assert string in attribute, f"Bucket name should contain '{string}'"
 
 
-class TextImporterConfig(Base):
+class PartitionerConfig(Base):
     def __init__(self, config_dict):
-        k = ['solr_server', 'solr_core', 's3_bucket_rebuilt', 'key_batches', 'newspapers']
-        self.check_params(config_dict, k)
-        self.solr_server = config_dict["solr_server"]
-        self.solr_core = config_dict["solr_core"]
-        self.bucket_rebuilt = config_dict["s3_bucket_rebuilt"]
-        self.key_batches = config_dict["key_batches"]
-        self.newspapers = config_dict["newspapers"]
-        self.check_bucket("rebuilt", self.bucket_rebuilt)
-
-
-class MentionBuilderConfig(Base):
-    def __init__(self, config_dict):
-        k = ['solr_server', 'solr_core_mentions', 's3_bucket_processed', 'newspapers']
+        k = ['s3_bucket_rebuilt', "newspapers", 'output_dir', 'local_fs', 'keep_full']
         self.check_params(config_dict, k)
 
-        self.solr_server = config_dict["solr_server"]
-        self.solr_core_mentions = config_dict["solr_core_mentions"]
-        self.bucket_processed = config_dict["s3_bucket_processed"]
+        self.bucket_name = config_dict["s3_bucket_rebuilt"]
         self.newspapers = config_dict["newspapers"]
-        self.check_bucket("processed", self.bucket_processed)
-
-
-class MentionImporterConfig(Base):
-    def __init__(self, config_dict):
-        k = ['solr_server', 'solr_core', 's3_bucket_processed', 'newspapers']
-        self.check_params(config_dict, k)
-
-        self.solr_server = config_dict["solr_server"]
-        self.solr_core = config_dict["solr_core"]
-        self.bucket_processed = config_dict["s3_bucket_processed"]
-        self.newspapers = config_dict["newspapers"]
-        self.check_bucket("processed", self.bucket_processed)
-
-
-class TopicBuilderConfig(Base):
-    def __init__(self, config_dict):
-        k = ['solr_server', 'solr_core_topics', 's3_bucket_processed', 'newspapers', "process_type", "process_id"]
-        self.check_params(config_dict, k)
-
-        self.solr_server = config_dict["solr_server"]
-        self.solr_core_mentions = config_dict["solr_core_topics"]
-        self.bucket_processed = config_dict["s3_bucket_processed"]
-        self.process_type = config_dict["process_type"]
-        self.process_id = config_dict["process_id"]
-        self.newspapers = config_dict["newspapers"]
-        self.check_bucket("processed", self.bucket_processed)
-
-
-class TopicImporterConfig(Base):
-    def __init__(self, config_dict):
-        k = ['solr_server', 'solr_core', 's3_bucket_processed', "newspapers"]
-        self.check_params(config_dict, k)
-
-        self.solr_server = config_dict["solr_server"]
-        self.solr_core = config_dict["solr_core"]
-        self.bucket_processed = config_dict["s3_bucket_processed"]
-        self.newspapers = config_dict["newspapers"]
-        self.check_bucket("processed", self.bucket_processed)
+        self.output_dir = config_dict["output_dir"]
+        self.local_fs = config_dict["local_fs"]
+        self.keep_full = config_dict["keep_full"]
+        self.check_bucket("rebuilt", self.bucket_name)
 
 
 def main():
     file = "../config/solr_ci_builder_config.example.json"
-    config = TextImporterConfig.from_json(file)
+    config = PartitionerConfig.from_json(file)
     print(config.newspapers)
 
 

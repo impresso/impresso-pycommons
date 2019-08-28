@@ -77,6 +77,7 @@ def rejoin_articles(issue, issue_json):
         art_id = article['m']['id']
         article['m']['s3v'] = issue_json['s3_version']
         article['has_problem'] = False
+        article['m']['pp'] = sorted(list(set(article['m']['pp'])))
 
         pages = []
         page_ids = [

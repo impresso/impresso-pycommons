@@ -3,7 +3,6 @@
 # created on 2018.03.27 using PyCharm
 # project impresso-image-acquisition
 
-
 import logging
 import sys
 import time
@@ -15,6 +14,8 @@ from dask import compute, delayed
 from dask.diagnostics import ProgressBar
 from dask.multiprocessing import get as mp_get
 import multiprocessing
+
+logger = logging.getLogger(__name__)
 
 
 def executetask(tasks, parallel_execution):
@@ -44,11 +45,11 @@ def init_logger(logger, log_level, log_file):
     if log_file is not None:
         fh = logging.FileHandler(filename=log_file, mode='w')
         fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(formatter)
 
-    logger.addHandler(fh)
     logger.addHandler(ch)
     logger.info("Logger successfully initialised")
 
@@ -84,6 +85,16 @@ def user_confirmation(question, default=None):
             return valid[choice]
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+
+
+
+def user_question(variable_to_confirm):
+    answer = user_confirmation(f"Is [{variable_to_confirm}] the correct one to work with?", None)
+    if not answer:
+        logger.info(f"Variable {variable_to_confirm} not confirmed, exiting.")
+        sys.exit()
+    else:
+        logger.info(f"Variable {variable_to_confirm} confirmed.")
 
 
 def timestamp():

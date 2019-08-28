@@ -6,3 +6,4 @@ dask-worker-space/
 *egg-info
 .pytest_cache
 .ipynb_*
+.idea/

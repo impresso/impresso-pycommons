@@ -29,7 +29,7 @@ setup(
     },
     long_description=DESCRIPTION,
     install_requires=[
-        'dask[complete]',
+        'dask[complete]==1.2.0',
         'boto',
         'boto3',
         'bs4',
