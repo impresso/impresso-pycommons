@@ -57,7 +57,10 @@ KNOWN_JOURNALS = [
     "EVT",
     "JDG",
     "LNQ",
-    "NZZ"
+    "NZZ",
+    "FedGazDe",
+    "FedGazFr",
+    "FedGazIt"
 ]
 
 
