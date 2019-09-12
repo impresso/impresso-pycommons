@@ -23,7 +23,7 @@ With `pipenv` for a specific branch:
 ## Usage
 
 ```python
->>> from impresso_commons.path import detect_issues
+>>> from impresso_commons.path.path_fs import detect_issues
 >>> issues = detect_issues("../impresso-text-acquisition/text_importer/data/sample_data/")
 >>> print(issues)
 ```
