@@ -104,7 +104,13 @@ KNOWN_JOURNALS = [
     "SGZ",
     "SRT",
     "WHD",
-    "ZBT"
+    "ZBT",
+    "CON", "DTT",
+    "FCT", "GAV",
+    "GAZ", "LLS",
+    "OIZ", "SAX",
+    "SDT", "SMZ",
+    "VDR", "VHT"
 
 ]
 
