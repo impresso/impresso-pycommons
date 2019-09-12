@@ -60,7 +60,9 @@ KNOWN_JOURNALS = [
     "NZZ",
     "FedGazDe",
     "FedGazFr",
-    "FedGazIt"
+    "FedGazIt",
+    "arbeitgeber",
+    "handelsztg",
 ]
 
 
