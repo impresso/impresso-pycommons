@@ -89,7 +89,23 @@ KNOWN_JOURNALS = [
     "volkfreu1869",
     "waechtersauer",
     "waeschfra",
-    
+    "BLB",
+    "BNN",
+    "DFS",
+    "DVF",
+    "EZR",
+    "FZG",
+    "HRV",
+    "LAB",
+    "LLE",
+    "MGS",
+    "NTS",
+    "NZG",
+    "SGZ",
+    "SRT",
+    "WHD",
+    "ZBT"
+
 ]
 
 
