@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8]
 
 Options:
 
@@ -12,6 +12,7 @@ Options:
 --filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
 --verbose  Set logging level to DEBUG (by default is INFO)
 --clear  Remove output directory before and after rebuilding
+--k8  Launch on a dask kubernetes cluster (requires credentials in `~/.kube/`)
 --format=<fo>  stuff
 """  # noqa: E501
 
@@ -24,6 +25,7 @@ import shutil
 import dask.bag as db
 import jsonlines
 from dask.distributed import Client, progress
+from dask_k8 import DaskCluster
 from docopt import docopt
 from smart_open import smart_open
 
@@ -33,6 +35,7 @@ from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
+from impresso_commons.utils.kube import make_kube_configuration
 from impresso_commons.utils.s3 import get_s3_resource
 
 logger = logging.getLogger(__name__)
@@ -596,6 +599,7 @@ def main():
     output_format = arguments["--format"]
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
+    launch_kubernetes = arguments["--k8"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
 
@@ -615,7 +619,22 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        client = Client(processes=False, n_workers=8, threads_per_worker=1)
+        if launch_kubernetes:
+            cluster = DaskCluster(
+                namespace="dhlab",
+                cluster_id="impresso-pycommons-rebuild",
+                worker_pod_spec=make_kube_configuration(
+                    memory="5G"
+                )
+            )
+            import ipdb; ipdb.set_trace()
+            cluster.create()
+            cluster.scale(20, blocking=True)
+            client = cluster.make_dask_client()
+            print(client)
+            import ipdb; ipdb.set_trace()
+        else:
+            client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
@@ -659,6 +678,9 @@ def main():
             .starmap(cleanup)
         future = b.persist()
         progress(future)
+
+        if launch_kubernetes:
+            cluster.close()
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
