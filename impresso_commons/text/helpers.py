@@ -58,7 +58,10 @@ def read_issue_pages(issue, issue_json, bucket=None):
     newspaper = issue.journal
     year = issue.date.year
 
-    filename = f"{bucket}/{newspaper}/pages/{newspaper}-{year}/{issue_json['id']}-pages.jsonl.bz2"
+    filename = (
+            f"{bucket}/{newspaper}/pages/{newspaper}-{year}"
+            f"/{issue_json['id']}-pages.jsonl.bz2"
+    )
     pages = db.read_text(
         filename,
         storage_options=IMPRESSO_STORAGEOPT
