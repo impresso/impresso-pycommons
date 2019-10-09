@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 DASK_WORKERS_NUMBER = 36
 DASK_MEMORY_LIMIT = "1G"
 
+S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
+
 # Use an env var to determine the type of dask scheduling to run:
 # 1) synchronous; distributed external or distributed internal
 try:
@@ -38,17 +40,14 @@ elif DASK_SCHEDULER_STRATEGY == 'external':
 
 
 def test_rebuild_NZZ():
-    input_bucket_name = "original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
     )
 
-    input_issues = impresso_iter_bucket(
-        input_bucket_name,
-        prefix="NZZ/1784/12/",
-        item_type="issue"
-    )
+    input_issues = read_s3_issues("NZZ", "1897", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
 
     issue_key, json_files = rebuild_issues(
         issues=input_issues,
@@ -85,13 +84,14 @@ def test_rebuild_JDG():
     logger.info(result)
     assert result is not None
 
+
 def test_rebuild_JDG2():
     input_bucket_name = "s3://original-canonical-fixed"
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
     )
-    
+
     input_issues = read_s3_issues("JDG", "1862", input_bucket_name)
     print(f'{len(input_issues)} issues to rebuild')
 
@@ -102,7 +102,7 @@ def test_rebuild_JDG2():
         dask_client=client,
         format='solr'
     )
-    
+
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
