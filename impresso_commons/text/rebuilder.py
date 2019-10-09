@@ -666,9 +666,8 @@ def main():
 
     if arguments["rebuild_articles"]:
 
-        for n, batch in enumerate(config):
-
-            try:
+        try:
+            for n, batch in enumerate(config):
                 rebuilt_issues = []
                 print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
                 newspaper = list(batch.keys())[0]
@@ -708,14 +707,14 @@ def main():
                 future = b.persist()
                 progress(future)
 
-            except Exception as e:
-                traceback.print_tb(e.__traceback__)
-                print(e)
-                if cluster:
-                    cluster.close()
-            finally:
-                if cluster:
-                    cluster.close()
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
+            print(e)
+            if cluster:
+                cluster.close()
+        finally:
+            if cluster:
+                cluster.close()
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
