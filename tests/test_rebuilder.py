@@ -1,6 +1,6 @@
 import dask
 import os
-from impresso_commons.path.path_s3 import impresso_iter_bucket
+from pytest import mark
 from impresso_commons.text.rebuilder import rebuild_issues, compress
 from impresso_commons.path.path_s3 import read_s3_issues
 from dask.distributed import Client
@@ -63,7 +63,7 @@ def test_rebuild_NZZ():
 
 
 def test_rebuild_JDG():
-    input_bucket_name = "s3://original-canonical-compressed"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -86,7 +86,7 @@ def test_rebuild_JDG():
 
 
 def test_rebuild_JDG2():
-    input_bucket_name = "s3://original-canonical-fixed"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -107,8 +107,9 @@ def test_rebuild_JDG2():
     logger.info(result)
     assert result is not None
 
+
 def test_rebuild_GDL():
-    input_bucket_name = "s3://original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -131,7 +132,7 @@ def test_rebuild_GDL():
 
 
 def test_rebuild_IMP():
-    input_bucket_name = "s3://original-canonical-compressed"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -154,7 +155,7 @@ def test_rebuild_IMP():
 
 
 def test_rebuild_luxzeit1858():
-    input_bucket_name = "s3://original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -177,7 +178,7 @@ def test_rebuild_luxzeit1858():
 
 
 def test_rebuild_indeplux():
-    input_bucket_name = "s3://TRANSFER"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -201,7 +202,7 @@ def test_rebuild_indeplux():
 
 
 def test_rebuild_luxwort():
-    input_bucket_name = "s3://original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -224,7 +225,7 @@ def test_rebuild_luxwort():
 
 
 def test_rebuild_buergerbeamten():
-    input_bucket_name = "s3://original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
@@ -247,7 +248,7 @@ def test_rebuild_buergerbeamten():
 
 
 def test_rebuild_for_passim():
-    input_bucket_name = "s3://original-canonical-data"
+    input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt-passim'
