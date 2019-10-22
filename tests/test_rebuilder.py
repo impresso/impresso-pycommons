@@ -34,6 +34,7 @@ if DASK_SCHEDULER_STRATEGY == 'internal':
 elif DASK_SCHEDULER_STRATEGY == 'synchronous':
     # it does not work perfectly but almost
     dask.config.set(scheduler="synchronous")
+    client = None
 
 elif DASK_SCHEDULER_STRATEGY == 'external':
     client = Client('localhost:8786')
@@ -208,7 +209,7 @@ def test_rebuild_luxwort():
         'data/rebuilt'
     )
 
-    input_issues = read_s3_issues("luxwort", "1852", input_bucket_name)
+    input_issues = read_s3_issues("luxwort", "1860", input_bucket_name)
     print(f'{len(input_issues)} issues to rebuild')
 
     issue_key, json_files = rebuild_issues(

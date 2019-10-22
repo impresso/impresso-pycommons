@@ -121,7 +121,10 @@ def rebuild_text(page, string=None):
                             tmp = "{} ".format(token["nf"])
                             string += tmp
                     else:
-                        region["l"] = len(token["tx"])
+                        if token['tx']:
+                            region["l"] = len(token["tx"])
+                        else:
+                            region["l"] = 0
 
                         if "gn" in token and token["gn"]:
                             tmp = "{}".format(token["tx"])
@@ -135,8 +138,10 @@ def rebuild_text(page, string=None):
                         if 'hy' in token:
                             offsets['line'].append(region["s"])
                         else:
+                            token_length = len(token["tx"]) if token['tx']\
+                             else 0
                             offsets['line'].append(
-                                region["s"] + len(token["tx"])
+                                region["s"] + token_length
                             )
 
                     coordinates['tokens'].append(region)
