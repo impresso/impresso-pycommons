@@ -11,7 +11,7 @@ IMPRESSO_IIIF_ENDPOINT = 'https://dhlabsrv17.epfl.ch/iiif_impresso/'
 # IMPRESSO_IIIF_ENDPOINT = 'http://pub.cl.uzh.ch/service/iiif_impresso'
 
 
-def compute_image_links(ci, padding=20):
+def compute_image_links(ci, padding=20, iiif_endpoint=IMPRESSO_IIIF_ENDPOINT):
     """Short summary.
 
     :param type ci: Description of parameter `ci`.

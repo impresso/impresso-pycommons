@@ -129,7 +129,8 @@ class ContentItem:
         assert data is not None or path is not None
 
         if data is not None:
-            doc = ContentItem(data['id'], data['lg'], data['tp'])
+            lang = None if "lg" not in data else data['lg']
+            doc = ContentItem(data['id'], lang, data['tp'])
             doc.case = case
 
             if case == ContentItemCase.TEXT or case == ContentItemCase.FULL:
