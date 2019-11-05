@@ -36,16 +36,12 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        'DKPro_PyCAS',
         'opencv-python>=3.4,<4',
         'numpy',
         'smart_open',
         'jsonlines',
         's3fs'
-    ],
-    dependency_links=[
-      'https://github.com/dkpro/dkpro-pycas/tarball/master#egg=DKPro_PyCAS-0.1.1a',
-     ]
+    ]
 )
 
 # TODO: add dkpro-pycas
