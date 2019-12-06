@@ -36,7 +36,7 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        'DKPro_PyCAS',
+        #'DKPro_PyCAS',
         'opencv-python>=3.4,<4',
         'numpy',
         'smart_open',
