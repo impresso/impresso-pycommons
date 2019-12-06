@@ -42,10 +42,7 @@ setup(
         'smart_open',
         'jsonlines',
         's3fs'
-    ],
-    dependency_links=[
-      'https://github.com/dkpro/dkpro-pycas/tarball/master#egg=DKPro_PyCAS-0.1.1a',
-     ]
+    ]
 )
 
 # TODO: add dkpro-pycas
