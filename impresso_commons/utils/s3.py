@@ -427,7 +427,7 @@ def alternative_read_text(s3_key, s3_credentials):
         which breaks on buckets having >= 1000 keys (it raises a
         `FileNotFoundError`).
     """
-    print(f'reading {s3_key}')
+    logger.info(f'reading {s3_key}')
     session = boto3.Session(
         aws_access_key_id=s3_credentials['key'],
         aws_secret_access_key=s3_credentials['secret'],
