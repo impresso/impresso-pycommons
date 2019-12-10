@@ -37,3 +37,7 @@ tox = "*"
 graphviz = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
+black = "*"
+
+[pipenv]
+allow_prereleases = true
