@@ -5,9 +5,7 @@ import json
 from typing import Dict, Tuple, List
 
 from dask import bag as db
-from pycas.cas.core.CAS import CAS
-from pycas.cas.writer.XmiWriter import XmiWriter
-from pycas.type.cas.TypeSystemFactory import TypeSystemFactory
+from cassis import load_cas_from_xmi, load_typesystem, Cas
 
 
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
@@ -107,7 +105,7 @@ def get_iiif_links(contentitems: List[ContentItem], canonical_bucket: str):
     return {page_id: iiif_link for page_id, iiif_link in iiif_links}
 
 
-def rebuilt2xmi(ci, output_dir, typesystem_path, iiif_mappings, pct_coordinates=False):
+def rebuilt2xmi(ci, output_dir, typesystem_path, iiif_mappings, pct_coordinates=False) -> str:
     """
     Converts a rebuilt ContentItem into Apache UIMA/XMI format.
 
@@ -122,13 +120,18 @@ def rebuilt2xmi(ci, output_dir, typesystem_path, iiif_mappings, pct_coordinates=
     layers.
     :type typesystem_path: str
     """
-    tsf = TypeSystemFactory()
-    tsf = tsf.readTypeSystem(typesystem_path)
-    cas = CAS(tsf)
-    cas.documentText = ci.fulltext
-    cas.sofaMimeType = 'text'
+
+    with open(typesystem_path, "rb") as f:
+        typesystem = load_typesystem(f)
+
+    cas = Cas(typesystem=typesystem)
+    cas.sofa_string = ci.fulltext
+    cas.sofa_mime = 'text/plain'
+
     sentType = 'de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Sentence'
     imgLinkType = 'webanno.custom.ImpressoImages'
+    Sentence = typesystem.get_type(sentType)
+    ImageLink = typesystem.get_type(imgLinkType)
 
     # create sentence-level annotations
     start_offset = 0
@@ -136,17 +139,14 @@ def rebuilt2xmi(ci, output_dir, typesystem_path, iiif_mappings, pct_coordinates=
         start = start_offset
         end = break_offset
         start_offset = break_offset
-        sntc = cas.createAnnotation(sentType, {'begin': start, 'end': end})
-        cas.addToIndex(sntc)
+        cas.add_annotation(Sentence(begin=start, end=end))
 
     iiif_links = compute_image_links(ci, iiif_links=iiif_mappings, pct=pct_coordinates)
 
     # inject the IIIF links into
     for iiif_link, start, end in iiif_links:
-        imglink = cas.createAnnotation(imgLinkType, {'begin': start, 'end': end, 'link': iiif_link})
-        cas.addToIndex(imglink)
+        cas.add_annotation(ImageLink(begin=start, end=end, link=iiif_link))
 
-    writer = XmiWriter()
     outfile_path = os.path.join(output_dir, f'{ci.id}.xmi')
-
-    writer.write(cas, outfile_path)
+    cas.to_xmi(outfile_path, pretty_print=True)
+    return outfile_path

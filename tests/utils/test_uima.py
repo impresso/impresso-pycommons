@@ -30,8 +30,8 @@ def test_rebuilt2xmi(canonical_bucket, rebuilt_bucket, newspaper, year, pct_coor
     b = db.read_text(rebuilt_path, storage_options=impresso_s3)
     texts = b.compute()
 
-    # we take only the first document as a test
-    text = json.loads(texts[0])
+    # we take only an arbitrary document as a test
+    text = json.loads(texts[10])
     doc = ContentItem.from_json(data=text, case=ContentItemCase.FULL)
 
     iiif_mappings = get_iiif_links([doc], canonical_bucket)
