@@ -5,8 +5,10 @@ import logging
 import os
 
 from dask import bag as db
-from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
-from impresso_commons.utils.s3 import get_s3_versions, get_s3_resource
+
+from impresso_commons.utils.s3 import (IMPRESSO_STORAGEOPT,
+                                       alternative_read_text, get_s3_resource,
+                                       get_s3_versions)
 
 logger = logging.getLogger(__name__)
 
@@ -58,11 +60,22 @@ def read_issue_pages(issue, issue_json, bucket=None):
     newspaper = issue.journal
     year = issue.date.year
 
-    filename = f"{bucket}/{newspaper}/pages/{newspaper}-{year}/{issue_json['id']}-pages.jsonl.bz2"
+    filename = (
+            f"{bucket}/{newspaper}/pages/{newspaper}-{year}"
+            f"/{issue_json['id']}-pages.jsonl.bz2"
+    )
+
+    pages = [
+        json.loads(page)
+        for page in alternative_read_text(filename, IMPRESSO_STORAGEOPT)
+    ]
+
+    """
     pages = db.read_text(
         filename,
         storage_options=IMPRESSO_STORAGEOPT
     ).map(lambda x: json.loads(x)).compute()
+    """
     print(filename)
     issue_json["pp"] = pages
     del pages

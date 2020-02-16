@@ -18,7 +18,13 @@ __author__ = "maudehrmann"
 logger = logging.getLogger(__name__)
 
 
-def get_iiif_url(page_id, box, base="http://dhlabsrv17.epfl.ch/iiif_impresso"):
+def get_iiif_url(
+    page_id: str,
+    box: str,
+    base: str = "http://dhlabsrv17.epfl.ch/iiif_impresso",
+    iiif_manifest_uri: str = None,
+    pct: bool = False,
+) -> str:
     """ Returns impresso iiif url given a page id and a box
 
     :param page_id: impresso page id, e.g. EXP-1930-06-10-a-p0001
@@ -28,8 +34,13 @@ def get_iiif_url(page_id, box, base="http://dhlabsrv17.epfl.ch/iiif_impresso"):
     :return: iiif url of the box
     :rtype: str
     """
+    prefix = "pct:" if pct else ""
     suffix = "full/0/default.jpg"
-    return os.path.join(base, page_id, box.replace(" ", ","), suffix)
+
+    if iiif_manifest_uri is None:
+        return os.path.join(base, page_id, prefix + box.replace(" ", ","), suffix)
+    else:
+        return os.path.join(iiif_manifest_uri.replace('/info.json', ''), prefix + box.replace(" ", ","), suffix)
 
 
 def compute_scale_factor(img_source_path, img_dest_path):
@@ -90,8 +101,8 @@ def convert_box(input_box):
         logger.info(f'Invalid box format: {input_box}')
         return
 
-    w = (int(elems[2]) - int(elems[0]))
-    h = (int(elems[3]) - int(elems[1]))
+    w = int(elems[2]) - int(elems[0])
+    h = int(elems[3]) - int(elems[1])
     return ",".join([elems[0], elems[1], str(w), str(h)])
 
 
@@ -162,8 +173,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
             return int(source_res) / int(dest_res)
 
         else:
-            logger.info(f"Impossible to get resolution in case: tif"
-                        " in {issue_dir_path}, page {page_number}")
+            logger.info(f"Impossible to get resolution in case: tif" " in {issue_dir_path}, page {page_number}")
             return None
 
     elif box_strategy == img_utils.BoxStrategy.png_highest.name:
@@ -176,10 +186,14 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         if png_res == olive_res:
             return 1.0
         else:
-            logger.info(f"Incompatible resolutions between highest png and olive indications \
-            in {issue_dir_path}, page {page_number}")
-            print(f"Incompatible resolutions between highest png and olive indications \
-                        in {issue_dir_path}, page {page_number}")
+            logger.info(
+                f"Incompatible resolutions between highest png and olive indications \
+            in {issue_dir_path}, page {page_number}"
+            )
+            print(
+                f"Incompatible resolutions between highest png and olive indications \
+                        in {issue_dir_path}, page {page_number}"
+            )
             return None
 
     elif box_strategy == img_utils.BoxStrategy.png_uniq.name:
@@ -196,8 +210,10 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
         if jpg_x_dim == int(olive_x_dim):
             return 1.0
         else:
-            logger.info("Incompatible resolutions between uniq jpg and olive indications"
-                        " in {issue_dir_path}, page {page_number}.")
+            logger.info(
+                "Incompatible resolutions between uniq jpg and olive indications"
+                " in {issue_dir_path}, page {page_number}."
+            )
             return None
 
 
@@ -351,8 +367,9 @@ def test():
     archive = os.path.join(base_dir, "TEST/JDV-1848-05-24/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name,
-                          "1/Img/Pg001.jpg")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg"
+    )
 
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("JDV-1848-05-24-a-p0001", newbox)
@@ -367,8 +384,9 @@ def test():
     archive = os.path.join(base_dir, "TEST/JDV-1848-05-24/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name,
-                          "1/Img/Pg001.jpg")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg"
+    )
 
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("JDV-1848-05-24-a-p0001", newbox)
@@ -383,8 +401,9 @@ def test():
     archive = os.path.join(base_dir, "TEST/JDV-1848-05-24/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name,
-                          "1/Img/Pg001.jpg")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg"
+    )
 
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("JDV-1848-05-24-a-p0001", newbox)
@@ -394,14 +413,14 @@ def test():
     print(f"Newbox: {newbox}")
     print(f"IIIF: {iiif}\n")
 
-
     # JDV-1848-05-24;  pages 1,2,3,4 jpg uniq
     box = "751 1606 817 1625"  # collèges in p1 Ar00102.xml
     archive = os.path.join(base_dir, "TEST/JDV-1848-05-24/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name,
-                          "1/Img/Pg001.jpg")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.jpg_uniq.name, "1/Img/Pg001.jpg"
+    )
 
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("JDV-1848-05-24-a-p0001", newbox)
@@ -416,8 +435,9 @@ def test():
     archive = os.path.join(base_dir, "TEST/EXP-1964-05-19/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("5/Pg005.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
-                           "Img/Pg005_180.png")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name, "Img/Pg005_180.png"
+    )
     print(sf)
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("EXP-1964-05-19-a-p0005", newbox)
@@ -432,8 +452,9 @@ def test():
     archive = os.path.join(base_dir, "TEST/EXP-1964-05-19/Document.zip")
     working_archive = zipfile.ZipFile(archive)
     page_data = working_archive.read("1/Pg001.xml")
-    sf = get_scale_factor("fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name,
-                          "Img/Pg001_180.png")
+    sf = get_scale_factor(
+        "fictious path", working_archive, page_data, img_utils.BoxStrategy.png_highest.name, "Img/Pg001_180.png"
+    )
     print(sf)
     newbox = compute_box(sf, box)
     iiif = get_iiif_url("EXP-1964-05-19-a-p0001", newbox)
@@ -446,5 +467,5 @@ def test():
 
 if __name__ == '__main__':
     test()
-    #box = "1096 454 1200 470"
-    #print(convert_box(box))
+    # box = "1096 454 1200 470"
+    # print(convert_box(box))

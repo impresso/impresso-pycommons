@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8]
 
 Options:
 
@@ -12,18 +12,23 @@ Options:
 --filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
 --verbose  Set logging level to DEBUG (by default is INFO)
 --clear  Remove output directory before and after rebuilding
+--k8  Launch on a dask kubernetes cluster (requires credentials in `~/.kube/`)
 --format=<fo>  stuff
 """  # noqa: E501
 
+import traceback
 import datetime
 import json
 import logging
 import os
 import shutil
+import signal
+from sys import exit
 
 import dask.bag as db
 import jsonlines
 from dask.distributed import Client, progress
+from dask_k8 import DaskCluster
 from docopt import docopt
 from smart_open import smart_open
 
@@ -33,6 +38,8 @@ from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
+from impresso_commons.utils.kube import (make_scheduler_configuration,
+                                         make_worker_configuration)
 from impresso_commons.utils.s3 import get_s3_resource
 
 logger = logging.getLogger(__name__)
@@ -114,7 +121,10 @@ def rebuild_text(page, string=None):
                             tmp = "{} ".format(token["nf"])
                             string += tmp
                     else:
-                        region["l"] = len(token["tx"])
+                        if token['tx']:
+                            region["l"] = len(token["tx"])
+                        else:
+                            region["l"] = 0
 
                         if "gn" in token and token["gn"]:
                             tmp = "{}".format(token["tx"])
@@ -128,8 +138,10 @@ def rebuild_text(page, string=None):
                         if 'hy' in token:
                             offsets['line'].append(region["s"])
                         else:
+                            token_length = len(token["tx"]) if token['tx']\
+                             else 0
                             offsets['line'].append(
-                                region["s"] + len(token["tx"])
+                                region["s"] + token_length
                             )
 
                     coordinates['tokens'].append(region)
@@ -587,6 +599,16 @@ def init_logging(level, file):
 
 def main():
 
+    def signal_handler(*args):
+        # Handle any cleanup here
+        print(
+            'SIGINT or CTRL-C detected. Exiting gracefully'
+            ' and shutting down the dask kubernetes cluster'
+        )
+        if cluster:
+            cluster.close()
+        exit(0)
+
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
     bucket_name = f's3://{arguments["--input-bucket"]}'
@@ -596,8 +618,11 @@ def main():
     output_format = arguments["--format"]
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
+    launch_kubernetes = arguments["--k8"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     if languages:
         languages = languages.split(',')
@@ -615,50 +640,86 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        client = Client(processes=False, n_workers=8, threads_per_worker=1)
+        if launch_kubernetes:
+            cluster = DaskCluster(
+                namespace="dhlab",
+                cluster_id="impresso-pycommons-k8-rebuild",
+                scheduler_pod_spec=make_scheduler_configuration(),
+                worker_pod_spec=make_worker_configuration(
+                    docker_image="ic-registry.epfl.ch/dhlab/impresso_pycommons:v1",
+                    memory="5G"
+                )
+            )
+            try:
+                cluster.create()
+                cluster.scale(50, blocking=True)
+                client = cluster.make_dask_client()
+                print(client.get_versions(check=False))
+            except Exception as e:
+                print(e)
+                cluster.close()
+                exit(0)
+
+            print(client)
+        else:
+            cluster = None
+            client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
+        cluster = None
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
 
     if arguments["rebuild_articles"]:
 
-        rebuilt_issues = []
+        try:
+            for n, batch in enumerate(config):
+                rebuilt_issues = []
+                print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
+                newspaper = list(batch.keys())[0]
+                start_year, end_year = batch[newspaper]
 
-        for n, batch in enumerate(config):
+                for year in range(start_year, end_year):
+                    print(f'Processing year {year}')
+                    print('Retrieving issues...')
+                    try:
+                        input_issues = read_s3_issues(
+                            newspaper,
+                            year,
+                            bucket_name
+                        )
+                    except FileNotFoundError:
+                        print(f'{newspaper}-{year} not found in {bucket_name}')
+                        continue
 
-            print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
-            newspaper = list(batch.keys())[0]
-            start_year, end_year = batch[newspaper]
-
-            for year in range(start_year, end_year):
-                print(f'Processing year {year}')
-                print('Retrieving issues...')
-                try:
-                    input_issues = read_s3_issues(
-                        newspaper,
-                        year,
-                        bucket_name
+                    issue_key, json_files = rebuild_issues(
+                        issues=input_issues,
+                        input_bucket=bucket_name,
+                        output_dir=outp_dir,
+                        dask_client=client,
+                        format=output_format,
+                        filter_language=languages
                     )
-                except FileNotFoundError:
-                    print(f'{newspaper}-{year} not found in {bucket_name}')
-                    continue
+                    rebuilt_issues.append((issue_key, json_files))
 
-                issue_key, json_files = rebuild_issues(
-                    issues=input_issues,
-                    input_bucket=bucket_name,
-                    output_dir=outp_dir,
-                    dask_client=client,
-                    format=output_format,
-                    filter_language=languages
-                )
-                rebuilt_issues.append((issue_key, json_files))
+                print((
+                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                    f"to {output_bucket_name}"
+                ))
+                b = db.from_sequence(rebuilt_issues) \
+                    .starmap(compress, output_dir=outp_dir) \
+                    .starmap(upload, bucket_name=output_bucket_name) \
+                    .starmap(cleanup)
+                future = b.persist()
+                progress(future)
 
-        b = db.from_sequence(rebuilt_issues) \
-            .starmap(compress, output_dir=outp_dir) \
-            .starmap(upload, bucket_name=output_bucket_name) \
-            .starmap(cleanup)
-        future = b.persist()
-        progress(future)
+        except Exception as e:
+            traceback.print_tb(e.__traceback__)
+            print(e)
+            if cluster:
+                cluster.close()
+        finally:
+            if cluster:
+                cluster.close()
 
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")

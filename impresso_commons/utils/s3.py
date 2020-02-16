@@ -12,7 +12,7 @@ import boto3
 import bz2
 from boto.s3.connection import OrdinaryCallingFormat
 from smart_open import s3_iter_bucket
-import dask.bag as db
+from smart_open import open as s_open
 
 from impresso_commons.utils import _get_cores
 
@@ -21,8 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 def get_storage_options():
-    return {'client_kwargs': {'endpoint_url': 'https://os.zhdk.cloud.switch.ch'},
-            'key': os.environ['SE_ACCESS_KEY'], 'secret': os.environ['SE_SECRET_KEY']}
+    return {
+        'client_kwargs': {'endpoint_url': 'https://os.zhdk.cloud.switch.ch'},
+        'key': os.environ['SE_ACCESS_KEY'],
+        'secret': os.environ['SE_SECRET_KEY']
+    }
 
 
 IMPRESSO_STORAGEOPT = get_storage_options()
@@ -414,3 +417,30 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
                  for o in boto3_bucket.objects.filter(Prefix=base_path)
                  if o.key.endswith(suffix_path)]
     return filenames
+
+
+def alternative_read_text(s3_key, s3_credentials):
+    """Read from S3 a line-separated text file (e.g. *.jsonl.bz2).
+
+    ..note::
+        The reason for this function is a bug in `dask.bag.read_text()`
+        which breaks on buckets having >= 1000 keys (it raises a
+        `FileNotFoundError`).
+    """
+    logger.info(f'reading {s3_key}')
+    session = boto3.Session(
+        aws_access_key_id=s3_credentials['key'],
+        aws_secret_access_key=s3_credentials['secret'],
+    )
+    s3_endpoint = s3_credentials['client_kwargs']['endpoint_url']
+    transport_params = {
+        'session': session,
+        'resource_kwargs': {
+            'endpoint_url': s3_endpoint,
+        }
+    }
+
+    with s_open(s3_key, 'r', transport_params=transport_params) as infile:
+        lines = infile.readlines()
+
+    return lines

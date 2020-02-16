@@ -7,3 +7,6 @@ dask-worker-space/
 .pytest_cache
 .ipynb_*
 .idea/
+build/
+dist/
+impresso_commons/data/rebuilt*
