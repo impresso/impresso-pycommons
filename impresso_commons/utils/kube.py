@@ -72,7 +72,7 @@ def make_worker_configuration(
       volumes:
         - name: scratch
           persistentVolumeClaim:
-            claimName: dhlab-scratch-tmp
+            claimName: dhlab-scratch
     """ # noqa
 
     return config_template
