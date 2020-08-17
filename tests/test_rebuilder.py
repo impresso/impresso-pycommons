@@ -37,7 +37,7 @@ elif DASK_SCHEDULER_STRATEGY == 'synchronous':
     client = None
 
 elif DASK_SCHEDULER_STRATEGY == 'external':
-    client = Client('localhost:8786')
+    client = Client('localhost:8686')
 
 
 def test_rebuild_NZZ():

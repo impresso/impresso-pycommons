@@ -1,0 +1,441 @@
+2020-04-30 17:03:16,091 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-22-a-pages.jsonl.bz2
+2020-04-30 17:03:16,098 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-08-a-pages.jsonl.bz2
+2020-04-30 17:03:16,121 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-01-a-pages.jsonl.bz2
+2020-04-30 17:03:16,137 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-10-25-a-pages.jsonl.bz2
+2020-04-30 17:03:16,168 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-10-17-a-pages.jsonl.bz2
+2020-04-30 17:03:16,184 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-09-15-a-pages.jsonl.bz2
+2020-04-30 17:03:16,216 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-09-01-a-pages.jsonl.bz2
+2020-04-30 17:03:16,228 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-15-a-pages.jsonl.bz2
+2020-04-30 17:03:16,236 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-04-a-pages.jsonl.bz2
+2020-04-30 17:03:16,238 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-18-a-pages.jsonl.bz2
+2020-04-30 17:03:16,245 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-21-a-pages.jsonl.bz2
+2020-04-30 17:03:16,265 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-12-a-pages.jsonl.bz2
+2020-04-30 17:03:16,300 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-07-a-pages.jsonl.bz2
+2020-04-30 17:03:16,307 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-12-a-pages.jsonl.bz2
+2020-04-30 17:03:16,355 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-05-a-pages.jsonl.bz2
+2020-04-30 17:03:16,383 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-27-a-pages.jsonl.bz2
+2020-04-30 17:03:16,399 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-11-a-pages.jsonl.bz2
+2020-04-30 17:03:16,418 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-17-a-pages.jsonl.bz2
+2020-04-30 17:03:16,424 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-18-a-pages.jsonl.bz2
+2020-04-30 17:03:16,463 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-07-a-pages.jsonl.bz2
+2020-04-30 17:03:16,537 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-03-a-pages.jsonl.bz2
+2020-04-30 17:03:16,543 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-22-a-pages.jsonl.bz2
+2020-04-30 17:03:16,556 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-09-a-pages.jsonl.bz2
+2020-04-30 17:03:20,021 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-30-a-pages.jsonl.bz2
+2020-04-30 17:03:20,151 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-22-a-pages.jsonl.bz2
+2020-04-30 17:03:20,175 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-23-a-pages.jsonl.bz2
+2020-04-30 17:03:20,248 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-24-a-pages.jsonl.bz2
+2020-04-30 17:03:20,290 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-01-a-pages.jsonl.bz2
+2020-04-30 17:03:20,364 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-17-a-pages.jsonl.bz2
+2020-04-30 17:03:20,680 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-20-a-pages.jsonl.bz2
+2020-04-30 17:03:20,785 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-11-a-pages.jsonl.bz2
+2020-04-30 17:03:20,801 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-14-a-pages.jsonl.bz2
+2020-04-30 17:03:20,834 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-11-a-pages.jsonl.bz2
+2020-04-30 17:03:20,878 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-10-20-a-pages.jsonl.bz2
+2020-04-30 17:03:20,901 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-02-24-a-pages.jsonl.bz2
+2020-04-30 17:03:21,317 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-31-a-pages.jsonl.bz2
+2020-04-30 17:03:21,360 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-10-06-a-pages.jsonl.bz2
+2020-04-30 17:03:21,371 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-09-29-a-pages.jsonl.bz2
+2020-04-30 17:03:21,390 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-25-a-pages.jsonl.bz2
+2020-04-30 17:03:21,508 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-07-a-pages.jsonl.bz2
+2020-04-30 17:03:21,559 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-09-a-pages.jsonl.bz2
+2020-04-30 17:03:21,575 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-02-a-pages.jsonl.bz2
+2020-04-30 17:03:21,583 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-07-a-pages.jsonl.bz2
+2020-04-30 17:03:21,982 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-28-a-pages.jsonl.bz2
+2020-04-30 17:03:22,059 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-04-a-pages.jsonl.bz2
+2020-04-30 17:03:22,131 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-04-a-pages.jsonl.bz2
+2020-04-30 17:03:24,744 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-15-a-pages.jsonl.bz2
+2020-04-30 17:03:24,806 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-14-a-pages.jsonl.bz2
+2020-04-30 17:03:25,425 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-18-a-pages.jsonl.bz2
+2020-04-30 17:03:25,611 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-25-a-pages.jsonl.bz2
+2020-04-30 17:03:25,789 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-18-a-pages.jsonl.bz2
+2020-04-30 17:03:25,818 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-25-a-pages.jsonl.bz2
+2020-04-30 17:03:25,844 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-15-a-pages.jsonl.bz2
+2020-04-30 17:03:25,990 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-09-22-a-pages.jsonl.bz2
+2020-04-30 17:03:26,105 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-08-02-a-pages.jsonl.bz2
+2020-04-30 17:03:26,112 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-09-08-a-pages.jsonl.bz2
+2020-04-30 17:03:26,234 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-21-a-pages.jsonl.bz2
+2020-04-30 17:03:26,244 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-02-28-a-pages.jsonl.bz2
+2020-04-30 17:03:26,674 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-14-a-pages.jsonl.bz2
+2020-04-30 17:03:26,749 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-12-31-a-pages.jsonl.bz2
+2020-04-30 17:03:26,759 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-06-22-a-pages.jsonl.bz2
+2020-04-30 17:03:26,822 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-05-a-pages.jsonl.bz2
+2020-04-30 17:03:26,830 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-07-26-a-pages.jsonl.bz2
+2020-04-30 17:03:26,952 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-10-10-a-pages.jsonl.bz2
+2020-04-30 17:03:27,022 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-26-a-pages.jsonl.bz2
+2020-04-30 17:03:27,057 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-04-21-a-pages.jsonl.bz2
+2020-04-30 17:03:27,166 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-11-24-a-pages.jsonl.bz2
+2020-04-30 17:03:27,176 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-03-26-a-pages.jsonl.bz2
+2020-04-30 17:03:27,858 impresso_commons.utils.s3 INFO     reading s3://original-canonical-staging/FedGazDe/pages/FedGazDe-1849/FedGazDe-1849-05-22-a-pages.jsonl.bz2
+2020-04-30 17:03:31,314 impresso_commons.text.helpers ERROR    Page p0014 not found for item FedGazDe-1849-11-24-a-i0001Issue FedGazDe-1849-11-24-a has pages ['FedGazDe-1849-11-24-a-p0001', 'FedGazDe-1849-11-24-a-p0002', 'FedGazDe-1849-11-24-a-p0003', 'FedGazDe-1849-11-24-a-p0004', 'FedGazDe-1849-11-24-a-p0005', 'FedGazDe-1849-11-24-a-p0006', 'FedGazDe-1849-11-24-a-p0007', 'FedGazDe-1849-11-24-a-p0008', 'FedGazDe-1849-11-24-a-p0009', 'FedGazDe-1849-11-24-a-p0010', 'FedGazDe-1849-11-24-a-p0011', 'FedGazDe-1849-11-24-a-p0012', 'FedGazDe-1849-11-24-a-p0013']
+2020-04-30 17:03:32,585 impresso_commons.text.helpers ERROR    Page p0019 not found for item FedGazDe-1849-05-22-a-i0001Issue FedGazDe-1849-05-22-a has pages ['FedGazDe-1849-05-22-a-p0001', 'FedGazDe-1849-05-22-a-p0002', 'FedGazDe-1849-05-22-a-p0003', 'FedGazDe-1849-05-22-a-p0004', 'FedGazDe-1849-05-22-a-p0005', 'FedGazDe-1849-05-22-a-p0006', 'FedGazDe-1849-05-22-a-p0007', 'FedGazDe-1849-05-22-a-p0008', 'FedGazDe-1849-05-22-a-p0009', 'FedGazDe-1849-05-22-a-p0010', 'FedGazDe-1849-05-22-a-p0011', 'FedGazDe-1849-05-22-a-p0012', 'FedGazDe-1849-05-22-a-p0013', 'FedGazDe-1849-05-22-a-p0014', 'FedGazDe-1849-05-22-a-p0015', 'FedGazDe-1849-05-22-a-p0016', 'FedGazDe-1849-05-22-a-p0017', 'FedGazDe-1849-05-22-a-p0018', 'FedGazDe-1849-05-22-a-p0020', 'FedGazDe-1849-05-22-a-p0021', 'FedGazDe-1849-05-22-a-p0022', 'FedGazDe-1849-05-22-a-p0023', 'FedGazDe-1849-05-22-a-p0024', 'FedGazDe-1849-05-22-a-p0025', 'FedGazDe-1849-05-22-a-p0026', 'FedGazDe-1849-05-22-a-p0027', 'FedGazDe-1849-05-22-a-p0028', 'FedGazDe-1849-05-22-a-p0029', 'FedGazDe-1849-05-22-a-p0030', 'FedGazDe-1849-05-22-a-p0031', 'FedGazDe-1849-05-22-a-p0032', 'FedGazDe-1849-05-22-a-p0033', 'FedGazDe-1849-05-22-a-p0034', 'FedGazDe-1849-05-22-a-p0035', 'FedGazDe-1849-05-22-a-p0036', 'FedGazDe-1849-05-22-a-p0037', 'FedGazDe-1849-05-22-a-p0038', 'FedGazDe-1849-05-22-a-p0039', 'FedGazDe-1849-05-22-a-p0040', 'FedGazDe-1849-05-22-a-p0041', 'FedGazDe-1849-05-22-a-p0042', 'FedGazDe-1849-05-22-a-p0043', 'FedGazDe-1849-05-22-a-p0044', 'FedGazDe-1849-05-22-a-p0045', 'FedGazDe-1849-05-22-a-p0046', 'FedGazDe-1849-05-22-a-p0047', 'FedGazDe-1849-05-22-a-p0048', 'FedGazDe-1849-05-22-a-p0049']
+2020-04-30 17:04:29,972 impresso_commons.text.helpers ERROR    Page p0021 not found for item FedGazDe-1849-03-14-a-i0001Issue FedGazDe-1849-03-14-a has pages ['FedGazDe-1849-03-14-a-p0001', 'FedGazDe-1849-03-14-a-p0002', 'FedGazDe-1849-03-14-a-p0003', 'FedGazDe-1849-03-14-a-p0004', 'FedGazDe-1849-03-14-a-p0005', 'FedGazDe-1849-03-14-a-p0006', 'FedGazDe-1849-03-14-a-p0007', 'FedGazDe-1849-03-14-a-p0008', 'FedGazDe-1849-03-14-a-p0009', 'FedGazDe-1849-03-14-a-p0010', 'FedGazDe-1849-03-14-a-p0011', 'FedGazDe-1849-03-14-a-p0012', 'FedGazDe-1849-03-14-a-p0013', 'FedGazDe-1849-03-14-a-p0014', 'FedGazDe-1849-03-14-a-p0015', 'FedGazDe-1849-03-14-a-p0016', 'FedGazDe-1849-03-14-a-p0017', 'FedGazDe-1849-03-14-a-p0018', 'FedGazDe-1849-03-14-a-p0019', 'FedGazDe-1849-03-14-a-p0020', 'FedGazDe-1849-03-14-a-p0022', 'FedGazDe-1849-03-14-a-p0023', 'FedGazDe-1849-03-14-a-p0024', 'FedGazDe-1849-03-14-a-p0025', 'FedGazDe-1849-03-14-a-p0026', 'FedGazDe-1849-03-14-a-p0027', 'FedGazDe-1849-03-14-a-p0028', 'FedGazDe-1849-03-14-a-p0029', 'FedGazDe-1849-03-14-a-p0030', 'FedGazDe-1849-03-14-a-p0031', 'FedGazDe-1849-03-14-a-p0032', 'FedGazDe-1849-03-14-a-p0033', 'FedGazDe-1849-03-14-a-p0034', 'FedGazDe-1849-03-14-a-p0035', 'FedGazDe-1849-03-14-a-p0036', 'FedGazDe-1849-03-14-a-p0037']
+2020-04-30 17:04:31,291 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-17-a-i0001
+2020-04-30 17:04:31,292 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-18-a-i0001
+2020-04-30 17:04:31,292 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-12-a-i0001
+2020-04-30 17:04:31,293 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-12-a-i0001
+2020-04-30 17:04:31,293 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-27-a-i0001
+2020-04-30 17:04:31,293 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-11-a-i0001
+2020-04-30 17:04:31,294 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-22-a-i0001
+2020-04-30 17:04:31,294 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-25-a-i0001
+2020-04-30 17:04:31,294 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-22-a-i0001
+2020-04-30 17:04:31,295 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-01-a-i0001
+2020-04-30 17:04:31,299 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-15-a-i0001
+2020-04-30 17:04:31,300 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-04-a-i0001
+2020-04-30 17:04:31,300 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-07-a-i0001
+2020-04-30 17:04:31,336 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-21-a-i0001
+2020-04-30 17:04:31,337 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-12-a-i0001 (Took 0:00:00.044970)
+2020-04-30 17:04:31,340 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-08-a-i0001
+2020-04-30 17:04:31,341 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-17-a-i0001 (Took 0:00:00.049870)
+2020-04-30 17:04:31,342 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-05-a-i0001
+2020-04-30 17:04:31,342 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-18-a-i0001
+2020-04-30 17:04:31,342 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-09-a-i0001
+2020-04-30 17:04:31,343 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-15-a-i0001
+2020-04-30 17:04:31,343 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-01-a-i0001
+2020-04-30 17:04:31,354 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-07-a-i0001
+2020-04-30 17:04:31,360 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-17-a-i0001
+2020-04-30 17:04:31,360 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-03-a-i0001
+2020-04-30 17:04:31,397 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-12-a-i0001 (Took 0:00:00.103989)
+2020-04-30 17:04:31,433 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-11-a-i0001 (Took 0:00:00.139788)
+2020-04-30 17:04:31,433 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-18-a-i0001 (Took 0:00:00.141287)
+2020-04-30 17:04:31,437 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-27-a-i0001 (Took 0:00:00.143520)
+2020-04-30 17:04:31,459 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-22-a-i0001 (Took 0:00:00.165833)
+2020-04-30 17:04:31,474 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-22-a-i0001 (Took 0:00:00.179792)
+2020-04-30 17:04:31,485 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-25-a-i0001 (Took 0:00:00.191308)
+2020-04-30 17:04:31,489 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-01-a-i0001 (Took 0:00:00.194007)
+2020-04-30 17:04:31,491 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-15-a-i0001 (Took 0:00:00.191996)
+2020-04-30 17:04:31,498 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-04-a-i0001 (Took 0:00:00.198436)
+2020-04-30 17:04:31,516 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-07-a-i0001 (Took 0:00:00.215575)
+2020-04-30 17:04:31,530 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-21-a-i0001 (Took 0:00:00.194034)
+2020-04-30 17:04:31,530 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-12-a-i0002
+2020-04-30 17:04:31,541 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-17-a-i0002
+2020-04-30 17:04:31,547 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-08-a-i0001 (Took 0:00:00.207124)
+2020-04-30 17:04:31,562 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-05-a-i0001 (Took 0:00:00.220445)
+2020-04-30 17:04:31,571 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-18-a-i0001 (Took 0:00:00.229093)
+2020-04-30 17:04:31,575 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-09-a-i0001 (Took 0:00:00.232565)
+2020-04-30 17:04:31,579 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-15-a-i0001 (Took 0:00:00.235865)
+2020-04-30 17:04:31,606 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-01-a-i0001 (Took 0:00:00.263263)
+2020-04-30 17:04:31,633 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-17-a-i0001 (Took 0:00:00.273178)
+2020-04-30 17:04:31,659 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-07-a-i0001 (Took 0:00:00.304305)
+2020-04-30 17:04:31,659 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-12-a-i0002
+2020-04-30 17:04:31,665 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-11-a-i0002
+2020-04-30 17:04:31,674 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-03-a-i0001 (Took 0:00:00.313215)
+2020-04-30 17:04:31,674 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-18-a-i0002
+2020-04-30 17:04:31,674 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-14-a-i0001
+2020-04-30 17:04:31,675 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-22-a-i0002
+2020-04-30 17:04:31,675 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-22-a-i0002
+2020-04-30 17:04:31,675 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-25-a-i0002
+2020-04-30 17:04:31,676 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-01-a-i0002
+2020-04-30 17:04:31,676 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-15-a-i0002
+2020-04-30 17:04:31,676 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-04-a-i0002
+2020-04-30 17:04:31,676 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-07-a-i0002
+2020-04-30 17:04:31,677 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-21-a-i0002
+2020-04-30 17:04:31,684 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-12-a-i0002 (Took 0:00:00.153442)
+2020-04-30 17:04:31,685 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-17-a-i0002 (Took 0:00:00.143440)
+2020-04-30 17:04:31,685 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-08-a-i0002
+2020-04-30 17:04:31,686 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-01-a-i0001
+2020-04-30 17:04:31,686 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-18-a-i0002
+2020-04-30 17:04:31,686 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-09-a-i0002
+2020-04-30 17:04:31,687 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-15-a-i0002
+2020-04-30 17:04:31,687 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-01-a-i0002
+2020-04-30 17:04:31,687 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-24-a-i0001
+2020-04-30 17:04:31,688 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-04-a-i0001
+2020-04-30 17:04:31,701 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-12-a-i0002 (Took 0:00:00.042334)
+2020-04-30 17:04:31,702 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-11-a-i0002 (Took 0:00:00.037661)
+2020-04-30 17:04:31,702 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-03-a-i0002
+2020-04-30 17:04:31,709 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-18-a-i0002 (Took 0:00:00.035151)
+2020-04-30 17:04:31,725 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-14-a-i0001 (Took 0:00:00.050759)
+2020-04-30 17:04:31,728 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-22-a-i0002 (Took 0:00:00.052804)
+2020-04-30 17:04:31,742 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-22-a-i0002 (Took 0:00:00.067160)
+2020-04-30 17:04:31,750 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-25-a-i0002 (Took 0:00:00.075009)
+2020-04-30 17:04:31,751 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-01-a-i0002 (Took 0:00:00.075746)
+2020-04-30 17:04:31,757 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-15-a-i0002 (Took 0:00:00.081453)
+2020-04-30 17:04:31,760 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-04-a-i0002 (Took 0:00:00.083654)
+2020-04-30 17:04:31,770 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-21-a-i0002 (Took 0:00:00.093065)
+2020-04-30 17:04:31,775 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-30-a-i0001
+2020-04-30 17:04:31,781 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-17-a-i0003
+2020-04-30 17:04:31,782 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-07-a-i0002 (Took 0:00:00.105486)
+2020-04-30 17:04:31,785 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-08-a-i0002 (Took 0:00:00.099793)
+2020-04-30 17:04:31,799 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-01-a-i0001 (Took 0:00:00.113468)
+2020-04-30 17:04:31,822 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-18-a-i0002 (Took 0:00:00.136287)
+2020-04-30 17:04:31,825 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-15-a-i0002 (Took 0:00:00.137893)
+2020-04-30 17:04:31,830 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-01-a-i0002 (Took 0:00:00.143453)
+2020-04-30 17:04:31,857 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-24-a-i0001 (Took 0:00:00.170121)
+2020-04-30 17:04:31,864 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-04-a-i0001 (Took 0:00:00.176625)
+2020-04-30 17:04:31,880 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-12-a-i0003
+2020-04-30 17:04:31,892 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-09-a-i0002 (Took 0:00:00.205419)
+2020-04-30 17:04:31,892 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-22-a-i0001
+2020-04-30 17:04:31,895 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-03-a-i0002 (Took 0:00:00.192841)
+2020-04-30 17:04:31,896 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-07-a-i0001
+2020-04-30 17:04:31,896 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-18-a-i0001
+2020-04-30 17:04:31,896 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-22-a-i0003
+2020-04-30 17:04:31,897 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-20-a-i0001
+2020-04-30 17:04:31,897 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-20-a-i0001
+2020-04-30 17:04:31,897 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-24-a-i0001
+2020-04-30 17:04:31,898 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-23-a-i0001
+2020-04-30 17:04:31,898 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-04-a-i0003
+2020-04-30 17:04:31,898 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-21-a-i0003
+2020-04-30 17:04:31,899 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-30-a-i0001 (Took 0:00:00.123782)
+2020-04-30 17:04:31,901 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-17-a-i0003 (Took 0:00:00.120454)
+2020-04-30 17:04:31,902 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-07-a-i0003
+2020-04-30 17:04:31,902 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-08-a-i0003
+2020-04-30 17:04:31,902 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-25-a-i0001
+2020-04-30 17:04:31,903 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-18-a-i0003
+2020-04-30 17:04:31,903 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-29-a-i0001
+2020-04-30 17:04:31,903 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-01-a-i0003
+2020-04-30 17:04:31,904 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-24-a-i0002
+2020-04-30 17:04:31,904 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-04-a-i0002
+2020-04-30 17:04:31,905 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-12-a-i0003 (Took 0:00:00.024844)
+2020-04-30 17:04:31,905 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-28-a-i0001
+2020-04-30 17:04:31,915 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-22-a-i0001 (Took 0:00:00.023302)
+2020-04-30 17:04:31,916 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-03-a-i0003
+2020-04-30 17:04:31,931 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-07-a-i0001 (Took 0:00:00.034932)
+2020-04-30 17:04:31,947 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-18-a-i0001 (Took 0:00:00.050631)
+2020-04-30 17:04:31,948 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-22-a-i0003 (Took 0:00:00.051382)
+2020-04-30 17:04:31,968 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-20-a-i0001 (Took 0:00:00.071699)
+2020-04-30 17:04:31,986 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-24-a-i0001 (Took 0:00:00.088191)
+2020-04-30 17:04:31,987 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-20-a-i0001 (Took 0:00:00.090358)
+2020-04-30 17:04:31,993 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-23-a-i0001 (Took 0:00:00.095525)
+2020-04-30 17:04:32,008 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-21-a-i0003 (Took 0:00:00.109762)
+2020-04-30 17:04:32,009 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-04-a-i0003 (Took 0:00:00.111170)
+2020-04-30 17:04:32,010 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-30-a-i0002
+2020-04-30 17:04:32,010 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-06-a-i0001
+2020-04-30 17:04:32,024 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-07-a-i0003 (Took 0:00:00.122325)
+2020-04-30 17:04:32,025 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-08-a-i0003 (Took 0:00:00.123442)
+2020-04-30 17:04:32,038 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-18-a-i0003 (Took 0:00:00.135703)
+2020-04-30 17:04:32,047 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-25-a-i0001 (Took 0:00:00.144266)
+2020-04-30 17:04:32,054 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-29-a-i0001 (Took 0:00:00.150679)
+2020-04-30 17:04:32,055 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-01-a-i0003 (Took 0:00:00.151356)
+2020-04-30 17:04:32,058 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-24-a-i0002 (Took 0:00:00.154651)
+2020-04-30 17:04:32,074 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-09-a-i0001
+2020-04-30 17:04:32,086 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-04-a-i0002 (Took 0:00:00.181818)
+2020-04-30 17:04:32,107 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-22-a-i0002
+2020-04-30 17:04:32,111 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-28-a-i0001 (Took 0:00:00.206192)
+2020-04-30 17:04:32,112 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-03-a-i0003 (Took 0:00:00.196542)
+2020-04-30 17:04:32,112 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-07-a-i0002
+2020-04-30 17:04:32,113 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-18-a-i0002
+2020-04-30 17:04:32,113 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-22-a-i0004
+2020-04-30 17:04:32,114 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-20-a-i0002
+2020-04-30 17:04:32,114 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-24-a-i0002
+2020-04-30 17:04:32,114 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-20-a-i0002
+2020-04-30 17:04:32,115 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-23-a-i0002
+2020-04-30 17:04:32,115 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-11-a-i0001
+2020-04-30 17:04:32,115 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-04-a-i0004
+2020-04-30 17:04:32,117 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-30-a-i0002 (Took 0:00:00.107423)
+2020-04-30 17:04:32,134 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-04-a-i0001
+2020-04-30 17:04:32,137 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-06-a-i0001 (Took 0:00:00.126925)
+2020-04-30 17:04:32,138 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-17-a-i0001
+2020-04-30 17:04:32,138 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-07-a-i0001
+2020-04-30 17:04:32,138 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-25-a-i0002
+2020-04-30 17:04:32,139 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-29-a-i0002
+2020-04-30 17:04:32,139 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-25-a-i0001
+2020-04-30 17:04:32,139 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-03-14-a-i0001 won't be rebuilt.
+2020-04-30 17:04:32,155 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-05-22-a-i0001 won't be rebuilt.
+2020-04-30 17:04:32,161 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-09-a-i0001 (Took 0:00:00.086440)
+2020-04-30 17:04:32,163 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-22-a-i0002 (Took 0:00:00.055603)
+2020-04-30 17:04:32,163 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-28-a-i0002
+2020-04-30 17:04:32,164 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-31-a-i0001
+2020-04-30 17:04:32,169 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-07-a-i0002 (Took 0:00:00.056782)
+2020-04-30 17:04:32,173 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-18-a-i0002 (Took 0:00:00.059955)
+2020-04-30 17:04:32,174 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-22-a-i0004 (Took 0:00:00.060863)
+2020-04-30 17:04:32,176 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-20-a-i0002 (Took 0:00:00.062121)
+2020-04-30 17:04:32,196 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-24-a-i0002 (Took 0:00:00.082677)
+2020-04-30 17:04:32,201 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-20-a-i0002 (Took 0:00:00.086471)
+2020-04-30 17:04:32,205 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-23-a-i0002 (Took 0:00:00.090096)
+2020-04-30 17:04:32,221 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-11-a-i0001 (Took 0:00:00.106467)
+2020-04-30 17:04:32,225 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-04-a-i0004 (Took 0:00:00.109807)
+2020-04-30 17:04:32,225 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-30-a-i0003
+2020-04-30 17:04:32,236 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-06-a-i0002
+2020-04-30 17:04:32,240 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-04-a-i0001 (Took 0:00:00.106803)
+2020-04-30 17:04:32,264 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-07-a-i0001 (Took 0:00:00.125996)
+2020-04-30 17:04:32,267 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-25-a-i0002 (Took 0:00:00.128180)
+2020-04-30 17:04:32,896 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-29-a-i0002 (Took 0:00:00.757663)
+2020-04-30 17:04:32,897 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-03-14-a-i0001 won't be rebuilt.
+2020-04-30 17:04:32,917 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-25-a-i0001 (Took 0:00:00.777629)
+2020-04-30 17:04:32,917 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-05-22-a-i0001 won't be rebuilt.
+2020-04-30 17:04:32,923 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-09-a-i0002
+2020-04-30 17:04:32,935 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-17-a-i0001 (Took 0:00:00.796844)
+2020-04-30 17:04:32,935 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-25-a-i0001
+2020-04-30 17:04:32,936 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-28-a-i0002 (Took 0:00:00.773084)
+2020-04-30 17:04:32,946 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-31-a-i0001 (Took 0:00:00.781846)
+2020-04-30 17:04:32,946 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-07-a-i0003
+2020-04-30 17:04:32,947 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-22-a-i0005
+2020-04-30 17:04:32,948 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-20-a-i0003
+2020-04-30 17:04:32,948 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-28-a-i0001
+2020-04-30 17:04:32,948 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-10-10-a-i0001
+2020-04-30 17:04:32,949 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-23-a-i0003
+2020-04-30 17:04:32,949 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-11-a-i0002
+2020-04-30 17:04:32,949 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-04-a-i0005
+2020-04-30 17:04:32,950 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-30-a-i0003 (Took 0:00:00.724496)
+2020-04-30 17:04:32,951 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-06-a-i0002 (Took 0:00:00.715250)
+2020-04-30 17:04:32,952 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-04-21-a-i0001
+2020-04-30 17:04:32,952 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-07-a-i0002
+2020-04-30 17:04:32,953 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-08-a-i0001
+2020-04-30 17:04:32,953 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-14-a-i0002
+2020-04-30 17:04:32,954 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-25-a-i0002
+2020-04-30 17:04:32,954 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-22-a-i0002
+2020-04-30 17:04:32,966 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-09-a-i0002 (Took 0:00:00.043567)
+2020-04-30 17:04:32,967 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-31-a-i0001
+2020-04-30 17:04:32,975 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-25-a-i0001 (Took 0:00:00.039967)
+2020-04-30 17:04:32,976 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-05-a-i0001
+2020-04-30 17:04:32,976 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-31-a-i0002
+2020-04-30 17:04:32,980 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-07-a-i0003 (Took 0:00:00.033973)
+2020-04-30 17:04:32,991 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-20-a-i0003 (Took 0:00:00.043415)
+2020-04-30 17:04:32,996 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-22-a-i0005 (Took 0:00:00.048574)
+2020-04-30 17:04:33,012 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-28-a-i0001 (Took 0:00:00.063759)
+2020-04-30 17:04:33,018 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-10-10-a-i0001 (Took 0:00:00.069707)
+2020-04-30 17:04:33,019 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-23-a-i0003 (Took 0:00:00.070638)
+2020-04-30 17:04:33,020 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-11-a-i0002 (Took 0:00:00.071352)
+2020-04-30 17:04:33,023 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-04-a-i0005 (Took 0:00:00.073772)
+2020-04-30 17:04:33,023 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-15-a-i0001
+2020-04-30 17:04:33,023 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-22-a-i0001
+2020-04-30 17:04:33,033 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-07-a-i0002 (Took 0:00:00.080485)
+2020-04-30 17:04:33,045 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-08-a-i0001 (Took 0:00:00.092222)
+2020-04-30 17:04:33,054 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-04-21-a-i0001 (Took 0:00:00.101905)
+2020-04-30 17:04:33,061 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-25-a-i0002 (Took 0:00:00.107754)
+2020-04-30 17:04:33,064 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-14-a-i0002 (Took 0:00:00.110707)
+2020-04-30 17:04:33,066 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-22-a-i0002 (Took 0:00:00.112374)
+2020-04-30 17:04:33,067 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-09-a-i0003
+2020-04-30 17:04:33,077 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-31-a-i0001 (Took 0:00:00.110156)
+2020-04-30 17:04:33,085 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-05-a-i0001 (Took 0:00:00.109483)
+2020-04-30 17:04:33,091 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-07-a-i0004
+2020-04-30 17:04:33,097 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-31-a-i0002 (Took 0:00:00.120554)
+2020-04-30 17:04:33,097 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-15-a-i0001
+2020-04-30 17:04:33,098 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-02-a-i0001
+2020-04-30 17:04:33,098 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-28-a-i0002
+2020-04-30 17:04:33,099 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-18-a-i0001
+2020-04-30 17:04:33,099 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-11-a-i0003
+2020-04-30 17:04:33,100 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-11-a-i0001
+2020-04-30 17:04:33,105 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-15-a-i0001 (Took 0:00:00.081469)
+2020-04-30 17:04:33,108 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-22-a-i0001 (Took 0:00:00.084479)
+2020-04-30 17:04:33,109 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-07-a-i0003
+2020-04-30 17:04:33,109 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-08-a-i0002
+2020-04-30 17:04:33,109 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-02-a-i0001
+2020-04-30 17:04:33,110 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-14-a-i0003
+2020-04-30 17:04:33,110 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-22-a-i0003
+2020-04-30 17:04:33,111 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-09-a-i0003 (Took 0:00:00.043898)
+2020-04-30 17:04:33,111 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-31-a-i0002
+2020-04-30 17:04:33,112 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-11-05-a-i0002
+2020-04-30 17:04:33,113 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-07-a-i0004 (Took 0:00:00.022556)
+2020-04-30 17:04:33,113 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-31-a-i0003
+2020-04-30 17:04:33,150 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-02-a-i0001 (Took 0:00:00.052120)
+2020-04-30 17:04:33,174 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-15-a-i0001 (Took 0:00:00.077136)
+2020-04-30 17:04:33,178 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-18-a-i0001 (Took 0:00:00.079461)
+2020-04-30 17:04:33,179 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-11-a-i0003 (Took 0:00:00.079882)
+2020-04-30 17:04:33,184 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-28-a-i0002 (Took 0:00:00.085689)
+2020-04-30 17:04:33,189 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-15-a-i0002
+2020-04-30 17:04:33,196 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-11-a-i0001 (Took 0:00:00.096240)
+2020-04-30 17:04:33,196 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-09-22-a-i0002
+2020-04-30 17:04:33,199 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-07-a-i0003 (Took 0:00:00.090502)
+2020-04-30 17:04:33,209 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-08-a-i0002 (Took 0:00:00.100413)
+2020-04-30 17:04:33,213 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-02-a-i0001 (Took 0:00:00.103756)
+2020-04-30 17:04:33,216 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-14-a-i0003 (Took 0:00:00.106186)
+2020-04-30 17:04:33,220 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-22-a-i0003 (Took 0:00:00.110511)
+2020-04-30 17:04:33,221 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-26-a-i0001
+2020-04-30 17:04:33,222 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-31-a-i0002 (Took 0:00:00.110286)
+2020-04-30 17:04:33,227 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-11-05-a-i0002 (Took 0:00:00.115093)
+2020-04-30 17:04:33,227 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-26-a-i0001
+2020-04-30 17:04:33,232 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-31-a-i0003 (Took 0:00:00.118932)
+2020-04-30 17:04:33,233 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-11-24-a-i0001 won't be rebuilt.
+2020-04-30 17:04:33,233 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-12-15-a-i0002
+2020-04-30 17:04:33,233 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-18-a-i0002
+2020-04-30 17:04:33,234 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-11-a-i0004
+2020-04-30 17:04:33,234 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-28-a-i0003
+2020-04-30 17:04:33,242 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-15-a-i0002 (Took 0:00:00.053135)
+2020-04-30 17:04:33,242 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-11-a-i0002
+2020-04-30 17:04:33,258 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-07-a-i0004
+2020-04-30 17:04:33,258 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-09-22-a-i0002 (Took 0:00:00.061812)
+2020-04-30 17:04:33,259 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-02-a-i0002
+2020-04-30 17:04:33,260 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-22-a-i0004
+2020-04-30 17:04:33,271 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-26-a-i0001 (Took 0:00:00.049893)
+2020-04-30 17:04:33,284 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-26-a-i0001 (Took 0:00:00.056958)
+2020-04-30 17:04:33,284 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-31-a-i0004
+2020-04-30 17:04:33,285 impresso_commons.text.rebuilder WARNING  Article FedGazDe-1849-11-24-a-i0001 won't be rebuilt.
+2020-04-30 17:04:33,287 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-12-15-a-i0002 (Took 0:00:00.053955)
+2020-04-30 17:04:33,288 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-18-a-i0002 (Took 0:00:00.054959)
+2020-04-30 17:04:33,290 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-11-a-i0004 (Took 0:00:00.056349)
+2020-04-30 17:04:33,304 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-28-a-i0003 (Took 0:00:00.069965)
+2020-04-30 17:04:33,306 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-11-a-i0002 (Took 0:00:00.063320)
+2020-04-30 17:04:33,326 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-07-a-i0004 (Took 0:00:00.067789)
+2020-04-30 17:04:33,341 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-02-a-i0002 (Took 0:00:00.081839)
+2020-04-30 17:04:33,343 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-22-a-i0004 (Took 0:00:00.083103)
+2020-04-30 17:04:33,344 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-26-a-i0002
+2020-04-30 17:04:33,356 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-31-a-i0004 (Took 0:00:00.071608)
+2020-04-30 17:04:33,356 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-18-a-i0003
+2020-04-30 17:04:33,357 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-22-a-i0001
+2020-04-30 17:04:33,357 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-02-28-a-i0004
+2020-04-30 17:04:33,357 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-11-a-i0003
+2020-04-30 17:04:33,357 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-26-a-i0001
+2020-04-30 17:04:33,358 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-02-a-i0003
+2020-04-30 17:04:33,358 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-22-a-i0005
+2020-04-30 17:04:33,363 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-26-a-i0002 (Took 0:00:00.018825)
+2020-04-30 17:04:33,363 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-31-a-i0005
+2020-04-30 17:04:33,364 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-18-a-i0003 (Took 0:00:00.008026)
+2020-04-30 17:04:33,376 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-22-a-i0001 (Took 0:00:00.019386)
+2020-04-30 17:04:33,378 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-02-28-a-i0004 (Took 0:00:00.020970)
+2020-04-30 17:04:33,383 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-11-a-i0003 (Took 0:00:00.025668)
+2020-04-30 17:04:33,390 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-26-a-i0001 (Took 0:00:00.032461)
+2020-04-30 17:04:33,392 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-02-a-i0003 (Took 0:00:00.034297)
+2020-04-30 17:04:33,395 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-22-a-i0005 (Took 0:00:00.036640)
+2020-04-30 17:04:33,395 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-26-a-i0003
+2020-04-30 17:04:33,397 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-31-a-i0005 (Took 0:00:00.033654)
+2020-04-30 17:04:33,397 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-18-a-i0004
+2020-04-30 17:04:33,398 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-06-22-a-i0002
+2020-04-30 17:04:33,399 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-11-a-i0004
+2020-04-30 17:04:33,399 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-26-a-i0002
+2020-04-30 17:04:33,399 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-02-a-i0004
+2020-04-30 17:04:33,400 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-05-22-a-i0006
+2020-04-30 17:04:33,401 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-26-a-i0003 (Took 0:00:00.006058)
+2020-04-30 17:04:33,402 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-21-a-i0001
+2020-04-30 17:04:33,409 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-18-a-i0004 (Took 0:00:00.011980)
+2020-04-30 17:04:33,410 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-06-22-a-i0002 (Took 0:00:00.012573)
+2020-04-30 17:04:33,414 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-11-a-i0004 (Took 0:00:00.015712)
+2020-04-30 17:04:33,416 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-26-a-i0002 (Took 0:00:00.016781)
+2020-04-30 17:04:33,418 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-02-a-i0004 (Took 0:00:00.018406)
+2020-04-30 17:04:33,423 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-26-a-i0004
+2020-04-30 17:04:33,445 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-05-22-a-i0006 (Took 0:00:00.045549)
+2020-04-30 17:04:33,446 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-21-a-i0001 (Took 0:00:00.044820)
+2020-04-30 17:04:33,448 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-08-11-a-i0005
+2020-04-30 17:04:33,448 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-26-a-i0003
+2020-04-30 17:04:33,450 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-26-a-i0004 (Took 0:00:00.026643)
+2020-04-30 17:04:33,451 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-21-a-i0002
+2020-04-30 17:04:33,452 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-08-11-a-i0005 (Took 0:00:00.004806)
+2020-04-30 17:04:33,465 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-26-a-i0003 (Took 0:00:00.017075)
+2020-04-30 17:04:33,477 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-21-a-i0002 (Took 0:00:00.026193)
+2020-04-30 17:04:33,477 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-14-a-i0001
+2020-04-30 17:04:33,477 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-03-26-a-i0004
+2020-04-30 17:04:33,487 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-14-a-i0001 (Took 0:00:00.010105)
+2020-04-30 17:04:33,488 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-03-26-a-i0004 (Took 0:00:00.010479)
+2020-04-30 17:04:33,488 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-14-a-i0002
+2020-04-30 17:04:33,489 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-14-a-i0002 (Took 0:00:00.000617)
+2020-04-30 17:04:33,489 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-14-a-i0003
+2020-04-30 17:04:33,493 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-14-a-i0003 (Took 0:00:00.003533)
+2020-04-30 17:04:33,493 impresso_commons.text.rebuilder INFO     Started rebuilding article FedGazDe-1849-07-14-a-i0004
+2020-04-30 17:04:33,494 impresso_commons.text.rebuilder INFO     Done rebuilding article FedGazDe-1849-07-14-a-i0004 (Took 0:00:00.001472)
+2020-04-30 17:04:37,320 test_rebuilder INFO     ['/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/00.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/01.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/02.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/03.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/04.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/05.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/06.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/07.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/08.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/09.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/10.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/11.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/12.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/13.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/14.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/15.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/16.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/17.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/18.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/19.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/20.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/21.json', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/22.json']
+2020-04-30 17:04:37,320 impresso_commons.text.rebuilder INFO     Compressing 23 JSON files into /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:37,767 impresso_commons.text.rebuilder INFO     Written 7 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/00.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:38,183 impresso_commons.text.rebuilder INFO     Written 6 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/01.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:38,368 impresso_commons.text.rebuilder INFO     Written 8 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/02.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:38,547 impresso_commons.text.rebuilder INFO     Written 5 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/03.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:38,940 impresso_commons.text.rebuilder INFO     Written 7 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/04.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:39,098 impresso_commons.text.rebuilder INFO     Written 6 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/05.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:39,397 impresso_commons.text.rebuilder INFO     Written 9 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/06.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:39,538 impresso_commons.text.rebuilder INFO     Written 9 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/07.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:39,744 impresso_commons.text.rebuilder INFO     Written 14 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/08.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:40,081 impresso_commons.text.rebuilder INFO     Written 10 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/09.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:40,249 impresso_commons.text.rebuilder INFO     Written 9 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/10.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:40,379 impresso_commons.text.rebuilder INFO     Written 7 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/11.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:40,972 impresso_commons.text.rebuilder INFO     Written 8 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/12.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:41,322 impresso_commons.text.rebuilder INFO     Written 7 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/13.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:41,508 impresso_commons.text.rebuilder INFO     Written 4 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/14.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:41,770 impresso_commons.text.rebuilder INFO     Written 4 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/15.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:42,085 impresso_commons.text.rebuilder INFO     Written 5 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/16.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:42,357 impresso_commons.text.rebuilder INFO     Written 5 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/17.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:42,500 impresso_commons.text.rebuilder INFO     Written 5 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/18.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:42,941 impresso_commons.text.rebuilder INFO     Written 11 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/19.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:43,149 impresso_commons.text.rebuilder INFO     Written 10 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/20.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:43,436 impresso_commons.text.rebuilder INFO     Written 6 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/21.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:43,741 impresso_commons.text.rebuilder INFO     Written 6 docs from /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849/22.json to /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2
+2020-04-30 17:04:43,820 impresso_commons.text.rebuilder INFO     Removed temporary directory and files in /home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849
+2020-04-30 17:04:43,827 test_rebuilder INFO     ('FedGazDe-1849', '/home/romanell/impresso_code/impresso-pycommons/impresso_commons/data/rebuilt/FedGazDe-1849.jsonl.bz2')
