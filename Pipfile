@@ -22,9 +22,10 @@ e1839a8 = {path = ".",editable = true}
 "s3fs" = "*"
 bokeh = "*"
 notebook = "*"
-dask-k8 = {editable = true,git = "https://github.com/SeguinBe/dask_k8.git"}
-dask = {extras = ["complete"],version = "==1.2.0"}
-dkpro-cassis = "*"
+distributed = "==2.3.2"
+dask = {extras = ["complete"],version = "==2.3.0"}
+dkpro-pycas-0-1-1a = {editable = true,git = "https://github.com/dkpro/dkpro-pycas.git"}
+dask-k8 = {editable = true,git = "https://github.com/impresso/dask_k8.git"}
 
 [dev-packages]
 jupyter = "*"
