@@ -290,3 +290,27 @@ def test_rebuild_FedGazDe():
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
+
+
+def test_rebuild_excelsior():
+    input_bucket_name = S3_CANONICAL_BUCKET
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt'
+    )
+
+    input_issues = read_s3_issues("excelsior", "1911", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
+
+    issue_key, json_files = rebuild_issues(
+        #issues=input_issues[:50],
+        issues=input_issues,
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=client,
+        format='solr'
+    )
+    logger.info(json_files)
+    result = compress(issue_key, json_files, outp_dir)
+    logger.info(result)
+    assert result is not None
