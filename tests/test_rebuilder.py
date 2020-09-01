@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 DASK_WORKERS_NUMBER = 36
-DASK_MEMORY_LIMIT = "1G"
+DASK_MEMORY_LIMIT = "5G"
 
 S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
 
@@ -38,7 +38,7 @@ elif DASK_SCHEDULER_STRATEGY == 'synchronous':
 
 elif DASK_SCHEDULER_STRATEGY == 'external':
     client = Client('localhost:8686')
-
+    print(f"Dask client {client}")
 
 def test_rebuild_NZZ():
     input_bucket_name = S3_CANONICAL_BUCKET

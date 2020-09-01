@@ -531,12 +531,12 @@ def rebuild_issues(
     issues_bag = db.from_sequence(issues, partition_size=3)
 
     faulty_issues = issues_bag.filter(
-        lambda i: len(i['pp']) == 0
-    ).pluck('id').compute()
+        lambda i: len(i[1]['pp']) == 0
+    ).map(lambda i: i[1]).pluck('id').compute()
     print(f'Issues with no pages (will be skipped): {faulty_issues}')
     print(f"Number of partitions: {issues_bag.npartitions}")
 
-    articles_bag = issues_bag.filter(lambda i: len(i['pp']) > 0)
+    articles_bag = issues_bag.filter(lambda i: len(i[1]['pp']) > 0)\
         .starmap(read_issue_pages, bucket=input_bucket)\
         .starmap(rejoin_articles) \
         .flatten().persist()
