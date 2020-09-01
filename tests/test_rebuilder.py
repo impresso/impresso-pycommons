@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 DASK_WORKERS_NUMBER = 36
-DASK_MEMORY_LIMIT = "1G"
+DASK_MEMORY_LIMIT = "5G"
 
 S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
 
@@ -38,7 +38,7 @@ elif DASK_SCHEDULER_STRATEGY == 'synchronous':
 
 elif DASK_SCHEDULER_STRATEGY == 'external':
     client = Client('localhost:8686')
-
+    print(f"Dask client {client}")
 
 def test_rebuild_NZZ():
     input_bucket_name = S3_CANONICAL_BUCKET
@@ -300,6 +300,29 @@ def test_rebuild_excelsior():
     )
 
     input_issues = read_s3_issues("excelsior", "1911", input_bucket_name)
+    print(f'{len(input_issues)} issues to rebuild')
+
+    issue_key, json_files = rebuild_issues(
+        #issues=input_issues[:50],
+        issues=input_issues,
+        input_bucket=input_bucket_name,
+        output_dir=outp_dir,
+        dask_client=client,
+        format='solr'
+    )
+    logger.info(json_files)
+    result = compress(issue_key, json_files, outp_dir)
+    logger.info(result)
+    assert result is not None
+
+def test_rebuild_oecaen():
+    input_bucket_name = S3_CANONICAL_BUCKET
+    outp_dir = pkg_resources.resource_filename(
+        'impresso_commons',
+        'data/rebuilt'
+    )
+
+    input_issues = read_s3_issues("oecaen", "1914", input_bucket_name)
     print(f'{len(input_issues)} issues to rebuild')
 
     issue_key, json_files = rebuild_issues(
