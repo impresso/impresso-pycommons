@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 DASK_WORKERS_NUMBER = 36
-DASK_MEMORY_LIMIT = "1G"
+DASK_MEMORY_LIMIT = "2G"
 
 S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
 

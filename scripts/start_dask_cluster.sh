@@ -2,4 +2,4 @@
 
 screen -dmS dask-sched-pycommons-test dask-scheduler --port 8686
 screen -dmS dask-work-pycommons-test dask-worker localhost:8686 --nprocs 36\
- --nthreads 1 --memory-limit 2G --local-directory=dask-worker-space
+ --nthreads 1 --memory-limit 5G --local-directory=dask-worker-space
