@@ -42,7 +42,7 @@ setup(
         'smart_open',
         'jsonlines',
         's3fs',
-        'dask_k8'
+        'dask_k8>=0.1.1'
     ],
     dependency_links=[
         'https://github.com/impresso/dask_k8/tarball/master#egg=dask_k8-0.1.1',
