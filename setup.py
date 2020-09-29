@@ -42,10 +42,10 @@ setup(
         'smart_open',
         'jsonlines',
         's3fs',
-        'dask_k8>=0.1.1'
+        'dask_k8'
     ],
     dependency_links=[
-        'https://github.com/impresso/dask_k8.git#egg=dask_k8-0.1.1',
+        'https://github.com/impresso/dask_k8.git#egg=dask_k8',
     ]
 )
 
