@@ -18,3 +18,6 @@ formatter = logging.Formatter(
 )
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
+S3_CANONICAL_BUCKET = "s3://canonical-data"
+S3_REBUILT_BUCKET = "s3://rebuilt-data"

@@ -1,6 +1,7 @@
 import dask
 import os
 from pytest import mark
+from conftest import S3_CANONICAL_BUCKET
 from impresso_commons.text.rebuilder import rebuild_issues, compress
 from impresso_commons.path.path_s3 import read_s3_issues
 from dask.distributed import Client
@@ -9,10 +10,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-DASK_WORKERS_NUMBER = 36
-DASK_MEMORY_LIMIT = "5G"
+DASK_WORKERS_NUMBER = 8
+DASK_MEMORY_LIMIT = "3G"
 
-S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
+# now global variables are imported from conftest.py
+#S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
 
 # Use an env var to determine the type of dask scheduling to run:
 # 1) synchronous; distributed external or distributed internal
