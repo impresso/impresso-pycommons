@@ -36,16 +36,18 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        #'DKPro_PyCAS',
-        'opencv-python>=3.4,<4',
+        'dkpro-cassis',
+        'scikit-build',
+        'cmake',
+        'opencv-python==3.4.7.28',
         'numpy',
         'smart_open',
         'jsonlines',
-        's3fs',
+        's3fs==0.4.2',
         'dask_k8'
     ],
     dependency_links=[
-        'https://github.com/impresso/dask_k8.git#egg=dask_k8',
+        'https://github.com/impresso/dask_k8/tarball/master#egg=dask_k8',
     ]
 )
 
