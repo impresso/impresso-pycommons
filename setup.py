@@ -51,4 +51,3 @@ setup(
     ]
 )
 
-# TODO: add dkpro-pycas
