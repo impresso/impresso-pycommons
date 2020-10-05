@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # a simple data structure to represent input directories
 # a `Document.zip` file is expected to be found in `IssueDir.path`
 IssueDir = namedtuple(
-    "IssueDirectory", [
+    "IssueDir", [
         'journal',
         'date',
         'edition',
