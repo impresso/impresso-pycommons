@@ -1,6 +1,7 @@
 import dask
 import os
 from pytest import mark
+# global variables are imported from conftest.py
 from conftest import S3_CANONICAL_BUCKET
 from impresso_commons.text.rebuilder import rebuild_issues, compress
 from impresso_commons.path.path_s3 import read_s3_issues
@@ -11,10 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 DASK_WORKERS_NUMBER = 8
-DASK_MEMORY_LIMIT = "3G"
-
-# now global variables are imported from conftest.py
-#S3_CANONICAL_BUCKET = "s3://original-canonical-staging"
+DASK_MEMORY_LIMIT = "1G"
 
 # Use an env var to determine the type of dask scheduling to run:
 # 1) synchronous; distributed external or distributed internal
@@ -42,18 +40,37 @@ elif DASK_SCHEDULER_STRATEGY == 'external':
     client = Client('localhost:8686')
     print(f"Dask client {client}")
 
-def test_rebuild_NZZ():
+limit_issues = 10
+test_data = [
+    ("NZZ", 1897, limit_issues),
+    ("JDG", 1830, limit_issues),
+    ("JDG", 1862, limit_issues),
+    ("GDL", 1806, limit_issues),
+    ("IMP", 1994, limit_issues),
+    ("luxzeit1858", 1858, limit_issues),
+    ("indeplux", 1905, limit_issues),
+    ("luxwort", 1860, limit_issues),
+    ("buergerbeamten", 1909, limit_issues),
+    ("FedGazDe", 1849, limit_issues),
+    ("excelsior", 1911, limit_issues),
+    ("oecaen", 1914, limit_issues)
+
+]
+
+@pytest.mark.parametrize("newspaper_id, year, limit", test_data)
+def test_rebuild_solr(newspaper_id : str, year : int, limit : int):
     input_bucket_name = S3_CANONICAL_BUCKET
     outp_dir = pkg_resources.resource_filename(
         'impresso_commons',
         'data/rebuilt'
     )
 
-    input_issues = read_s3_issues("NZZ", "1897", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
+    input_issues = read_s3_issues(newspaper_id, year, input_bucket_name)
+    print(f'{newspaper_id}/{year}: {len(input_issues)} issues to rebuild')
+    print(f'limiting test rebuild to first {limit} issues.')
 
     issue_key, json_files = rebuild_issues(
-        issues=input_issues,
+        issues=input_issues[:limit],
         input_bucket=input_bucket_name,
         output_dir=outp_dir,
         dask_client=client,
@@ -63,192 +80,6 @@ def test_rebuild_NZZ():
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
-
-
-def test_rebuild_JDG():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("JDG", "1830", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_JDG2():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("JDG", "1862", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_GDL():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("GDL", "1806", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_IMP():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("IMP", "1994", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues[:50],
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-    logger.info(json_files)
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_luxzeit1858():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("luxzeit1858", "1858", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues[:50],
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_indeplux():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("indeplux", "1905", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues[:50],
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr',
-        filter_language=['fr']
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_luxwort():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("luxwort", "1860", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=None,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_buergerbeamten():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("buergerbeamten", "1909", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=None,
-        format='solr'
-    )
-
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
 
 def test_rebuild_for_passim():
     input_bucket_name = S3_CANONICAL_BUCKET
@@ -268,74 +99,3 @@ def test_rebuild_for_passim():
         filter_language=['fr']
     )
     logger.info(f'{issue_key}: {json_files}')
-
-
-def test_rebuild_FedGazDe():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("FedGazDe", "1849", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        #issues=input_issues[:50],
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-    logger.info(json_files)
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-
-def test_rebuild_excelsior():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("excelsior", "1911", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        #issues=input_issues[:50],
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-    logger.info(json_files)
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
-
-def test_rebuild_oecaen():
-    input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
-
-    input_issues = read_s3_issues("oecaen", "1914", input_bucket_name)
-    print(f'{len(input_issues)} issues to rebuild')
-
-    issue_key, json_files = rebuild_issues(
-        #issues=input_issues[:50],
-        issues=input_issues,
-        input_bucket=input_bucket_name,
-        output_dir=outp_dir,
-        dask_client=client,
-        format='solr'
-    )
-    logger.info(json_files)
-    result = compress(issue_key, json_files, outp_dir)
-    logger.info(result)
-    assert result is not None
