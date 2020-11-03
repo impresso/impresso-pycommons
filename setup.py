@@ -10,7 +10,7 @@ DESCRIPTION = "Python module with bits of code (objects, functions)\
     highly reusable within impresso."
 
 setup(
-    name='impresso_commons',
+    name='impresso_pycommons',
     author='Matteo Romanello, Maud Ehrmann',
     author_email='matteo.romanello@epfl.ch, maud.ehrmann@epfl.ch',
     url='https://github.com/impresso/impresso-pycommons',
@@ -18,7 +18,7 @@ setup(
     packages=find_packages(),
     package_data={
         'impresso_commons': [
-            'data/',
+            'data/xmi/*.xml',
         ]
     },
     entry_points={
@@ -45,9 +45,6 @@ setup(
         'jsonlines',
         's3fs==0.4.2',
         'dask_k8'
-    ],
-    dependency_links=[
-        'https://github.com/impresso/dask_k8/tarball/master#egg=dask_k8',
     ]
 )
 
