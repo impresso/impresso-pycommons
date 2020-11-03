@@ -19,6 +19,7 @@ setup(
     package_data={
         'impresso_commons': [
             'data/xmi/*.xml',
+            'data/config/*.json'
         ]
     },
     entry_points={
@@ -27,7 +28,14 @@ setup(
             'impresso-rebuilder = impresso_commons.text.rebuilder:main'
         ]
     },
+    python_requires='>=3.6',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
+    ],
     long_description=DESCRIPTION,
+    long_description_content_type='text/markdown',
     install_requires=[
         'dask[complete]',
         'distributed',
@@ -47,4 +55,3 @@ setup(
         'dask_k8'
     ]
 )
-

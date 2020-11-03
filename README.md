@@ -1,87 +1,16 @@
-# impresso-pycommons
-Python module with bits of code (objects, functions) highly reusable within impresso.
+# impresso_pycommons
 
-* `impresso_commons.path`: contains objects and functions related to parsing impresso's canonical directory structure.
+Python module with bits of code (objects, functions) highly-reusable within the [impresso project](https://impresso-project.ch/).
 
-* `impresso_commons.images`: contains objects and functions related to working with images such as conversions of image box coordinates, etc.
+Please refer to the [documentation](https://impresso-pycommons.readthedocs.io/) for further information on this library.
 
 ## Installation
 
 With `pip`:
 
-    pip install https://<github_user>:<github_pwd>@github.com/impresso/impresso-pycommons/archive/master.zip
-
-With `pipenv`:
-
-    pipenv install -e git+https://github.com/impresso/impresso-pycommons.git#egg=impresso_commons
-
-With `pipenv` for a specific branch:
-
-    pipenv install -e git+ssh://git@github.com/impresso/impresso-pycommons.git@mybranch#egg=impresso_commons
-
-
-## Usage
-
-```python
->>> from impresso_commons.path.path_fs import detect_issues
->>> issues = detect_issues("../impresso-text-acquisition/text_importer/data/sample_data/")
->>> print(issues)
-```
-
-
-## Development settings
-
-**Version**
-
-`3.6`
-
-**Documentation**
-
-Python docstring style https://pythonhosted.org/an_example_pypi_project/sphinx.html
-
-Sphinx configuration file (`docs/conf.py`) generated with:
-
-    sphinx-quickstart --ext-githubpages
-
-To compile the documentation
-
 ```bash
-cd docs/
-make html
+pip install impresso_pycommons
 ```
-
-To view locally:
-
-Install `http-sever` (a node-js package):
-
-    npm install http-server -g
-
-Then:
-
-    cd docs
-    http-server
-
-And you'll be able to browse it at <http://127.0.0.1:8080>.
-
-
-
-**Testing**
-
-Python pytest framework: https://pypi.org/project/pytest/
-
-Tox: https://tox.readthedocs.io/en/latest/
-
-**Passing arguments**
-
-Doctopt: http://docopt.org/
-
-or
-
-argparse: https://docs.python.org/3.6/howto/argparse.html
-
-**Style**
-
-4 space indentation
 
 ## License
 
@@ -89,6 +18,6 @@ The 'impresso - Media Monitoring of the Past' project is funded by the Swiss Nat
 
 Copyright (C) 2020  The *impresso* team (contributors to this program: Matteo Romanello, Maud Ehrmann, Alex Flückinger, Edoardo Tarek Hölzl).
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. 
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [GNU Affero General Public License](https://github.com/impresso/impresso-pycommons/blob/master/LICENSE) for more details.
