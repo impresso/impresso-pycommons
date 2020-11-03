@@ -19,6 +19,7 @@ Options:
 import traceback
 import datetime
 import json
+import pathlib
 import logging
 import os
 import shutil
@@ -507,7 +508,7 @@ def rebuild_issues(
 
     def mkdir(path):
         if not os.path.exists(path):
-            os.mkdir(path)
+            pathlib.Path(path).mkdir(parents=True, exist_ok=True)
         else:
             for f in os.listdir(path):
                 os.remove(os.path.join(path, f))

@@ -1,6 +1,6 @@
 import dask
 import os
-from pytest import mark
+import pytest
 # global variables are imported from conftest.py
 from conftest import S3_CANONICAL_BUCKET
 from impresso_commons.text.rebuilder import rebuild_issues, compress
@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 DASK_WORKERS_NUMBER = 8
-DASK_MEMORY_LIMIT = "1G"
+DASK_MEMORY_LIMIT = "2G"
 
 # Use an env var to determine the type of dask scheduling to run:
 # 1) synchronous; distributed external or distributed internal
