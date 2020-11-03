@@ -7,6 +7,7 @@ import pytest
 import pkg_resources
 from dask import bag as db
 
+from conftest import S3_CANONICAL_BUCKET, S3_REBUILT_BUCKET
 from impresso_commons.classes import ContentItem, ContentItemCase
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT as impresso_s3
 from impresso_commons.utils.uima import rebuilt2xmi, get_iiif_links
@@ -14,8 +15,8 @@ from impresso_commons.utils.uima import rebuilt2xmi, get_iiif_links
 
 # TODO: add some test data from chroniclingamerica to test percentage coordinates
 test_data = [
-    ("s3://original-canonical-staging", "s3://canonical-rebuilt-release", "IMP", 1998, False),
-    ("s3://original-canonical-staging", "s3://canonical-rebuilt-release", "indeplux", 1898, False),
+    (S3_CANONICAL_BUCKET, S3_REBUILT_BUCKET, "IMP", 1908, False),
+    (S3_CANONICAL_BUCKET, S3_REBUILT_BUCKET, "indeplux", 1898, False),
 ]
 
 
@@ -28,10 +29,10 @@ def test_rebuilt2xmi(canonical_bucket, rebuilt_bucket, newspaper, year, pct_coor
 
     rebuilt_path = os.path.join(rebuilt_bucket, newspaper, f'{newspaper}-{year}.jsonl.bz2')
     b = db.read_text(rebuilt_path, storage_options=impresso_s3)
-    texts = b.compute()
+    texts = b.take(20)
 
     # we take only an arbitrary document as a test
-    text = json.loads(texts[10])
+    text = json.loads(texts[-1])
     doc = ContentItem.from_json(data=text, case=ContentItemCase.FULL)
 
     iiif_mappings = get_iiif_links([doc], canonical_bucket)

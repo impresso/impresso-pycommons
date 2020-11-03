@@ -34,11 +34,12 @@ ipdb = "*"
 isort = "*"
 "flake8" = "*"
 pytest = "*"
-tox = "*"
+tox = "==3.2.0"
 graphviz = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 black = "*"
+tox-pyenv = "*"
 
 [pipenv]
 allow_prereleases = true

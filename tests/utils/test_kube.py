@@ -19,10 +19,10 @@ def test_dask_cluster():
             docker_image="ic-registry.epfl.ch/dhlab/impresso_pycommons:v1"
         )
     )
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
     cluster.create()
     cluster.scale(2, blocking=True)
     dask_client = cluster.make_dask_client()
     print(dask_client)
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
     cluster.close()

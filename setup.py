@@ -10,7 +10,7 @@ DESCRIPTION = "Python module with bits of code (objects, functions)\
     highly reusable within impresso."
 
 setup(
-    name='impresso_commons',
+    name='impresso_pycommons',
     author='Matteo Romanello, Maud Ehrmann',
     author_email='matteo.romanello@epfl.ch, maud.ehrmann@epfl.ch',
     url='https://github.com/impresso/impresso-pycommons',
@@ -18,7 +18,8 @@ setup(
     packages=find_packages(),
     package_data={
         'impresso_commons': [
-            'data/',
+            'data/xmi/*.xml',
+            'data/config/*.json'
         ]
     },
     entry_points={
@@ -27,7 +28,14 @@ setup(
             'impresso-rebuilder = impresso_commons.text.rebuilder:main'
         ]
     },
+    python_requires='>=3.6',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
+    ],
     long_description=DESCRIPTION,
+    long_description_content_type='text/markdown',
     install_requires=[
         'dask[complete]',
         'distributed',
@@ -36,17 +44,14 @@ setup(
         'bs4',
         'docopt',
         'deprecated',
-        #'DKPro_PyCAS',
-        'opencv-python>=3.4,<4',
+        'dkpro-cassis',
+        'scikit-build',
+        'cmake',
+        'opencv-python==3.4.7.28',
         'numpy',
         'smart_open',
         'jsonlines',
-        's3fs',
+        's3fs==0.4.2',
         'dask_k8'
-    ],
-    dependency_links=[
-        'https://github.com/impresso/dask_k8.git#egg=dask_k8',
     ]
 )
-
-# TODO: add dkpro-pycas
