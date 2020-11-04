@@ -1,6 +1,7 @@
 """Config for Pypi."""
 
 import os
+import pathlib
 from setuptools import setup, find_packages
 from impresso_commons import __version__
 
