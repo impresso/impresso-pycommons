@@ -1,6 +1,5 @@
 """Config for Pypi."""
 
-import os
 import pathlib
 from setuptools import setup, find_packages
 from impresso_commons import __version__
@@ -11,7 +10,7 @@ VERSION = __version__
 HERE = pathlib.Path(__file__).parent
 
 # The text of the README file
-README = (os.path.join(HERE, "README.md")).read_text()
+README = (HERE / "README.md").read_text()
 
 
 DESCRIPTION = "Python module with bits of code (objects, functions)\
