@@ -1,9 +1,16 @@
 """Config for Pypi."""
 
+import os
 from setuptools import setup, find_packages
 from impresso_commons import __version__
 
 VERSION = __version__
+
+# The directory containing this file
+HERE = pathlib.Path(__file__).parent
+
+# The text of the README file
+README = (os.path.join(HERE, "README.md")).read_text()
 
 
 DESCRIPTION = "Python module with bits of code (objects, functions)\
@@ -34,7 +41,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7'
     ],
-    long_description=DESCRIPTION,
+    long_description=README,
     long_description_content_type='text/markdown',
     install_requires=[
         'dask[complete]',

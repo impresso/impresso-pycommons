@@ -1,5 +1,9 @@
 # impresso_pycommons
 
+[![Documentation Status](https://readthedocs.org/projects/impresso-pycommons/badge/?version=latest)](https://impresso-pycommons.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/impresso-pycommons.svg)](https://badge.fury.io/py/impresso-pycommons)
+![PyPI - License](https://img.shields.io/pypi/l/impresso-pycommons)
+
 Python module with bits of code (objects, functions) highly-reusable within the [impresso project](https://impresso-project.ch/).
 
 Please refer to the [documentation](https://impresso-pycommons.readthedocs.io/) for further information on this library.
