@@ -48,17 +48,15 @@ setup(
         'distributed',
         'boto',
         'boto3',
-        'bs4',
         'docopt',
         'deprecated',
         'dkpro-cassis',
         'scikit-build',
         'cmake',
-        'opencv-python==3.4.7.28',
+        'opencv-python>=3.4.18.65',
         'numpy',
         'smart_open',
         'jsonlines',
-        's3fs==0.4.2',
-        'dask_k8'
+        's3fs>=0.4.2'
     ]
 )
