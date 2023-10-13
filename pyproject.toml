@@ -4,9 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "impresso_pycommons"
-version = "0.12.7"
 authors = [
-    {name="Maud Ehrmann", email="maud.ehrmann@epfl.ch"}
+    {name="Maud Ehrmann", email="maud.ehrmann@epfl.ch"},
     {name="Matteo Romanello", email="matteo.romanello@gmail.com"}
 ]
 description = "Python module highly reusable within impresso."
@@ -23,13 +22,14 @@ classifiers = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
 ]
+dynamic = ["version"]
 
 dependencies = [
     "dask[complete]",
     "distributed",
     "boto",
     "boto3",
-    "beatifulsoup4",
+    "beautifulsoup4",
     "docopt",
     "deprecated",
     "dkpro-cassis",
@@ -45,6 +45,13 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/impresso/impresso-pycommons"
 Documentaton = "https://impresso-pycommons.readthedocs.io/en/latest/" 
+
+[tool.setuptools.dynamic]
+version = {attr = "impresso_commons.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["impresso_commons*"]
+namespaces = false
 
 [tool.setuptools.package-data]
 impresso_commons = [
