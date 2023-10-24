@@ -731,6 +731,9 @@ def main():
             if cluster:
                 cluster.close()
 
+        logger.info("---------- Done ----------")
+        print("---------- Done ----------")
+
     elif arguments["rebuild_pages"]:
         print("\nFunction not yet implemented (sorry!).\n")
 

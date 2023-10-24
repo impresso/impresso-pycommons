@@ -434,10 +434,7 @@ def alternative_read_text(s3_key, s3_credentials):
     )
     s3_endpoint = s3_credentials['client_kwargs']['endpoint_url']
     transport_params = {
-        'session': session,
-        'resource_kwargs': {
-            'endpoint_url': s3_endpoint,
-        }
+        'client': session.client('s3', endpoint_url=s3_endpoint),
     }
 
     with s_open(s3_key, 'r', transport_params=transport_params) as infile:
