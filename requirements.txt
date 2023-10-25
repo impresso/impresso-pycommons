@@ -2,7 +2,8 @@ beautifulsoup4==4.12.2
 boto==2.49.0
 boto3==1.28.70
 dask==2023.10.0
-dask_k8==0.1.1
+git+https://github.com/dkpro/dkpro-pycas.git
+git+https://github.com/impresso/dask_k8.git
 docopt==0.6.2
 jsonlines==3.1.0
 numpy==1.24.3
