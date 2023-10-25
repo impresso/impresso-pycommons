@@ -54,7 +54,6 @@ setup(
         'dkpro-cassis',
         'scikit-build',
         'cmake',
-        'opencv-python==3.4.7.28',
         'numpy',
         'smart_open',
         'jsonlines',
