@@ -4,9 +4,10 @@ import os
 import json
 import pytest
 
-import pkg_resources
+from contextlib import ExitStack
 from dask import bag as db
 
+from impresso_commons.utils.utils import get_pkg_resource
 from conftest import S3_CANONICAL_BUCKET, S3_REBUILT_BUCKET
 from impresso_commons.classes import ContentItem, ContentItemCase
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT as impresso_s3
@@ -24,8 +25,9 @@ test_data = [
 def test_rebuilt2xmi(canonical_bucket, rebuilt_bucket, newspaper, year, pct_coordinates):
     """Tests that the UIMA/XMI of rebuilt data works as expected."""
 
-    output_dir = pkg_resources.resource_filename('impresso_commons', 'data/xmi')
-    typesystem = pkg_resources.resource_filename('impresso_commons', 'data/xmi/typesystem.xml')
+    file_mng = ExitStack()
+    output_dir = get_pkg_resource(file_mng, 'data/xmi')
+    typesystem = get_pkg_resource(file_mng, 'data/xmi/typesystem.xml')
 
     rebuilt_path = os.path.join(rebuilt_bucket, newspaper, f'{newspaper}-{year}.jsonl.bz2')
     b = db.read_text(rebuilt_path, storage_options=impresso_s3)
@@ -41,3 +43,4 @@ def test_rebuilt2xmi(canonical_bucket, rebuilt_bucket, newspaper, year, pct_coor
     # check that the output xmi file exists
     expected_filename = os.path.join(output_dir, f"{doc.id}.xmi")
     assert os.path.exists(expected_filename)
+    file_mng.close()

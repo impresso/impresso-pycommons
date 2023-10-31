@@ -5,8 +5,9 @@ import pytest
 from conftest import S3_CANONICAL_BUCKET
 from impresso_commons.text.rebuilder import rebuild_issues, compress
 from impresso_commons.path.path_s3 import read_s3_issues
+from impresso_commons.utils.utils import get_pkg_resource
 from dask.distributed import Client
-import pkg_resources
+from contextlib import ExitStack
 import logging
 
 logger = logging.getLogger(__name__)
@@ -59,11 +60,9 @@ test_data = [
 
 @pytest.mark.parametrize("newspaper_id, year, limit", test_data)
 def test_rebuild_solr(newspaper_id : str, year : int, limit : int):
+    file_mng = ExitStack()
     input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt'
-    )
+    outp_dir = get_pkg_resource(file_mng, 'data/rebuilt')
 
     input_issues = read_s3_issues(newspaper_id, year, input_bucket_name)
     print(f'{newspaper_id}/{year}: {len(input_issues)} issues to rebuild')
@@ -80,13 +79,12 @@ def test_rebuild_solr(newspaper_id : str, year : int, limit : int):
     result = compress(issue_key, json_files, outp_dir)
     logger.info(result)
     assert result is not None
+    file_mng.close()
 
 def test_rebuild_for_passim():
     input_bucket_name = S3_CANONICAL_BUCKET
-    outp_dir = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/rebuilt-passim'
-    )
+    file_mng = ExitStack()
+    outp_dir = get_pkg_resource(file_mng, 'data/rebuilt-passim')
 
     input_issues = read_s3_issues("luxwort", "1848", input_bucket_name)
 
@@ -99,3 +97,4 @@ def test_rebuild_for_passim():
         filter_language=['fr']
     )
     logger.info(f'{issue_key}: {json_files}')
+    file_mng.close()

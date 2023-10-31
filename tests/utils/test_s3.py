@@ -1,13 +1,13 @@
 import dask.bag as db
 import json
-import pytest
-import pkg_resources
 import glob
 import os
+from contextlib import ExitStack
 
+from impresso_commons.utils.utils import get_pkg_resource
 from impresso_commons.utils.s3 import get_bucket, get_s3_versions, read_jsonlines
 from impresso_commons.utils.daskutils import create_even_partitions
-from impresso_commons.utils.config_loader import TextImporterConfig
+from impresso_commons.utils.config_loader import PartitionerConfig
 
 
 def test_get_s3_versions():
@@ -36,9 +36,11 @@ def test_read_jsonlines():
 
 
 def test_create_even_partitions():
-    dir_partition = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/partitions/'
+    file_mng = ExitStack()
+    dir_partition = get_pkg_resource(
+        file_mng,
+        'data/partitions/',
+        package='impresso_commons'
     )
 
     config_newspapers = {
@@ -61,18 +63,21 @@ def test_create_even_partitions():
 
     partitions = glob.glob(os.path.join(dir_partition, "*.bz2"))
     assert len(partitions) == 100
+    file_mng.close()
 
 
 def test_load_config():
-    file = pkg_resources.resource_filename(
-        'impresso_commons',
+    file_mng = ExitStack()
+    file = get_pkg_resource(
+        file_mng,
         'config/solr_ci_builder_config.example.json'
     )
     np = {'GDL': [1940, 1941]}
-    config = TextImporterConfig.from_json(file)
+    config = PartitionerConfig.from_json(file)
     assert config.bucket_rebuilt == "canonical-rebuilt"
     assert config.newspapers == np
     assert config.solr_server == "https://dhlabsrv18.epfl.ch/solr/"
     assert config.solr_core == "impresso_sandbox"
+    file_mng.close()
 
 
