@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8 --nworkers=<nw>]
 
 Options:
 
@@ -14,6 +14,7 @@ Options:
 --clear  Remove output directory before and after rebuilding
 --k8  Launch on a dask kubernetes cluster (requires credentials in `~/.kube/`)
 --format=<fo>  stuff
+--nworkers=<nw>  number of workers for (local) dask client
 """  # noqa: E501
 
 import traceback
@@ -528,7 +529,7 @@ def rebuild_issues(
     issue_dir = os.path.join(output_dir, key)
     db.from_sequence([issue_dir]).map(mkdir).compute()
 
-    print("Fleshing out articles by issue...")
+    print("Fleshing out articles by issue...") # warning about large graph comes here
     issues_bag = db.from_sequence(issues, partition_size=3)
 
     faulty_issues = issues_bag.filter(
@@ -629,6 +630,7 @@ def main():
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
     launch_kubernetes = arguments["--k8"]
+    nworkers = arguments["--nworkers"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
 
@@ -673,7 +675,11 @@ def main():
             print(client)
         else:
             cluster = None
-            client = Client(processes=False, n_workers=8, threads_per_worker=1)
+            if nworkers is not None:
+                print(f"nworkers: {nworkers}")
+                client = Client(processes=False, n_workers=int(nworkers), threads_per_worker=1)
+            else:
+                client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         cluster = None
         client = Client(scheduler)
@@ -721,6 +727,8 @@ def main():
                     .starmap(cleanup)
                 future = b.persist()
                 progress(future)
+                # clear memory of objects once computations are done
+                client.cancel(future)  
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
