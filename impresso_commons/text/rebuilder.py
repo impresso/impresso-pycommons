@@ -474,7 +474,7 @@ def _article_has_problem(article):
     return article['has_problem']
 
 
-def _article_wihtout_problem(article):
+def _article_without_problem(article):
     """Helper function to keep articles without problems.
 
     :param article: input article
@@ -527,7 +527,7 @@ def rebuild_issues(
     issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
     issue_dir = os.path.join(output_dir, key)
-    db.from_sequence([issue_dir]).map(mkdir).compute()
+    mkdir(issue_dir)
 
     print("Fleshing out articles by issue...") # warning about large graph comes here
     issues_bag = db.from_sequence(issues, partition_size=3)
@@ -536,6 +536,7 @@ def rebuild_issues(
         lambda i: len(i[1]['pp']) == 0
     ).map(lambda i: i[1]).pluck('id').compute()
     print(f'Issues with no pages (will be skipped): {faulty_issues}')
+    del faulty_issues
     print(f"Number of partitions: {issues_bag.npartitions}")
 
     articles_bag = issues_bag.filter(lambda i: len(i[1]['pp']) > 0)\
@@ -549,8 +550,9 @@ def rebuild_issues(
         .pluck('id')\
         .compute()
     print(f'Skipped articles: {faulty_articles_n}')
+    del faulty_articles_n
 
-    articles_bag = articles_bag.filter(_article_wihtout_problem)\
+    articles_bag = articles_bag.filter(_article_without_problem)\
         .map(rebuild_function)\
         .persist()
 
@@ -569,6 +571,7 @@ def rebuild_issues(
         result = articles_bag.map(json.dumps)\
             .to_textfiles('{}/*.json'.format(issue_dir))
 
+    dask_client.cancel(issues_bag)  
     print("done.")
 
     return (key, result)
@@ -716,7 +719,7 @@ def main():
                         filter_language=languages
                     )
                     rebuilt_issues.append((issue_key, json_files))
-
+                    del input_issues
                 print((
                     f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
                     f"to {output_bucket_name}"
@@ -729,6 +732,8 @@ def main():
                 progress(future)
                 # clear memory of objects once computations are done
                 client.cancel(future)  
+                client.cancel(rebuilt_issues) 
+                print("cancelled futures")
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
