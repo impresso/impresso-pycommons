@@ -73,6 +73,10 @@ RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install \
     "s3fs>=2023.3.0" \
     jupyter
 
+EXPOSE 8080
+EXPOSE 8786
+EXPOSE 8787
+
 # Set the working directory
 WORKDIR /home/$USER_NAME/impresso_pycommons
 

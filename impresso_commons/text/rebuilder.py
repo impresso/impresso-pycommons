@@ -29,7 +29,7 @@ from sys import exit
 
 import dask.bag as db
 import jsonlines
-from dask.distributed import Client, progress
+from dask.distributed import Client, LocalCluster, progress
 from dask_k8 import DaskCluster
 from docopt import docopt
 from smart_open import smart_open
@@ -535,8 +535,10 @@ def rebuild_issues(
     faulty_issues = issues_bag.filter(
         lambda i: len(i[1]['pp']) == 0
     ).map(lambda i: i[1]).pluck('id').compute()
+    logger.debug(f'Issues with no pages (will be skipped): {faulty_issues}')
     print(f'Issues with no pages (will be skipped): {faulty_issues}')
     del faulty_issues
+    logger.debug(f"Number of partitions: {issues_bag.npartitions}")
     print(f"Number of partitions: {issues_bag.npartitions}")
 
     articles_bag = issues_bag.filter(lambda i: len(i[1]['pp']) > 0)\
@@ -549,6 +551,7 @@ def rebuild_issues(
         .pluck('m')\
         .pluck('id')\
         .compute()
+    logger.debug(f'Skipped articles: {faulty_articles_n}')
     print(f'Skipped articles: {faulty_articles_n}')
     del faulty_articles_n
 
@@ -572,6 +575,7 @@ def rebuild_issues(
             .to_textfiles('{}/*.json'.format(issue_dir))
 
     dask_client.cancel(issues_bag)  
+    logger.info("done.")
     print("done.")
 
     return (key, result)
@@ -679,9 +683,14 @@ def main():
         else:
             cluster = None
             if nworkers is not None:
-                print(f"nworkers: {nworkers}")
-                client = Client(processes=False, n_workers=int(nworkers), threads_per_worker=1)
+                cluster = LocalCluster()
+                cluster.adapt(minimum=1, maximum=int(nworkers))
+                logger.info(f"nworkers: {nworkers}. Turned on adaptivity of the cluster from 1 to {nworkers}")
+                print(f"nworkers: {nworkers}. Turned on adaptivity of the cluster from 1 to {nworkers}")
+                client = Client(cluster)
+                #client = Client(processes=False, n_workers=int(nworkers), threads_per_worker=1)
             else:
+                
                 client = Client(processes=False, n_workers=8, threads_per_worker=1)
     else:
         cluster = None
@@ -693,11 +702,14 @@ def main():
         try:
             for n, batch in enumerate(config):
                 rebuilt_issues = []
+                logger.info(f'Processing batch {n + 1}/{len(config)} [{batch}]')
                 print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
                 newspaper = list(batch.keys())[0]
                 start_year, end_year = batch[newspaper]
 
                 for year in range(start_year, end_year):
+                    logger.info(f'Processing year {year}')
+                    logger.info('Retrieving issues...')
                     print(f'Processing year {year}')
                     print('Retrieving issues...')
                     try:
@@ -707,6 +719,7 @@ def main():
                             bucket_name
                         )
                     except FileNotFoundError:
+                        logger.info(f'{newspaper}-{year} not found in {bucket_name}')
                         print(f'{newspaper}-{year} not found in {bucket_name}')
                         continue
 
@@ -720,6 +733,10 @@ def main():
                     )
                     rebuilt_issues.append((issue_key, json_files))
                     del input_issues
+                logger.info((
+                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                    f"to {output_bucket_name}"
+                ))
                 print((
                     f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
                     f"to {output_bucket_name}"
