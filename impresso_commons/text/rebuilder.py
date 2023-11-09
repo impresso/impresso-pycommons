@@ -683,19 +683,15 @@ def main():
         else:
             cluster = None
             if nworkers is not None:
-                cluster = LocalCluster()
-                cluster.adapt(minimum=1, maximum=int(nworkers))
-                logger.info(f"nworkers: {nworkers}. Turned on adaptivity of the cluster from 1 to {nworkers}")
-                print(f"nworkers: {nworkers}. Turned on adaptivity of the cluster from 1 to {nworkers}")
-                client = Client(cluster)
-                #client = Client(processes=False, n_workers=int(nworkers), threads_per_worker=1)
+                client = Client(n_workers=int(nworkers), threads_per_worker=1)
             else:
                 
-                client = Client(processes=False, n_workers=8, threads_per_worker=1)
+                client = Client(n_workers=8, threads_per_worker=1)
     else:
         cluster = None
         client = Client(scheduler)
     logger.info(f"Dask cluster: {client}")
+    print(f"Dask cluster: {client}")
 
     if arguments["rebuild_articles"]:
 
