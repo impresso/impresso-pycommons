@@ -744,9 +744,9 @@ def main():
                 future = b.persist()
                 progress(future)
                 # clear memory of objects once computations are done
-                client.cancel(future)  
-                client.cancel(rebuilt_issues) 
-                print("cancelled futures")
+                client.restart()
+                print(f"Restarted client after finishing processing batch {n + 1}")
+                logger.info(f"Restarted client after finishing processing batch {n + 1}")
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
