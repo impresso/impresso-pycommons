@@ -34,10 +34,9 @@ from docopt import docopt
 from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
-from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
-from impresso_commons.text.helpers import (pages_to_article, read_issue,
-                                           read_issue_pages, rejoin_articles)
+from impresso_commons.path.path_s3 import read_s3_issues
+from impresso_commons.text.helpers import (read_issue_pages, rejoin_articles,
+                                           reconstruct_iiif_link)
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.kube import (make_scheduler_configuration,
                                          make_worker_configuration)
@@ -268,19 +267,7 @@ def rebuild_for_solr(article_metadata):
     }
 
     if mapped_type == "img":
-        suffix = "full/0/default.jpg"
-        if (
-            "iiif_link" in article_metadata["m"] and
-            article_metadata["m"]['iiif_link'] is not None
-        ):
-            iiif_link = article_metadata["m"]["iiif_link"]
-            article['iiif_link'] = os.path.join(
-                os.path.dirname(iiif_link),
-                ",".join([str(c) for c in article_metadata["c"]]),
-                suffix
-            )
-        else:
-            article['iiif_link'] = None
+        article['iiif_link'] = reconstruct_iiif_link(article_metadata)
 
     if 't' in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]

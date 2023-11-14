@@ -1,8 +1,9 @@
-"""TODO"""
+"""Helper functions for the text `rebuilder.py` script."""
 
 import json
 import logging
 import os
+from typing import Any
 
 from dask import bag as db
 
@@ -12,6 +13,10 @@ from impresso_commons.utils.s3 import (IMPRESSO_STORAGEOPT,
 
 logger = logging.getLogger(__name__)
 
+IIIF_ENDPOINT_BASE_2_SUFFIX = {
+    'https://ub-sipi.ub.unibas.ch/impresso': 'max/0/default.jpg', # suffix for SWA data
+    'https://scriptorium.bcu-lausanne.ch/api': '600,/0/default.jpg' # suffix for BCUL data
+}
 
 def read_issue(issue, bucket_name, s3_client=None):
     """Read the data from S3 for a given newspaper issue.
@@ -184,3 +189,69 @@ def text_apply_breaks(fulltext, breaks):
     text.append(fulltext[start:])
 
     return text
+
+
+def get_iiif_and_coords(ci: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Fetch the iiif link and image coordinates from CI metadata.
+
+    Adapts to the various cases currently present in the canonical data, see
+    https://github.com/impresso/impresso-text-acquisition/issues/117.
+
+    Args:
+        ci (dict[str, Any]): Content item to retrieve the information from.
+
+    Returns:
+        tuple[str | None, str | None]: IIIF link and coordinates as string or
+            None if part of the information is missing from the content item
+    """
+    if "iiif_link" in ci or 'iiif_link' in ci['m']:
+        iiif_link = (ci['m']['iiif_link'] 
+                     if 'iiif_link' in ci['m'] else ci['iiif_link'])
+
+        if 'c' in ci or 'c' in ci['m']:
+            coords = ci['c'] if 'c' in ci else ci['m']['c']
+
+            if iiif_link and coords:
+                return iiif_link, ",".join([str(c) for c in coords])
+    return None, None
+
+
+def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
+    """Construct the iiif link to the CI's image based on its metadata.
+
+    A iiif link to the manifest and the image coordinates are to be fetched
+    from the content item first.
+    Different importers (and endpoints) have different formats, needing
+    different processing. 
+    In addition, some canonical data has the wrong iiif link in the metadata.
+    This function adapts to these variations, more details in issue:
+    https://github.com/impresso/impresso-text-acquisition/issues/117
+
+    Args:
+        content_item (dict[str, Any]): Content item in canonical format.
+
+    Returns:
+        str: iiif link to the image area of the content item if present in the
+            CI metadata, else None.
+    """
+    img_suffix="full/0/default.jpg"
+
+    iiif, coords = get_iiif_and_coords(content_item)
+    if iiif:
+        # recover the url base to which the image suffix should be appended
+        url_base, old_suffix = os.path.split(iiif)
+        if old_suffix in ['manifest.json', 'default.jpg']:
+            # case of bnf and bnf-en (https://gallica.bnf.fr/iiif/{ARK}/f1/full/full/0/manifest.json)
+            # and case of image url instead of manifest (suffix is "{coords}/full/0/default.jpg")
+            url_base = '/'.join(url_base.split('/')[:-3])
+        elif old_suffix != 'info.json':
+            logger.warning(f"Unexpected iiif url suffix: {old_suffix} "
+                           f"for CI with id: {content_item['id']}.")
+        
+        # SWA and BCUL data have a different image suffix than other endpoints
+        for iiif_base, iiif_suffix in IIIF_ENDPOINT_BASE_2_SUFFIX.items():
+            img_suffix = iiif_suffix if url_base in iiif_base else img_suffix
+
+        # reconstruct the final link
+        return os.path.join(url_base, coords, img_suffix)
+    return None
