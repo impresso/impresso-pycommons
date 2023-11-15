@@ -219,11 +219,11 @@ def get_iiif_and_coords(ci: dict[str, Any]) -> tuple[str | None, str | None]:
 def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
     """Construct the iiif link to the CI's image based on its metadata.
 
-    A iiif link to the manifest and the image coordinates are to be fetched
+    A iiif image API link and the image coordinates are to be fetched
     from the content item first.
     Different importers (and endpoints) have different formats, needing
     different processing. 
-    In addition, some canonical data has the wrong iiif link in the metadata.
+    In addition, some inconsistencies exist in the canonical data.
     This function adapts to these variations, more details in issue:
     https://github.com/impresso/impresso-text-acquisition/issues/117
 
