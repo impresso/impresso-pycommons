@@ -240,9 +240,8 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
     if iiif:
         # recover the url base to which the image suffix should be appended
         url_base, old_suffix = os.path.split(iiif)
-        if old_suffix in ['manifest.json', 'default.jpg']:
-            # case of bnf and bnf-en (https://gallica.bnf.fr/iiif/{ARK}/f1/full/full/0/manifest.json)
-            # and case of image url instead of manifest (suffix is "{coords}/full/0/default.jpg")
+        if old_suffix in ['default.jpg']:
+            # case of image uri instead of info (suffix is "{coords}/full/0/default.jpg")
             url_base = '/'.join(url_base.split('/')[:-3])
         elif old_suffix != 'info.json':
             logger.warning(f"Unexpected iiif url suffix: {old_suffix} "
