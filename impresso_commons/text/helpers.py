@@ -239,18 +239,22 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
     iiif, coords = get_iiif_and_coords(content_item)
     if iiif:
         # recover the url base to which the image suffix should be appended
-        url_base, old_suffix = os.path.split(iiif)
-        if old_suffix in ['default.jpg']:
-            # case of image uri instead of info (suffix is "{coords}/full/0/default.jpg")
-            url_base = '/'.join(url_base.split('/')[:-3])
+        uri_base, old_suffix = os.path.split(iiif)
+
+        # SWA and BCUL data have a different image suffix than other endpoints
+        for iiif_base, iiif_suffix in IIIF_ENDPOINT_BASE_2_SUFFIX.items():
+            img_suffix = iiif_suffix if uri_base in iiif_base else img_suffix
+
+        if old_suffix == 'default.jpg':
+            # iiif was already constructed according to needs.
+            if coords in iiif and img_suffix in iiif:
+                return iiif
+            # uri was already of image, but not correct.
+            uri_base = '/'.join(uri_base.split('/')[:-3])
         elif old_suffix != 'info.json':
             logger.warning(f"Unexpected iiif url suffix: {old_suffix} "
                            f"for CI with id: {content_item['id']}.")
         
-        # SWA and BCUL data have a different image suffix than other endpoints
-        for iiif_base, iiif_suffix in IIIF_ENDPOINT_BASE_2_SUFFIX.items():
-            img_suffix = iiif_suffix if url_base in iiif_base else img_suffix
-
-        # reconstruct the final link
-        return os.path.join(url_base, coords, img_suffix)
+        # reconstruct the final image link
+        return os.path.join(uri_base, coords, img_suffix)
     return None
