@@ -1,5 +1,4 @@
 # https://stackoverflow.com/questions/11320782/bash-getting-pid-of-daemonized-screen-session
 
-screen -dmS dask-sched-pycommons-test dask-scheduler --port 8686
-screen -dmS dask-work-pycommons-test dask-worker localhost:8686 --nprocs 36\
- --nthreads 1 --memory-limit 5G --local-directory=dask-worker-space
+screen -dmS scheduler . /opt/conda/etc/profile.d/conda.sh ; dask scheduler --port 8786
+screen -dmS workers . /opt/conda/etc/profile.d/conda.sh ; dask-worker localhost:8786 --workers 36 --nthreads 1 --memory-limit 6G

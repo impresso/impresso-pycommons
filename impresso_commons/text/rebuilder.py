@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8 --nworkers=<nw>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw>]
 
 Options:
 
@@ -12,7 +12,6 @@ Options:
 --filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
 --verbose  Set logging level to DEBUG (by default is INFO)
 --clear  Remove output directory before and after rebuilding
---k8  Launch on a dask kubernetes cluster (requires credentials in `~/.kube/`)
 --format=<fo>  stuff
 --nworkers=<nw>  number of workers for (local) dask client
 """  # noqa: E501
@@ -621,10 +620,9 @@ def main():
         # Handle any cleanup here
         print(
             'SIGINT or CTRL-C detected. Exiting gracefully'
-            ' and shutting down the dask kubernetes cluster'
+            ' and shutting down the dask local cluster'
         )
-        if cluster:
-            cluster.close()
+        client.shutdown()
         exit(0)
 
     arguments = docopt(__doc__)
@@ -636,8 +634,7 @@ def main():
     output_format = arguments["--format"]
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
-    launch_kubernetes = arguments["--k8"]
-    nworkers = arguments["--nworkers"]
+    nworkers = arguments["--nworkers"] if arguments["--nworkers"] else 8
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
 
@@ -659,39 +656,12 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        if launch_kubernetes:
-            cluster = DaskCluster(
-                namespace="dhlab",
-                cluster_id="impresso-pycommons-k8-rebuild",
-                scheduler_pod_spec=make_scheduler_configuration(),
-                worker_pod_spec=make_worker_configuration(
-                    docker_image="ic-registry.epfl.ch/dhlab/impresso_pycommons:v1",
-                    memory="5G"
-                )
-            )
-            try:
-                cluster.create()
-                cluster.scale(50, blocking=True)
-                client = cluster.make_dask_client()
-                print(client.get_versions(check=False))
-            except Exception as e:
-                print(e)
-                cluster.close()
-                exit(0)
-
-            print(client)
-        else:
-            cluster = None
-            if nworkers is not None:
-                client = Client(n_workers=int(nworkers), threads_per_worker=1)
-            else:
-                
-                client = Client(n_workers=8, threads_per_worker=1)
+        client = Client(n_workers=nworkers, threads_per_worker=1)
     else:
         cluster = None
         client = Client(scheduler)
-    logger.info(f"Dask cluster: {client}")
-    print(f"Dask cluster: {client}")
+    logger.info(f"Dask local cluster: {client}")
+    print(f"Dask local cluster: {client}")
 
     if arguments["rebuild_articles"]:
 
@@ -751,11 +721,9 @@ def main():
         except Exception as e:
             traceback.print_tb(e.__traceback__)
             print(e)
-            if cluster:
-                cluster.close()
+            client.shutdown()
         finally:
-            if cluster:
-                cluster.close()
+            client.shutdown()
 
         logger.info("---------- Done ----------")
         print("---------- Done ----------")

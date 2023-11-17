@@ -62,13 +62,12 @@ RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install \
 	pandas PyYAML jsonlines pytest
 
 RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install \
-    git+https://github.com/impresso/dask_k8.git \
     boto \
     boto3 \
     docopt \
-    "kubernetes>=9.0.0,<10" \
+    kubernetes \
     "urllib3>1.21.1<1.25" \
-    "opencv-python>=3.4,<=4" \
+    opencv-python \
     smart_open \
     "s3fs>=2023.3.0" \
     jupyter
