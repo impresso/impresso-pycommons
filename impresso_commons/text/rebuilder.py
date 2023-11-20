@@ -29,7 +29,6 @@ from sys import exit
 import dask.bag as db
 import jsonlines
 from dask.distributed import Client, LocalCluster, progress
-from dask_k8 import DaskCluster
 from docopt import docopt
 from smart_open import smart_open
 
@@ -39,8 +38,6 @@ from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
 from impresso_commons.text.helpers import (pages_to_article, read_issue,
                                            read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
-from impresso_commons.utils.kube import (make_scheduler_configuration,
-                                         make_worker_configuration)
 from impresso_commons.utils.s3 import get_s3_resource
 
 logger = logging.getLogger(__name__)
