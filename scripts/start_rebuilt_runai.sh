@@ -47,9 +47,9 @@ echo "Using user: $USER_NAME"
 # move to directory containing init script
 cd /home/$USER_NAME/dhlab-data/data/$USER_NAME-data
 
-# make init script exectuable and execute it.
-chmod -x init_rebuilt_runai.sh 
-. init_rebuilt_runai.sh
+# make config script exectuable and execute it.
+chmod -x config_rebuilt_runai.sh 
+. config_rebuilt_runai.sh
 
 # sanity check
 echo "Sanity check: env. variable log_file: $log_file"
