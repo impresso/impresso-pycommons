@@ -96,5 +96,9 @@ Then, the script can directly be launched with:
 ```
 . scripts/start_rebuilt_runai.sh  
 ```
+By default, this script will start a local Dask cluster with 64 workers. Alternatively, the number of workers can be modified by specifying the corresponding option:
+```
+. scripts/start_rebuilt_runai.sh --nworkers <num>
+```
 
 Note: The docker image can also easily be modified to directly run the script upon start. It was not added to the current Dockerfile to allow for slightly more control and a possibility to modify scripts on the pod if necessary.
