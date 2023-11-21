@@ -1,5 +1,5 @@
 # Set base image
-FROM daskdev/dask:latest-py3.11
+FROM daskdev/dask:2023.11.0-py3.11
 
 # Set environment variables for user
 ENV GROUP_NAME=DHLAB-unit
@@ -41,28 +41,12 @@ RUN useradd -ms /bin/bash -u $USER_ID -g $GROUP_ID $USER_NAME
 # Add new user to sudoers
 RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Add Conda
-ENV CONDA_PREFIX=/home/${USER_NAME}/.conda
-ENV CONDA=/home/${USER_NAME}/.conda/condabin/conda
-
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
-    bash miniconda.sh -b -p ${CONDA_PREFIX} && \
-    rm miniconda.sh && \
-    ${CONDA} config --set auto_activate_base false && \
-    ${CONDA} init bash && \
-    ${CONDA} create --name rebuilt python=3.11
-
-ENV PATH="/home/${USER_NAME}/.conda/envs/rebuilt/bin:$PATH"
-
-RUN /home/${USER_NAME}/.conda/condabin/conda create -n rebuilt python=3.11 pip
-
-RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install --upgrade pip setuptools
-RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install \
-	numpy scipy pillow beautifulsoup4 \
-	pandas PyYAML jsonlines pytest
-
-RUN /home/${USER_NAME}/.conda/condabin/conda run -n rebuilt pip install \
-    boto \
+# install desired libraries. 
+# TODO remove boto once it's removed from all functions.
+RUN pip install --upgrade pip setuptools
+RUN pip install numpy scipy pillow beautifulsoup4 pandas PyYAML jsonlines pytest
+RUN pip install \
+    boto \ 
     boto3 \
     docopt \
     kubernetes \
@@ -88,7 +72,7 @@ RUN chown -R ${USER_NAME}:${GROUP_NAME} /home/${USER_NAME}/impresso_pycommons
 # Switch to the new user
 USER $USER_NAME
 
-RUN /home/$USER_NAME/.conda/condabin/conda run -n rebuilt pip install -e .
+RUN pip install -e .
 
 # Make sure the script launching the rebuilt is executable
 RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/start_rebuilt_runai.sh
