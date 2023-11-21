@@ -90,4 +90,7 @@ USER $USER_NAME
 
 RUN /home/$USER_NAME/.conda/condabin/conda run -n rebuilt pip install -e .
 
+# Make sure the script launching the rebuilt is executable
+RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/start_rebuilt_runai.sh
+
 CMD ["sleep", "infinity"]
