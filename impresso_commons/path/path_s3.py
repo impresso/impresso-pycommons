@@ -41,9 +41,12 @@ class s3ContentItem:
 
 def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
     """
-    List the content of a bucket using pagination. No filtering besides indicated prefix and accept_key lambda.
+    List the content of a bucket using pagination. 
+    No filtering besides indicated prefix and accept_key lambda.
+
     :param bucket_name: string, e.g. 'original-canonical-data'
-    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical structure within the bucket
+    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical 
+        structure within the bucket
     :param accept_key: lambda function, to accept or reject a specific key
     @return: arrays of keys
     """

@@ -13,7 +13,7 @@ def test_impresso_iter_bucket():
 
     iter_items = impresso_iter_bucket(
         bucket_name="original-canonical-data",
-        item_type="content_item",
+        item_type="issue",
         # prefix = 'GDL/1950'
         filter_config=np_config
     )
@@ -37,7 +37,7 @@ def test_s3_filter_archives():
 
 
 def test_s3_filter_archives_timebucket():
-    config = {"GDL": [1798, 1999, 10]}
+    config = {"GDL": [1799, 1999, 10]}
     b = get_bucket("canonical-rebuilt", create=False)
     keys = s3_filter_archives(b.name, config=config)
     assert keys is not None

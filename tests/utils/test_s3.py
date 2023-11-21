@@ -46,8 +46,6 @@ def test_create_even_partitions():
     config_newspapers = {
         "GDL": [1804, 1805]
     }
-    bucket_partition_name = None
-    bucket_partition_prefix = None
     keep_full = True,
     nb_partition = 100  # 500 on all data
 
@@ -56,9 +54,8 @@ def test_create_even_partitions():
     create_even_partitions(bucket,
                            config_newspapers,
                            dir_partition,
-                           bucket_partition_name,
-                           bucket_partition_prefix,
-                           keep_full,
+                           local_fs=True,
+                           keep_full=keep_full,
                            nb_partition=nb_partition)
 
     partitions = glob.glob(os.path.join(dir_partition, "*.bz2"))
