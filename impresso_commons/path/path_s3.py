@@ -2,6 +2,7 @@
 
 import json
 import logging
+import warnings
 from datetime import date
 from collections import namedtuple
 
@@ -13,7 +14,7 @@ from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
 
 logger = logging.getLogger(__name__)
-
+_WARNED = False
 # a simple data structure to represent input directories
 IssueDir = namedtuple(
     "IssueDirectory", [
@@ -176,6 +177,12 @@ def impresso_iter_bucket(bucket_name,
     :param partition_size: partition size of dask to build the object (Issuedir or ContentItem)
     @return: an array of (filtered) IssueDir or ContentItems.
     """
+    global _WARNED
+    if not _WARNED:
+        warning = ("This function is depreciated and cannot be trusted to yield"
+                   " correct outputs. Please use s3_iter_bucket instead.")
+        logger.warning(warning)
+        warnings.warn(warning, DeprecationWarning)
     # either prefix or config, but not both
     if prefix and filter_config:
         logger.error("Provide either a prefix or a config but not both")

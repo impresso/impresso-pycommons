@@ -28,10 +28,15 @@ def get_storage_options():
 
 
 IMPRESSO_STORAGEOPT = get_storage_options()
+
 _WARNING = """As the boto library is being removed from this package the 
     following functions are depreciated and should be replaced:
     - get_s3_connection, to be replaced by get_s3_resource.
-    - get_bucket_boto3, to be replaced by get_bucket.
+    - get_bucket_boto3 and get_bucket, to be replaced by get_or_create_bucket.
+    
+    The objects returned by boto3 differ from the ones returned by boto, which 
+    might cause issues in the code. Please refer to this migration guide:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/migrations3.html
 """
 _WARNED = False
 
@@ -103,7 +108,7 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
 
     Note: 
         This function is depreciated, as it used boto instead of boto3, 
-        please prioritize using `get_s3_resource()` instead.
+        please prioritize using get_s3_resource instead.
 
     :param host_url: the s3 endpoint's URL
     :type host_url: string
@@ -111,14 +116,12 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
     """
     global _WARNED
     if not _WARNED:
-        logger.warning(_WARNING)
-        warnings.warn(msg, DeprecationWarning)
+        warnings.warn(_WARNING, DeprecationWarning)
         _WARNED = True
     return get_s3_resource()
 
-
-def get_bucket(name, create=False, versioning=True):
-    """Create a boto s3 connection and returns the requested bucket.
+def get_or_create_bucket(name, create=False, versioning=True):
+    """Create a boto3 s3 connection and returns the requested bucket.
 
     It is possible to ask for creating a new bucket
     with the specified name (in case it does not exist), and (optionally)
@@ -126,6 +129,7 @@ def get_bucket(name, create=False, versioning=True):
     >>> b = get_bucket('testb', create=False)
     >>> b = get_bucket('testb', create=True)
     >>> b = get_bucket('testb', create=True, versioning=False)
+
     :param name: the bucket's name
     :type name: string
     :param create: creates the bucket if not yet existing
@@ -161,21 +165,19 @@ def get_bucket(name, create=False, versioning=True):
 
     return bucket
 
-
-def get_bucket_boto3(name, create=False, versioning=True):
-    """Get a boto3 s3 resource and returns the requested bucket.
+def get_bucket(name, create=False, versioning=True):
+    """Create a boto s3 connection and returns the requested bucket.
 
     It is possible to ask for creating a new bucket
     with the specified name (in case it does not exist), and (optionally)
     to turn on the versioning on the newly created bucket.
-
     >>> b = get_bucket('testb', create=False)
     >>> b = get_bucket('testb', create=True)
     >>> b = get_bucket('testb', create=True, versioning=False)
 
     Note:
-        This function is depreciated, as `get_bucket()` has been updated to use
-        boto3, please prioritize using `get_bucket()` instead.
+        This function is depreciated, please prioritize using 
+        get_or_create_bucket or get_boto3_bucket instead.
 
     :param name: the bucket's name
     :type name: string
@@ -189,9 +191,41 @@ def get_bucket_boto3(name, create=False, versioning=True):
     global _WARNED
     if not _WARNED:
         logger.warning(_WARNING)
-        warnings.warn(msg, DeprecationWarning)
+        warnings.warn(_WARNING, DeprecationWarning)
         _WARNED = True
-    return get_bucket(name, create=create, versioning=versioning
+    return get_or_create_bucket(name, create=create, versioning=versioning)
+
+
+def get_bucket_boto3(name, create=False, versioning=True):
+    """Get a boto3 s3 resource and returns the requested bucket.
+
+    It is possible to ask for creating a new bucket
+    with the specified name (in case it does not exist), and (optionally)
+    to turn on the versioning on the newly created bucket.
+
+    >>> b = get_bucket('testb', create=False)
+    >>> b = get_bucket('testb', create=True)
+    >>> b = get_bucket('testb', create=True, versioning=False)
+
+    Note:
+        This function is depreciated, please prioritize using 
+        get_or_create_bucket or get_boto3_bucket instead.
+
+    :param name: the bucket's name
+    :type name: string
+    :param create: creates the bucket if not yet existing
+    :type create: boolean
+    :param versioning: whether the new bucket should be versioned
+    :type versioning: boolean
+    :return: an s3 bucket
+    :rtype: `boto3.resources.factory.s3.Bucket`
+    """
+    global _WARNED
+    if not _WARNED:
+        logger.warning(_WARNING)
+        warnings.warn(_WARNING, DeprecationWarning)
+        _WARNED = True
+    return get_or_create_bucket(name, create=create, versioning=versioning)
 
 
 def s3_get_articles(issue, bucket, workers=None):

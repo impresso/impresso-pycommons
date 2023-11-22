@@ -1,24 +1,36 @@
 #!/usr/bin/env python3
 # coding: utf-8
-
+import pytest
 from impresso_commons.path.path_s3 import (impresso_iter_bucket,
                                            s3_filter_archives, s3_iter_bucket)
 from impresso_commons.utils.s3 import get_bucket
 
+impresso_iter_bucket_testdata = [
+    #("original-canonical-data", "issue", None, 'GDL/issues/GDL-1950', 'not None'), 
+    ("rebuilt-data", "item", {"GDL": [1950, 1951]}, None, 'Empty'),
+    ("original-canonical-data", "item", {"GDL": [1950, 1951]}, 'GDL/pages/GDL-1950', 'None'),
+]
 
-def test_impresso_iter_bucket():
-    np_config = {
-        "GDL": [1950, 1951],
-    }
+@pytest.mark.parametrize(
+    "bucket,type,np_config,prefix,expected", 
+    impresso_iter_bucket_testdata
+)
+def test_impresso_iter_bucket(bucket, type, np_config, prefix, expected):
 
     iter_items = impresso_iter_bucket(
-        bucket_name="original-canonical-data",
-        item_type="issue",
-        # prefix = 'GDL/1950'
+        bucket_name=bucket,
+        item_type=type,
+        prefix = prefix,
         filter_config=np_config
     )
-    assert iter_items is not None
-    assert len(iter_items) > 0
+
+    if expected == 'not None':
+        assert iter_items is not None
+        assert len(iter_items) > 0
+    elif expected == 'Empty':
+        assert len(iter_items) == 0
+    else:
+        assert iter_items is None
 
 
 def test_s3_iter_bucket():
