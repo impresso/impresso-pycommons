@@ -116,6 +116,7 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
     """
     global _WARNED
     if not _WARNED:
+        logger.warning(_WARNING)
         warnings.warn(_WARNING, DeprecationWarning)
         _WARNED = True
     return get_s3_resource()
