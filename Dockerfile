@@ -46,7 +46,6 @@ RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN pip install --upgrade pip setuptools
 RUN pip install numpy scipy pillow beautifulsoup4 pandas PyYAML jsonlines pytest
 RUN pip install \
-    boto \ 
     boto3 \
     docopt \
     kubernetes \
