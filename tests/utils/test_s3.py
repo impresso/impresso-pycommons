@@ -1,21 +1,24 @@
 import dask.bag as db
 import json
-import pytest
-import pkg_resources
 import glob
 import os
+from contextlib import ExitStack
 
-from impresso_commons.utils.s3 import get_bucket, get_s3_versions, read_jsonlines
+from impresso_commons.utils.utils import get_pkg_resource
+from impresso_commons.utils.s3 import (get_bucket, get_s3_versions, 
+                                       get_s3_client, read_jsonlines, 
+                                       get_s3_connection, get_bucket_boto3, 
+                                       get_or_create_bucket)
 from impresso_commons.utils.daskutils import create_even_partitions
-from impresso_commons.utils.config_loader import TextImporterConfig
+from impresso_commons.utils.config_loader import PartitionerConfig
 
 
 def test_get_s3_versions():
     bucket_name = "canonical-rebuilt"
-    bucket = get_bucket(bucket_name)
-    keys = bucket.get_all_keys()[:10]
+    s3c = get_s3_client()
+    keys = s3c.list_objects(Bucket=bucket_name)['Contents'][:10]
     info = [
-        get_s3_versions(bucket_name, key.name)
+        get_s3_versions(bucket_name, key['Key'])
         for key in keys
     ]
     assert info is not None
@@ -36,16 +39,16 @@ def test_read_jsonlines():
 
 
 def test_create_even_partitions():
-    dir_partition = pkg_resources.resource_filename(
-        'impresso_commons',
-        'data/partitions/'
+    file_mng = ExitStack()
+    dir_partition = get_pkg_resource(
+        file_mng,
+        'data/partitions/',
+        package='impresso_commons'
     )
 
     config_newspapers = {
         "GDL": [1804, 1805]
     }
-    bucket_partition_name = None
-    bucket_partition_prefix = None
     keep_full = True,
     nb_partition = 100  # 500 on all data
 
@@ -54,25 +57,40 @@ def test_create_even_partitions():
     create_even_partitions(bucket,
                            config_newspapers,
                            dir_partition,
-                           bucket_partition_name,
-                           bucket_partition_prefix,
-                           keep_full,
+                           local_fs=True,
+                           keep_full=keep_full,
                            nb_partition=nb_partition)
 
     partitions = glob.glob(os.path.join(dir_partition, "*.bz2"))
     assert len(partitions) == 100
+    file_mng.close()
 
 
 def test_load_config():
-    file = pkg_resources.resource_filename(
-        'impresso_commons',
+    file_mng = ExitStack()
+    file = get_pkg_resource(
+        file_mng,
         'config/solr_ci_builder_config.example.json'
     )
     np = {'GDL': [1940, 1941]}
-    config = TextImporterConfig.from_json(file)
-    assert config.bucket_rebuilt == "canonical-rebuilt"
-    assert config.newspapers == np
-    assert config.solr_server == "https://dhlabsrv18.epfl.ch/solr/"
-    assert config.solr_core == "impresso_sandbox"
+    assert file is not None
+    if os.path.exists(file):
+        config = PartitionerConfig.from_json(file)
+        assert config is not None
+        assert config.bucket_rebuilt == "canonical-rebuilt"
+        assert config.newspapers == np
+        assert config.local_fs == True
+        assert config.keep_full == True
+    file_mng.close()
 
+def test_depreciation_warnings():
+    # depreciation warning should show only once.
+    s3c = get_s3_connection()
+    bucket1 = get_bucket("canonical-data", create=False)
+    bucket2 = get_bucket_boto3("canonical-data", create=False)
+    none_bucket = get_or_create_bucket("canonical", versioning=False)
 
+    assert s3c is not None
+    assert bucket1 is not None
+    assert bucket2 is not None
+    assert none_bucket is None

@@ -6,12 +6,11 @@ Warning: 2 boto libraries are used, and need to be kept until third party lib de
 import os
 import logging
 import json
+import warnings
 
-import boto
 import boto3
 import bz2
-from boto.s3.connection import OrdinaryCallingFormat
-from smart_open import s3_iter_bucket
+from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 
 from impresso_commons.utils import _get_cores
@@ -30,6 +29,16 @@ def get_storage_options():
 
 IMPRESSO_STORAGEOPT = get_storage_options()
 
+_WARNING = """As the boto library is being removed from this package the 
+    following functions are depreciated and should be replaced:
+    - get_s3_connection, to be replaced by get_s3_resource.
+    - get_bucket_boto3 and get_bucket, to be replaced by get_or_create_bucket.
+    
+    The objects returned by boto3 differ from the ones returned by boto, which 
+    might cause issues in the code. Please refer to this migration guide:
+    https://boto3.amazonaws.com/v1/documentation/api/latest/guide/migrations3.html
+"""
+_WARNED = False
 
 def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
     if host_url is None:
@@ -97,82 +106,27 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
     Assumes that two environment variables are set: `SE_ACCESS_KEY` and
         `SE_SECRET_KEY`.
 
-     :param host_url: the s3 endpoint's URL
+    Note: 
+        This function is depreciated, as it used boto instead of boto3, 
+        please prioritize using get_s3_resource instead.
+
+    :param host_url: the s3 endpoint's URL
     :type host_url: string
-    :rtype: `boto.s3.connection`
+    :rtype: `boto3.resources.factory.s3.ServiceResource`
     """
-    try:
-        access_key = os.environ["SE_ACCESS_KEY"]
-    except Exception:
-        raise
+    global _WARNED
+    if not _WARNED:
+        logger.warning(_WARNING)
+        warnings.warn(_WARNING, DeprecationWarning)
+        _WARNED = True
+    return get_s3_resource()
 
-    try:
-        secret_key = os.environ["SE_SECRET_KEY"]
-    except Exception:
-        raise
-
-    return boto.connect_s3(
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        host=host,
-        calling_format=OrdinaryCallingFormat(),
-    )
-
-
-def get_bucket(name, create=False, versioning=True):
-    """Create a boto s3 connection and returns the requested bucket.
+def get_or_create_bucket(name, create=False, versioning=True):
+    """Create a boto3 s3 connection and returns the requested bucket.
 
     It is possible to ask for creating a new bucket
     with the specified name (in case it does not exist), and (optionally)
     to turn on the versioning on the newly created bucket.
-    >>> b = get_bucket('testb', create=False)
-    >>> b = get_bucket('testb', create=True)
-    >>> b = get_bucket('testb', create=True, versioning=False)
-    :param name: the bucket's name
-    :type name: string
-    :param create: creates the bucket if not yet existing
-    :type create: boolean
-    :param versioning: whether the new bucket should be versioned
-    :type versioning: boolean
-    :return: an s3 bucket
-    :rtype: `boto.s3.bucket.Bucket`
-    .. TODO:: avoid import both `boto` and `boto3`
-    """
-    conn = get_s3_connection()
-    # try to fetch the specified bucket -- may return an empty list
-    bucket = [b for b in conn.get_all_buckets() if b.name == name]
-
-    try:
-        assert len(bucket) > 0
-        return bucket[0]
-
-    # bucket not found
-    except AssertionError:
-        if create:
-            bucket = conn.create_bucket(name)
-            print(f'New bucket {name} was created')
-        else:
-            print(f'Bucket {name} not found')
-            return None
-
-    # enable versioning
-    if versioning:
-        client = get_s3_resource()
-        versioning = client.BucketVersioning(name)
-        versioning.enable()
-
-    print(bucket.get_versioning_status())
-
-    return bucket
-
-
-def get_bucket_boto3(name, create=False, versioning=True):
-    """Get a boto3 s3 resource and returns the requested bucket.
-
-    It is possible to ask for creating a new bucket
-    with the specified name (in case it does not exist), and (optionally)
-    to turn on the versioning on the newly created bucket.
-
     >>> b = get_bucket('testb', create=False)
     >>> b = get_bucket('testb', create=True)
     >>> b = get_bucket('testb', create=True, versioning=False)
@@ -186,9 +140,9 @@ def get_bucket_boto3(name, create=False, versioning=True):
     :return: an s3 bucket
     :rtype: `boto3.resources.factory.s3.Bucket`
     """
-    s3 = get_s3_resource()
+    s3r = get_s3_resource()
     # try to fetch the specified bucket -- may return an empty list
-    bucket = [b for b in s3.buckets.all() if b.name == name]
+    bucket = [b for b in s3r.buckets.all() if b.name == name]
 
     try:
         assert len(bucket) > 0
@@ -197,7 +151,7 @@ def get_bucket_boto3(name, create=False, versioning=True):
     # bucket not found
     except AssertionError:
         if create:
-            bucket = s3.create_bucket(Bucket=name)
+            bucket = s3r.create_bucket(Bucket=name)
             print(f'New bucket {name} was created')
         else:
             print(f'Bucket {name} not found')
@@ -205,12 +159,74 @@ def get_bucket_boto3(name, create=False, versioning=True):
 
     # enable versioning
     if versioning:
-        bucket_versioning = s3.BucketVersioning(name)
+        bucket_versioning = s3r.BucketVersioning(name)
         bucket_versioning.enable()
 
     print(f"Versioning: {bucket_versioning.status}")
 
     return bucket
+
+def get_bucket(name, create=False, versioning=True):
+    """Create a boto s3 connection and returns the requested bucket.
+
+    It is possible to ask for creating a new bucket
+    with the specified name (in case it does not exist), and (optionally)
+    to turn on the versioning on the newly created bucket.
+    >>> b = get_bucket('testb', create=False)
+    >>> b = get_bucket('testb', create=True)
+    >>> b = get_bucket('testb', create=True, versioning=False)
+
+    Note:
+        This function is depreciated, please prioritize using 
+        get_or_create_bucket or get_boto3_bucket instead.
+
+    :param name: the bucket's name
+    :type name: string
+    :param create: creates the bucket if not yet existing
+    :type create: boolean
+    :param versioning: whether the new bucket should be versioned
+    :type versioning: boolean
+    :return: an s3 bucket
+    :rtype: `boto3.resources.factory.s3.Bucket`
+    """
+    global _WARNED
+    if not _WARNED:
+        logger.warning(_WARNING)
+        warnings.warn(_WARNING, DeprecationWarning)
+        _WARNED = True
+    return get_or_create_bucket(name, create=create, versioning=versioning)
+
+
+def get_bucket_boto3(name, create=False, versioning=True):
+    """Get a boto3 s3 resource and returns the requested bucket.
+
+    It is possible to ask for creating a new bucket
+    with the specified name (in case it does not exist), and (optionally)
+    to turn on the versioning on the newly created bucket.
+
+    >>> b = get_bucket('testb', create=False)
+    >>> b = get_bucket('testb', create=True)
+    >>> b = get_bucket('testb', create=True, versioning=False)
+
+    Note:
+        This function is depreciated, please prioritize using 
+        get_or_create_bucket or get_boto3_bucket instead.
+
+    :param name: the bucket's name
+    :type name: string
+    :param create: creates the bucket if not yet existing
+    :type create: boolean
+    :param versioning: whether the new bucket should be versioned
+    :type versioning: boolean
+    :return: an s3 bucket
+    :rtype: `boto3.resources.factory.s3.Bucket`
+    """
+    global _WARNED
+    if not _WARNED:
+        logger.warning(_WARNING)
+        warnings.warn(_WARNING, DeprecationWarning)
+        _WARNED = True
+    return get_or_create_bucket(name, create=create, versioning=versioning)
 
 
 def s3_get_articles(issue, bucket, workers=None):
@@ -220,13 +236,14 @@ def s3_get_articles(issue, bucket, workers=None):
     :type issue: an instance of `impresso_commons.path.IssueDir`
     :param bucket: the input s3 bucket
     :type bucket: `boto.s3.bucket.Bucket`
-    :param workers: number of workers for the s3_iter_bucket function. If None, will be the number of detected CPUs.
+    :param workers: number of workers for the iter_bucket function. 
+        If None, will be the number of detected CPUs.
     :return: a list of articles (dictionaries)
 
     NB: Content items with type = "ad" (advertisement) are filtered out.
     """
     nb_workers = _get_cores() if workers is None else workers
-    issue_data = list(s3_iter_bucket(bucket, prefix=issue.path, workers=nb_workers))
+    issue_data = list(iter_bucket(bucket, prefix=issue.path, workers=nb_workers))
     print(issue_data)
     issue_data = issue_data[0][1]
     issue_json = json.loads(issue_data.decode('utf-8'))
@@ -434,10 +451,7 @@ def alternative_read_text(s3_key, s3_credentials):
     )
     s3_endpoint = s3_credentials['client_kwargs']['endpoint_url']
     transport_params = {
-        'session': session,
-        'resource_kwargs': {
-            'endpoint_url': s3_endpoint,
-        }
+        'client': session.client('s3', endpoint_url=s3_endpoint),
     }
 
     with s_open(s3_key, 'r', transport_params=transport_params) as infile:

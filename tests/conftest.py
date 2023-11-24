@@ -1,6 +1,8 @@
 import pathlib
 import logging
-import pkg_resources
+from contextlib import ExitStack
+
+from impresso_commons.utils.utils import get_pkg_resource
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -9,9 +11,10 @@ logger.setLevel(logging.INFO)
 logging.getLogger('botocore').setLevel(logging.WARNING)
 logging.getLogger('smart_open').setLevel(logging.WARNING)
 
-log_dir = pkg_resources.resource_filename('impresso_commons', 'data/logs/')
-log_file = pkg_resources.resource_filename(
-    'impresso_commons',
+file_mng = ExitStack()
+log_dir = get_pkg_resource(file_mng, 'data/logs/')
+log_file = get_pkg_resource(
+    file_mng,
     'data/logs/tests.log'
 )
 pathlib.Path(log_dir).mkdir(parents=True, exist_ok=True)
@@ -25,3 +28,5 @@ logger.addHandler(handler)
 
 S3_CANONICAL_BUCKET = "s3://canonical-data"
 S3_REBUILT_BUCKET = "s3://rebuilt-data"
+
+file_mng.close()
