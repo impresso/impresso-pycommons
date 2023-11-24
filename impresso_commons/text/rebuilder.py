@@ -28,15 +28,14 @@ from sys import exit
 
 import dask.bag as db
 import jsonlines
-from dask.distributed import Client, LocalCluster, progress
+from dask.distributed import Client, progress
 from docopt import docopt
 from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
-from impresso_commons.text.helpers import (pages_to_article, read_issue,
-                                           read_issue_pages, rejoin_articles)
+from impresso_commons.path.path_s3 import read_s3_issues
+from impresso_commons.text.helpers import (read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_s3_resource
 

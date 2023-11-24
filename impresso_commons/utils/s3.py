@@ -104,7 +104,7 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
     """Create a boto connection to impresso's S3 drive.
 
     Assumes that two environment variables are set: `SE_ACCESS_KEY` and
-        `SE_SECRET_KEY`.
+    `SE_SECRET_KEY`.
 
     Note: 
         This function is depreciated, as it used boto instead of boto3, 
@@ -232,6 +232,8 @@ def get_bucket_boto3(name, create=False, versioning=True):
 def s3_get_articles(issue, bucket, workers=None):
     """Read a newspaper issue from S3 and return the articles it contains.
 
+    NB: Content items with type = "ad" (advertisement) are filtered out.
+
     :param issue: the newspaper issue
     :type issue: an instance of `impresso_commons.path.IssueDir`
     :param bucket: the input s3 bucket
@@ -239,8 +241,6 @@ def s3_get_articles(issue, bucket, workers=None):
     :param workers: number of workers for the iter_bucket function. 
         If None, will be the number of detected CPUs.
     :return: a list of articles (dictionaries)
-
-    NB: Content items with type = "ad" (advertisement) are filtered out.
     """
     nb_workers = _get_cores() if workers is None else workers
     issue_data = list(iter_bucket(bucket, prefix=issue.path, workers=nb_workers))
@@ -290,6 +290,8 @@ def s3_get_pages(issue_id, page_names, bucket):
 def get_s3_versions(bucket_name, key_name):
     """Get versioning information for a given key.
 
+    **NB:** it assumes a versioned bucket.
+
     :param bucket_name: the bucket's name
     :type bucket_name: string
     :param key_name: the key's name
@@ -297,8 +299,6 @@ def get_s3_versions(bucket_name, key_name):
     :return: for each version, the version id and the last modified date
     :rtype: a list of tuples, where tuple[0] is a string and tuple[1] a
         `datetime` instance.
-
-    **NB:** it assumes a versioned bucket.
     """
 
     client = get_s3_resource()
@@ -439,7 +439,7 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
 def alternative_read_text(s3_key, s3_credentials):
     """Read from S3 a line-separated text file (e.g. *.jsonl.bz2).
 
-    ..note::
+    Note:
         The reason for this function is a bug in `dask.bag.read_text()`
         which breaks on buckets having >= 1000 keys (it raises a
         `FileNotFoundError`).

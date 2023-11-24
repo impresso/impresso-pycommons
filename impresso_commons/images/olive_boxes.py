@@ -44,17 +44,16 @@ def get_iiif_url(
 
 
 def compute_scale_factor(img_source_path, img_dest_path):
-    """ Computes x scale factor bewteen 2 images
+    """
+    Computes x scale factor bewteen 2 images.
 
     :param img_source_path: the source image
     :type img_source_path: full path to the image
     :param img_dest_path: the destination image
     :type img_dest_path: full path to the image
     :return: scale factor
-    :rtype:float
-
+    :rtype: float
     """
-
     img_s = cv.imread(img_source_path, 0)
     img_d = cv.imread(img_dest_path, 0)
     x_s = img_s.shape[0]
@@ -198,7 +197,8 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
 
     elif box_strategy == img_utils.BoxStrategy.png_uniq.name:
         # TODO if needed
-        logger.info(f"Finally found a case of {png_uniq}, which is not ready yet")
+        logger.info(f"Finally found a case of {img_utils.BoxStrategy.png_uniq}, "
+                    "which is not ready yet")
 
     elif box_strategy == img_utils.BoxStrategy.jpg_uniq.name:
         # get the x dimension of the unique jpg (from which jp2 was acquired)

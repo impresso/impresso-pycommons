@@ -1,89 +1,83 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Input/Output &mdash; Impresso PyCommons  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Text Rebuild" href="rebuild.html" />
     <link rel="prev" title="Welcome to Impresso PyCommons’s documentation!" href="index.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> Impresso PyCommons
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Impresso PyCommons
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Input/Output</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path">General</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path.path_fs">I/O from file system</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#i-o-from-s3">I/O from S3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path">General</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.id2IssueDir"><code class="docutils literal notranslate"><span class="pre">id2IssueDir()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.parse_canonical_filename"><code class="docutils literal notranslate"><span class="pre">parse_canonical_filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path.path_fs">I/O from file system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.ContentItem"><code class="docutils literal notranslate"><span class="pre">ContentItem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir"><code class="docutils literal notranslate"><span class="pre">IssueDir</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir.date"><code class="docutils literal notranslate"><span class="pre">IssueDir.date</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir.edition"><code class="docutils literal notranslate"><span class="pre">IssueDir.edition</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir.journal"><code class="docutils literal notranslate"><span class="pre">IssueDir.journal</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir.path"><code class="docutils literal notranslate"><span class="pre">IssueDir.path</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.canonical_path"><code class="docutils literal notranslate"><span class="pre">canonical_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.check_filenaming"><code class="docutils literal notranslate"><span class="pre">check_filenaming()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.detect_canonical_issues"><code class="docutils literal notranslate"><span class="pre">detect_canonical_issues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.detect_issues"><code class="docutils literal notranslate"><span class="pre">detect_issues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.detect_journal_issues"><code class="docutils literal notranslate"><span class="pre">detect_journal_issues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.get_issueshortpath"><code class="docutils literal notranslate"><span class="pre">get_issueshortpath()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.pair_issue"><code class="docutils literal notranslate"><span class="pre">pair_issue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_fs.select_issues"><code class="docutils literal notranslate"><span class="pre">select_issues()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path.path_s3">I/O from S3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.IssueDir"><code class="docutils literal notranslate"><span class="pre">IssueDir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.impresso_iter_bucket"><code class="docutils literal notranslate"><span class="pre">impresso_iter_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.read_s3_issues"><code class="docutils literal notranslate"><span class="pre">read_s3_issues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.s3ContentItem"><code class="docutils literal notranslate"><span class="pre">s3ContentItem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.s3_filter_archives"><code class="docutils literal notranslate"><span class="pre">s3_filter_archives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.s3_iter_bucket"><code class="docutils literal notranslate"><span class="pre">s3_iter_bucket()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rebuild.html">Text Rebuild</a></li>
@@ -91,348 +85,347 @@
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Impresso PyCommons</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Input/Output</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Input/Output</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/io.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="input-output">
-<h1>Input/Output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-impresso_commons.path">
-<span id="general"></span><h2>General<a class="headerlink" href="#module-impresso_commons.path" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="impresso_commons.path.parse_canonical_filename">
-<code class="descclassname">impresso_commons.path.</code><code class="descname">parse_canonical_filename</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.parse_canonical_filename" title="Permalink to this definition">¶</a></dt>
+             
+  <section id="input-output">
+<h1>Input/Output<a class="headerlink" href="#input-output" title="Link to this heading"></a></h1>
+<section id="module-impresso_commons.path">
+<span id="general"></span><h2>General<a class="headerlink" href="#module-impresso_commons.path" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.id2IssueDir">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.</span></span><span class="sig-name descname"><span class="pre">id2IssueDir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.id2IssueDir" title="Link to this definition"></a></dt>
+<dd><p>TODO: documentation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.parse_canonical_filename">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.</span></span><span class="sig-name descname"><span class="pre">parse_canonical_filename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.parse_canonical_filename" title="Link to this definition"></a></dt>
 <dd><p>Parse a canonical page names into its components.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) – the filename to parse</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;GDL-1950-01-02-a-i0002&quot;</span>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>string</em>) – the filename to parse</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;GDL-1950-01-02-a-i0002&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parse_canonical_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="s1">&#39;GDL&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;1950&#39;</span><span class="p">,</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span> <span class="s1">&#39;02&#39;</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
-</div>
-<div class="section" id="module-impresso_commons.path.path_fs">
-<span id="i-o-from-file-system"></span><h2>I/O from file system<a class="headerlink" href="#module-impresso_commons.path.path_fs" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-impresso_commons.path.path_fs">
+<span id="i-o-from-file-system"></span><h2>I/O from file system<a class="headerlink" href="#module-impresso_commons.path.path_fs" title="Link to this heading"></a></h2>
 <p>Code for parsing impresso’s canonical directory structures.</p>
-<dl class="attribute">
-<dt id="impresso_commons.path.path_fs.ContentItem">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">ContentItem</code><a class="headerlink" href="#impresso_commons.path.path_fs.ContentItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">impresso_commons.path.path_fs.Item</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.ContentItem">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">ContentItem</span></span><a class="headerlink" href="#impresso_commons.path.path_fs.ContentItem" title="Link to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">Item</span></code></p>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="impresso_commons.path.path_fs.IssueDir">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">IssueDir</code><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">impresso_commons.path.path_fs.IssueDirectory</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.IssueDir">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">IssueDir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">journal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.IssueDir.date">
+<span class="sig-name descname"><span class="pre">date</span></span><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir.date" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.canonical_path">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">canonical_path</code><span class="sig-paren">(</span><em>dir</em>, <em>name=None</em>, <em>extension=None</em>, <em>path_type='file'</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.canonical_path" title="Permalink to this definition">¶</a></dt>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.IssueDir.edition">
+<span class="sig-name descname"><span class="pre">edition</span></span><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir.edition" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.IssueDir.journal">
+<span class="sig-name descname"><span class="pre">journal</span></span><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir.journal" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.IssueDir.path">
+<span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#impresso_commons.path.path_fs.IssueDir.path" title="Link to this definition"></a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.canonical_path">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">canonical_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'file'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.canonical_path" title="Link to this definition"></a></dt>
 <dd><p>Create a canonical dir/file path from an <cite>IssueDir</cite> object.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dir</strong> (<cite>IssueDir</cite>) – an object representing a newspaper issue</li>
-<li><strong>name</strong> (<em>string</em>) – the file name (used only if path_type==’file’)</li>
-<li><strong>extension</strong> (<em>string</em>) – the file extension (used only if path_type==’file’)</li>
-<li><strong>path_type</strong> (<em>string</em>) – type of path to build (‘dir’ | ‘file’)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dir</strong> (<cite>IssueDir</cite>) – an object representing a newspaper issue</p></li>
+<li><p><strong>name</strong> (<em>string</em>) – the file name (used only if path_type==’file’)</p></li>
+<li><p><strong>extension</strong> (<em>string</em>) – the file extension (used only if path_type==’file’)</p></li>
+<li><p><strong>path_type</strong> (<em>string</em>) – type of path to build (‘dir’ | ‘file’)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">string</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>string</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.check_filenaming">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">check_filenaming</code><span class="sig-paren">(</span><em>file_basename</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.check_filenaming" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.check_filenaming">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">check_filenaming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_basename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.check_filenaming" title="Link to this definition"></a></dt>
 <dd><p>Checks whether a filename complies with our naming convention (GDL-1900-01-10-a-p0001)</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_basename</strong> (<em>str</em>) – page file (txt or image)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_basename</strong> (<em>str</em>) – page file (txt or image)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.detect_canonical_issues">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">detect_canonical_issues</code><span class="sig-paren">(</span><em>base_dir</em>, <em>newspapers</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_canonical_issues" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.detect_canonical_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">detect_canonical_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspapers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_canonical_issues" title="Link to this definition"></a></dt>
 <dd><p>Parse a directory structure and detect newspaper issues to be imported.</p>
 <p>NB: invalid directories are skipped, and a warning message is logged.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_dir</strong> (<em>IssueDir</em>) – the root of the directory structure</li>
-<li><strong>newspapers</strong> (<em>str</em>) – the list of newspapers to consider (acronym blank separated)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_dir</strong> (<a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir" title="impresso_commons.path.path_fs.IssueDir"><em>IssueDir</em></a>) – the root of the directory structure</p></li>
+<li><p><strong>newspapers</strong> (<em>str</em>) – the list of newspapers to consider (acronym blank separated)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of <cite>IssueDir</cite> instances</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of <cite>IssueDir</cite> instances</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.detect_issues">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">detect_issues</code><span class="sig-paren">(</span><em>base_dir</em>, <em>journal_filter=None</em>, <em>exclude=False</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_issues" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.detect_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">detect_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">journal_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_issues" title="Link to this definition"></a></dt>
 <dd><p>Parse a directory structure and detect newspaper issues to be imported.</p>
 <p>NB: invalid directories are skipped, and a warning message is logged.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_dir</strong> (<em>basestring</em>) – the root of the directory structure</li>
-<li><strong>journal_filter</strong> (<em>set</em>) – list of newspaper to filter (positive or negative)</li>
-<li><strong>exclude</strong> (<em>boolean</em>) – whether journal_filter is positive or negative</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_dir</strong> (<em>basestring</em>) – the root of the directory structure</p></li>
+<li><p><strong>journal_filter</strong> (<em>set</em>) – list of newspaper to filter (positive or negative)</p></li>
+<li><p><strong>exclude</strong> (<em>boolean</em>) – whether journal_filter is positive or negative</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of <cite>IssueDir</cite> instances</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of <cite>IssueDir</cite> instances</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.detect_journal_issues">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">detect_journal_issues</code><span class="sig-paren">(</span><em>base_dir</em>, <em>newspapers</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_journal_issues" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.detect_journal_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">detect_journal_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspapers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.detect_journal_issues" title="Link to this definition"></a></dt>
 <dd><p>Parse a directory structure and detect newspaper issues to be imported.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_dir</strong> (<em>IssueDir</em>) – the root of the directory structure</li>
-<li><strong>newspapers</strong> (<em>str</em>) – the list of newspapers to consider (acronym blank separated)</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_dir</strong> (<a class="reference internal" href="#impresso_commons.path.path_fs.IssueDir" title="impresso_commons.path.path_fs.IssueDir"><em>IssueDir</em></a>) – the root of the directory structure</p></li>
+<li><p><strong>newspapers</strong> (<em>str</em>) – the list of newspapers to consider (acronym blank separated)</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of <cite>IssueDir</cite> instances</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of <cite>IssueDir</cite> instances</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.get_issueshortpath">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">get_issueshortpath</code><span class="sig-paren">(</span><em>issuedir</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.get_issueshortpath" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.get_issueshortpath">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">get_issueshortpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issuedir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.get_issueshortpath" title="Link to this definition"></a></dt>
 <dd><p>Returns short version of issue dir path</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.pair_issue">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">pair_issue</code><span class="sig-paren">(</span><em>issue_list1</em>, <em>issue_list2</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.pair_issue" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.pair_issue">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">pair_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue_list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_list2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.pair_issue" title="Link to this definition"></a></dt>
 <dd><p>Associates pairs of issues originating from original and canonical repositories.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>issue_list1</strong> (<em>array</em>) – list of IssueDir</li>
-<li><strong>issue_list2</strong> (<em>array</em>) – list of IssueDir</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>issue_list1</strong> (<em>array</em>) – list of IssueDir</p></li>
+<li><p><strong>issue_list2</strong> (<em>array</em>) – list of IssueDir</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list containing tuples of issue pairs [(issue1, issue2), (…)]</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list containing tuples of issue pairs [(issue1, issue2), (…)]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="impresso_commons.path.path_fs.select_issues">
-<code class="descclassname">impresso_commons.path.path_fs.</code><code class="descname">select_issues</code><span class="sig-paren">(</span><em>config_dict</em>, <em>inp_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.select_issues" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_fs.select_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_fs.</span></span><span class="sig-name descname"><span class="pre">select_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inp_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_fs.select_issues" title="Link to this definition"></a></dt>
 <dd><p>Reads a configuration file and select newspapers/issues to consider
 See config.example.md for explanations.</p>
-<dl class="docutils">
-<dt>Usage example:</dt>
-<dd><dl class="first last docutils">
-<dt>if config_file and os.path.isfile(config_file):</dt>
-<dd><dl class="first last docutils">
-<dt>with open(config_file, ‘r’) as f:</dt>
-<dd>config = json.load(f)
-issues = select_issues(config, inp_dir)</dd>
-<dt>else:</dt>
-<dd>issues = detect_issues(inp_dir)</dd>
-</dl>
+<dl class="simple">
+<dt>Usage example:</dt><dd><dl class="simple">
+<dt>if config_file and os.path.isfile(config_file):</dt><dd><dl class="simple">
+<dt>with open(config_file, ‘r’) as f:</dt><dd><p>config = json.load(f)
+issues = select_issues(config, inp_dir)</p>
+</dd>
+<dt>else:</dt><dd><p>issues = detect_issues(inp_dir)</p>
 </dd>
 </dl>
 </dd>
 </dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>config_dict</strong> (<em>dict</em>) – dict of newspaper filter parameters</li>
-<li><strong>inp_dir</strong> (<em>str</em>) – base dit where to get the issues from</li>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_dict</strong> (<em>dict</em>) – dict of newspaper filter parameters</p></li>
+<li><p><strong>inp_dir</strong> (<em>str</em>) – base dit where to get the issues from</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
+</section>
+<section id="module-impresso_commons.path.path_s3">
+<span id="i-o-from-s3"></span><h2>I/O from S3<a class="headerlink" href="#module-impresso_commons.path.path_s3" title="Link to this heading"></a></h2>
+<p>Code for parsing impresso’s S3 directory structures.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.IssueDir">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">IssueDir</span></span><a class="headerlink" href="#impresso_commons.path.path_s3.IssueDir" title="Link to this definition"></a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">IssueDirectory</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.impresso_iter_bucket">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">impresso_iter_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.impresso_iter_bucket" title="Link to this definition"></a></dt>
+<dd><p>Iterate over a bucket, possibly with a filter, and return an array of either IssueDir or ContentItem.
+VALID ONLY for original-canonical data, where there is individual files for issues and content items (articles).
+:param bucket_name: string, e.g. ‘original-canonical-data’
+:param item_type: ‘issue’ or ‘item’
+:param prefix: string, e.g. ‘GDL/1950’, used to filter key. Exclusive of ‘filter_config’
+:param filter_config: a dict with newspaper acronyms as keys and array of year interval as values:
+e.g. { “GDL”: [1950, 1960], “JDG”: [1890, 1900] }. Last year is excluded.
+:param partition_size: partition size of dask to build the object (Issuedir or ContentItem)
+&#64;return: an array of (filtered) IssueDir or ContentItems.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.read_s3_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">read_s3_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newspaper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_bucket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.read_s3_issues" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.s3ContentItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">s3ContentItem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">journal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doc_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebuilt_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.s3ContentItem" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.s3_filter_archives">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">s3_filter_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.jsonl.bz2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.s3_filter_archives" title="Link to this definition"></a></dt>
+<dd><p>Iterate over bucket and filter according to config and suffix.
+Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
+Example: config = { “GDL” : [1960, 1970], =&gt; will take all years in interval</p>
+<blockquote>
+<div><p>“JDG”: [], =&gt; Empty array means no filter, all years.
+“GDL”: [1798, 1999, 10] =&gt; take each 10th item within sequence of years
+}.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – the name of the bucket</p></li>
+<li><p><strong>config</strong> (<em>Dict</em>) – newspaper/years to consider</p></li>
+<li><p><strong>key_suffix</strong> – end of the key</p></li>
+</ul>
+</dd>
+</dl>
+<p>&#64;return: array of keys</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.s3_iter_bucket">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">s3_iter_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.s3_iter_bucket" title="Link to this definition"></a></dt>
+<dd><p>Iterate over a bucket and return all keys with <cite>prefix</cite> and <cite>suffix</cite>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">(</span><span class="s2">&quot;myBucket&quot;</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">k</span> <span class="o">=</span> <span class="n">s3_iter_bucket</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;GDL&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.bz2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="go">:param bucket_name: the name of the bucket</span>
+<span class="go">:type bucket_name: str</span>
+<span class="go">:param prefix: beginning of the key</span>
+<span class="go">:type prefix: str</span>
+<span class="go">:param key_suffix: how the key ends</span>
+<span class="go">:type prefix: str</span>
+<span class="go">@return: array of keys</span>
+</pre></div>
 </div>
-<div class="section" id="i-o-from-s3">
-<h2>I/O from S3<a class="headerlink" href="#i-o-from-s3" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</dd></dl>
+
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="rebuild.html" class="btn btn-neutral float-right" title="Text Rebuild" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral" title="Welcome to Impresso PyCommons’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Impresso PyCommons’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rebuild.html" class="btn btn-neutral float-right" title="Text Rebuild" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..
-
-    </p>
+    <p>&#169; Copyright 2023, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

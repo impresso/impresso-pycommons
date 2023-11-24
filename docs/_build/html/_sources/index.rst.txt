@@ -1,5 +1,5 @@
 .. Impresso PyCommons documentation master file, created by
-   sphinx-quickstart on Tue Sep 18 17:18:04 2018.
+   sphinx-quickstart on Fri Nov 24 12:10:00 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
