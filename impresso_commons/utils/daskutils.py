@@ -14,9 +14,6 @@ Options:
 import logging
 import docopt
 import os
-import sys
-import json
-import bz2
 
 from dask.diagnostics import ProgressBar
 import dask.bag as db
@@ -55,13 +52,13 @@ def create_even_partitions(bucket,
     N.B.: in resulting partitions articles are all shuffled.
     Warning: consider well the config_newspapers as it decides what will be in the partitions and loaded in memory.
 
-    @param bucket: name of the bucket where the files to partition are
-    @param config_newspapers: json dict specifying the sources to consider (name(s) of newspaper(s) and year span(s))
-    @param output_dir: classic FS repository where to write the produced partitions
-    @param local_fs:
-    @param keep_full: whether to filter out metadata or not (i.e. keeping only text and leaving out coordinates)
-    @param nb_partition: number of partitions
-    @return: None
+    :param bucket: name of the bucket where the files to partition are
+    :param config_newspapers: json dict specifying the sources to consider (name(s) of newspaper(s) and year span(s))
+    :param output_dir: classic FS repository where to write the produced partitions
+    :param local_fs:
+    :param keep_full: whether to filter out metadata or not (i.e. keeping only text and leaving out coordinates)
+    :param nb_partition: number of partitions
+    :return: None
     """
 
     t = Timer()

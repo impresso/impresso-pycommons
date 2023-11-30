@@ -1,233 +1,328 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Text Rebuild &mdash; Impresso PyCommons  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Utilities" href="utils.html" />
     <link rel="prev" title="Input/Output" href="io.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> Impresso PyCommons
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Impresso PyCommons
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="io.html">Input/Output</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Text Rebuild</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#config-file-example">Config file example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rebuild-functions">Rebuild functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#helpers">Helpers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.text.helpers">Helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.pages_to_article"><code class="docutils literal notranslate"><span class="pre">pages_to_article()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_issue"><code class="docutils literal notranslate"><span class="pre">read_issue()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_issue_pages"><code class="docutils literal notranslate"><span class="pre">read_issue_pages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_page"><code class="docutils literal notranslate"><span class="pre">read_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.rejoin_articles"><code class="docutils literal notranslate"><span class="pre">rejoin_articles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.text_apply_breaks"><code class="docutils literal notranslate"><span class="pre">text_apply_breaks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-rebuild-on-runai">Running Rebuild on Runai</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#steps-and-how-to-run-impresso-s-rebuilder-on-runai">Steps and How-to run <em>impresso</em>’s rebuilder on Runai</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-setup-runai">Step 1: Setup Runai</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-code-version-and-ic-registry">Step 2: Code version and IC Registry</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-3-prep-the-pvc">Step 3: Prep the PVC</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-4-sumbit-the-runai-job">Step 4: Sumbit the RunAi job</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Impresso PyCommons</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Text Rebuild</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Text Rebuild</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/rebuild.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="text-rebuild">
-<h1>Text Rebuild<a class="headerlink" href="#text-rebuild" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="command-line-interface">
-<h2>Command Line interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="text-rebuild">
+<h1>Text Rebuild<a class="headerlink" href="#text-rebuild" title="Link to this heading"></a></h1>
+<section id="command-line-interface">
+<h2>Command Line interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h2>
+</section>
+<section id="config-file-example">
+<h2>Config file example<a class="headerlink" href="#config-file-example" title="Link to this heading"></a></h2>
+<p>(from file: <cite>cluster.json</cite>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;GDL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1900</span><span class="p">,</span> <span class="mi">1999</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
 </div>
-<div class="section" id="rebuild-functions">
-<h2>Rebuild functions<a class="headerlink" href="#rebuild-functions" title="Permalink to this headline">¶</a></h2>
-<p>A set of functions to transform JSON files in <strong>impresso’s canonical format</strong>
-into a number of JSON-based formats for different purposes.</p>
+</section>
+<section id="rebuild-functions">
+<h2>Rebuild functions<a class="headerlink" href="#rebuild-functions" title="Link to this heading"></a></h2>
+</section>
+<section id="module-impresso_commons.text.helpers">
+<span id="helpers"></span><h2>Helpers<a class="headerlink" href="#module-impresso_commons.text.helpers" title="Link to this heading"></a></h2>
+<p>TODO</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.pages_to_article">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">pages_to_article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.pages_to_article" title="Link to this definition"></a></dt>
+<dd><p>Return all text regions belonging to a given article.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.read_issue">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">read_issue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_issue" title="Link to this definition"></a></dt>
+<dd><p>Read the data from S3 for a given newspaper issue.</p>
+<p>NB: It injects the s3_version into the returned object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>issue</strong> (<cite>IssueDir</cite>) – input issue</p></li>
+<li><p><strong>bucket_name</strong> (<em>str</em>) – bucket’s name</p></li>
+<li><p><strong>s3_client</strong> (<cite>boto3.resources.factory.s3.ServiceResource</cite>) – open connection to S3 storage</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a JSON representation of the issue object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.read_issue_pages">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">read_issue_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_json</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_issue_pages" title="Link to this definition"></a></dt>
+<dd><p>Read all pages of a given issue from S3 in parallel.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.read_page">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">read_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_page" title="Link to this definition"></a></dt>
+<dd><p>Read the data from S3 for a given newspaper pages.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.rejoin_articles">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">rejoin_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issue_json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.rejoin_articles" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.text_apply_breaks">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">text_apply_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fulltext</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">breaks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.text_apply_breaks" title="Link to this definition"></a></dt>
+<dd><p>Apply breaks to the text returned by <cite>rebuild_for_solr</cite>.</p>
+<p>The purpose of this function is to debug (visually) the <cite>rebuild_for_solr</cite>
+function. It applies to <cite>fulltext</cite> the characte offsets contained in
+<cite>breaks</cite> (e.g. line breaks, paragraph breaks, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fulltext</strong> (<em>str</em>) – input text</p></li>
+<li><p><strong>breaks</strong> (<em>list</em><em> of </em><em>int</em>) – a list of character offsets</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of text chunks</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="running-rebuild-on-runai">
+<h2>Running Rebuild on Runai<a class="headerlink" href="#running-rebuild-on-runai" title="Link to this heading"></a></h2>
+<section id="steps-and-how-to-run-impresso-s-rebuilder-on-runai">
+<h3>Steps and How-to run <em>impresso</em>’s rebuilder on Runai<a class="headerlink" href="#steps-and-how-to-run-impresso-s-rebuilder-on-runai" title="Link to this heading"></a></h3>
+<p>Documentation to setup Runai and run the <code class="docutils literal notranslate"><span class="pre">rebuilder.py</span></code> script on the iccluster using it.
+Last modification: Nov. 2023.</p>
+<section id="step-1-setup-runai">
+<h4>Step 1: Setup Runai<a class="headerlink" href="#step-1-setup-runai" title="Link to this heading"></a></h4>
+<p>Before anything else, Runai should be setup and configured. This can be done by following the tutorial(s) on the following sources:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.google.com/document/d/1--QB_9PLSK6LAEDfIirR5aptWHi9Ri5BxCwT7LXz29M/edit">RunAi Starter gDoc</a></p></li>
+<li><p><a class="reference external" href="https://docs.google.com/presentation/d/15UY_8wZGGQW_sLzcaOPaMjeU5nneraRfsWPjf8uF7cc/edit#slide=id.p">RunAi Crash Course gSlides</a></p></li>
+<li><p><a class="reference external" href="https://icitdocs.epfl.ch/display/clusterdocs/Getting+Started+with+RunAI">IC-IT RunAi Documentation</a></p></li>
+</ul>
+<p>To verify the setup was correctly done, run <code class="docutils literal notranslate"><span class="pre">runai</span> <span class="pre">list</span></code> on the terminal (while on EPFL intranet, use VPN if not on campus). The output should be similar to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Showing</span> <span class="n">jobs</span> <span class="k">for</span> <span class="n">project</span> <span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span>
+<span class="n">NAME</span>  <span class="n">STATUS</span>  <span class="n">AGE</span>  <span class="n">NODE</span>  <span class="n">IMAGE</span>  <span class="n">TYPE</span>  <span class="n">PROJECT</span>  <span class="n">USER</span>  <span class="n">GPUs</span> <span class="n">Allocated</span> <span class="p">(</span><span class="n">Requested</span><span class="p">)</span>  <span class="n">PODs</span> <span class="n">Running</span> <span class="p">(</span><span class="n">Pending</span><span class="p">)</span>  <span class="n">SERVICE</span> <span class="n">URL</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="helpers">
-<h2>Helpers<a class="headerlink" href="#helpers" title="Permalink to this headline">¶</a></h2>
+<p>Once the setup is done, no need to repeat this step on future run.</p>
+</section>
+<section id="step-2-code-version-and-ic-registry">
+<h4>Step 2: Code version and IC Registry<a class="headerlink" href="#step-2-code-version-and-ic-registry" title="Link to this heading"></a></h4>
+<p>Ensure the correct Docker image is currently in the <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects">EPFL IC registry</a>.
+If you have done significant code changes since, consider updating the <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects/25/repositories/dhlab%2Fimpresso_pycommons">dhlab/impresso_pycommons</a> Docker image there.
+If you wish to modify the version tag of the image uploaded, do so in the bash script <code class="docutils literal notranslate"><span class="pre">/impresso_commons/scripts/docker_image.sh</span></code>.</p>
+<p>Once the <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> and <code class="docutils literal notranslate"><span class="pre">docker_image.sh</span></code> match your needs, run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">docker_image</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
 </div>
+<p>Current image version to use: <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects/25/repositories/dhlab%2Fimpresso_pycommons/tags/v3">v3</a></p>
+</section>
+<section id="step-3-prep-the-pvc">
+<h4>Step 3: Prep the PVC<a class="headerlink" href="#step-3-prep-the-pvc" title="Link to this heading"></a></h4>
+<p>PVC is persistent storage available on RunAi pods. Therefore any code, configurations, logs etc you might want to access for each job should be put there.</p>
+<p><strong>Create user folder on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code></strong> (only once):
+First, if it doesn’t already exist, create the folder for you user on <code class="docutils literal notranslate"><span class="pre">cdhvm0002.xaas.epfl.ch</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span>
+</pre></div>
 </div>
+<p>Any files put in this folder will be accessible within the pod in folder:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">/</span><span class="n">dhlab</span><span class="o">-</span><span class="n">data</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
+</pre></div>
+</div>
+<p><strong>Create or modify the desired config file</strong></p>
+<p>A script named <code class="docutils literal notranslate"><span class="pre">config_rebuilt_runai.sh</span></code> instantiating all necessary options and environment variables for the <code class="docutils literal notranslate"><span class="pre">text/rebuilder.py</span></code> script is expected to be on the PCV.
+An example for this script is <code class="docutils literal notranslate"><span class="pre">example_config_rebuilt_runai.sh</span></code>, which should be modified for <em>each run</em> and uploaded to the pvc:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">config_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span> <span class="p">{</span><span class="n">gaspar_user</span><span class="p">}</span><span class="nd">@cdhvm0002</span><span class="o">.</span><span class="n">xaas</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>Of course, the file can also be directly modified on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code> between runs, as well as configuration files etc.
+The example script should <em>not be modified in this repository and pushed</em> as it contains sensitive information.</p>
+<p><strong>Upload your code on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code></strong></p>
+<p>Upload your <code class="docutils literal notranslate"><span class="pre">impresso-pycommons</span></code> folder to <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code>. This code will be the one executed, allowing for faster changes between code versions (eg. during development), and maintaining the filestructure and paths. Hence, logs will remain on the pvc in <code class="docutils literal notranslate"><span class="pre">impresso-pycommons/impresso_commons/data/logs</span></code> even once the pod is destroyed.
+Remember however to update the docker image with significant or impactful code changes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="o">-</span><span class="n">r</span> <span class="n">impresso</span><span class="o">-</span><span class="n">pycommons</span> <span class="p">{</span><span class="n">gaspar_user</span><span class="p">}</span><span class="nd">@cdhvm0002</span><span class="o">.</span><span class="n">xaas</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+<section id="step-4-sumbit-the-runai-job">
+<h4>Step 4: Sumbit the RunAi job<a class="headerlink" href="#step-4-sumbit-the-runai-job" title="Link to this heading"></a></h4>
+<p><strong>1. Launch the Runai job</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">submit</span> <span class="o">--</span><span class="n">name</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">--</span><span class="n">image</span> <span class="n">ic</span><span class="o">-</span><span class="n">registry</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="o">/</span><span class="n">dhlab</span><span class="o">/</span><span class="n">impresso_pycommons</span><span class="p">:{</span><span class="n">version_to_use</span><span class="p">}</span> <span class="o">--</span><span class="n">pvc</span> <span class="n">runai</span><span class="o">-</span><span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data1</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">/</span><span class="n">dhlab</span><span class="o">-</span><span class="n">data</span> <span class="o">--</span><span class="n">environment</span> <span class="n">USER_NAME</span><span class="o">=</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span> <span class="o">--</span><span class="n">environment</span> <span class="n">USER_ID</span><span class="o">=</span><span class="p">{</span><span class="nb">id</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">USER_ID</span></code> can be found on <a class="reference external" href="https://people.epfl.ch/">people.epfl</a> under <code class="docutils literal notranslate"><span class="pre">UID</span></code>.</p>
+<p>You can monitor the job creation by running</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">describe</span> <span class="n">job</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">-</span><span class="n">p</span> <span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>2. Enable port forwarding</strong>
+Once the job has successfully started, in another terminal window (optionally in a screen based on the expected runtime), enable port forwarding to have access to the Dask dashboard at <code class="docutils literal notranslate"><span class="pre">http://localhost:8787/status</span></code>.
+(Note: when multiple jobs run at the same time, the port needs to be adapted).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">port</span><span class="o">-</span><span class="n">forward</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span><span class="o">-</span><span class="mi">0</span><span class="o">-</span><span class="mi">0</span> <span class="mi">8787</span><span class="p">:</span><span class="mi">8787</span>
+</pre></div>
+</div>
+<p><strong>3. Launch the script from the pod</strong>
+You can connect to a bash session on the pod using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
+</pre></div>
+</div>
+<p>Then, the script can directly be launched with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">start_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>By default, this script will start a local Dask cluster with 64 workers. Alternatively, the number of workers can be modified by specifying the corresponding option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">start_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nworkers</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Note: The docker image can also easily be modified to directly run the script upon start. It was not added to the current Dockerfile to allow for slightly more control and a possibility to modify scripts on the pod if necessary.</p>
+<p><strong>4. Monitor the progress from Runai and Dask dashboard</strong></p>
+<p>Once the job is launched, it’s progress and resource consumption can be monitored on both <a class="reference external" href="https://epfl.run.ai/jobs?sortBy=%5B%7B%22key%22:%22creationTime%22,%22direction%22:%22desc%22%7D%5D&amp;amp;query=&amp;amp;page=1&amp;amp;items_per_page=20">RunAi</a> and the <a class="reference external" href="http://localhost:8787/status">Dask Dashboard</a>.</p>
+<ul class="simple">
+<li><p><strong>Runai</strong>: Allows to monitor CPU and memory usage or the job, stores metadata about previous runs. Note however that the CPU and CPU memory usage are <em>not</em> available after the job is deleted.</p></li>
+<li><p><strong>Dask dashboard</strong>: Provides in-depth monitoring of the tasks performed, worker health and other metrics, more information available <a class="reference external" href="https://docs.dask.org/en/latest/dashboard.html">here</a>.</p></li>
+</ul>
+<p>Additionally, the user can access the stdout by entering the screen where the scrip is running.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">screen</span> <span class="o">-</span><span class="n">r</span> <span class="n">rebuilder</span>
+</pre></div>
+</div>
+<p><strong>5. Delete the job</strong></p>
+<p>Once the processing is over, the screen in which the rebuild script was launched will automatically terminate.
+The user can then stop all other processes (namely the dask scheduler and workers), and possibly launch the rebuild script again with another configuration (cf. Step 3).</p>
+<p>Once fully done with the Runai job, it should be deleted to stop using the resources:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">delete</span> <span class="n">job</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="utils.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="io.html" class="btn btn-neutral" title="Input/Output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="io.html" class="btn btn-neutral float-left" title="Input/Output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..
-
-    </p>
+    <p>&#169; Copyright 2023, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

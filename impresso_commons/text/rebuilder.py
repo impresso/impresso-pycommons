@@ -1,7 +1,7 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --k8]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw>]
 
 Options:
 
@@ -12,8 +12,8 @@ Options:
 --filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
 --verbose  Set logging level to DEBUG (by default is INFO)
 --clear  Remove output directory before and after rebuilding
---k8  Launch on a dask kubernetes cluster (requires credentials in `~/.kube/`)
 --format=<fo>  stuff
+--nworkers=<nw>  number of workers for (local) dask client
 """  # noqa: E501
 
 import traceback
@@ -29,18 +29,14 @@ from sys import exit
 import dask.bag as db
 import jsonlines
 from dask.distributed import Client, progress
-from dask_k8 import DaskCluster
 from docopt import docopt
 from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
-from impresso_commons.path.path_s3 import impresso_iter_bucket, read_s3_issues
-from impresso_commons.text.helpers import (pages_to_article, read_issue,
-                                           read_issue_pages, rejoin_articles)
+from impresso_commons.path.path_s3 import read_s3_issues
+from impresso_commons.text.helpers import (read_issue_pages, rejoin_articles)
 from impresso_commons.utils import Timer, timestamp
-from impresso_commons.utils.kube import (make_scheduler_configuration,
-                                         make_worker_configuration)
 from impresso_commons.utils.s3 import get_s3_resource
 
 logger = logging.getLogger(__name__)
@@ -473,7 +469,7 @@ def _article_has_problem(article):
     return article['has_problem']
 
 
-def _article_wihtout_problem(article):
+def _article_without_problem(article):
     """Helper function to keep articles without problems.
 
     :param article: input article
@@ -526,15 +522,18 @@ def rebuild_issues(
     issue, issue_json = issues[0]
     key = f'{issue.journal}-{issue.date.year}'
     issue_dir = os.path.join(output_dir, key)
-    db.from_sequence([issue_dir]).map(mkdir).compute()
+    mkdir(issue_dir)
 
-    print("Fleshing out articles by issue...")
+    print("Fleshing out articles by issue...") # warning about large graph comes here
     issues_bag = db.from_sequence(issues, partition_size=3)
 
     faulty_issues = issues_bag.filter(
         lambda i: len(i[1]['pp']) == 0
     ).map(lambda i: i[1]).pluck('id').compute()
+    logger.debug(f'Issues with no pages (will be skipped): {faulty_issues}')
     print(f'Issues with no pages (will be skipped): {faulty_issues}')
+    del faulty_issues
+    logger.debug(f"Number of partitions: {issues_bag.npartitions}")
     print(f"Number of partitions: {issues_bag.npartitions}")
 
     articles_bag = issues_bag.filter(lambda i: len(i[1]['pp']) > 0)\
@@ -547,9 +546,11 @@ def rebuild_issues(
         .pluck('m')\
         .pluck('id')\
         .compute()
+    logger.debug(f'Skipped articles: {faulty_articles_n}')
     print(f'Skipped articles: {faulty_articles_n}')
+    del faulty_articles_n
 
-    articles_bag = articles_bag.filter(_article_wihtout_problem)\
+    articles_bag = articles_bag.filter(_article_without_problem)\
         .map(rebuild_function)\
         .persist()
 
@@ -568,6 +569,8 @@ def rebuild_issues(
         result = articles_bag.map(json.dumps)\
             .to_textfiles('{}/*.json'.format(issue_dir))
 
+    dask_client.cancel(issues_bag)  
+    logger.info("done.")
     print("done.")
 
     return (key, result)
@@ -613,10 +616,9 @@ def main():
         # Handle any cleanup here
         print(
             'SIGINT or CTRL-C detected. Exiting gracefully'
-            ' and shutting down the dask kubernetes cluster'
+            ' and shutting down the dask local cluster'
         )
-        if cluster:
-            cluster.close()
+        client.shutdown()
         exit(0)
 
     arguments = docopt(__doc__)
@@ -628,7 +630,7 @@ def main():
     output_format = arguments["--format"]
     scheduler = arguments["--scheduler"]
     log_file = arguments["--log-file"]
-    launch_kubernetes = arguments["--k8"]
+    nworkers = arguments["--nworkers"] if arguments["--nworkers"] else 8
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
 
@@ -650,45 +652,26 @@ def main():
 
     # start the dask local cluster
     if scheduler is None:
-        if launch_kubernetes:
-            cluster = DaskCluster(
-                namespace="dhlab",
-                cluster_id="impresso-pycommons-k8-rebuild",
-                scheduler_pod_spec=make_scheduler_configuration(),
-                worker_pod_spec=make_worker_configuration(
-                    docker_image="ic-registry.epfl.ch/dhlab/impresso_pycommons:v1",
-                    memory="5G"
-                )
-            )
-            try:
-                cluster.create()
-                cluster.scale(50, blocking=True)
-                client = cluster.make_dask_client()
-                print(client.get_versions(check=False))
-            except Exception as e:
-                print(e)
-                cluster.close()
-                exit(0)
-
-            print(client)
-        else:
-            cluster = None
-            client = Client(processes=False, n_workers=8, threads_per_worker=1)
+        client = Client(n_workers=nworkers, threads_per_worker=1)
     else:
         cluster = None
         client = Client(scheduler)
-    logger.info(f"Dask cluster: {client}")
+    logger.info(f"Dask local cluster: {client}")
+    print(f"Dask local cluster: {client}")
 
     if arguments["rebuild_articles"]:
 
         try:
             for n, batch in enumerate(config):
                 rebuilt_issues = []
+                logger.info(f'Processing batch {n + 1}/{len(config)} [{batch}]')
                 print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
                 newspaper = list(batch.keys())[0]
                 start_year, end_year = batch[newspaper]
 
                 for year in range(start_year, end_year):
+                    logger.info(f'Processing year {year}')
+                    logger.info('Retrieving issues...')
                     print(f'Processing year {year}')
                     print('Retrieving issues...')
                     try:
@@ -698,6 +681,7 @@ def main():
                             bucket_name
                         )
                     except FileNotFoundError:
+                        logger.info(f'{newspaper}-{year} not found in {bucket_name}')
                         print(f'{newspaper}-{year} not found in {bucket_name}')
                         continue
 
@@ -710,7 +694,11 @@ def main():
                         filter_language=languages
                     )
                     rebuilt_issues.append((issue_key, json_files))
-
+                    del input_issues
+                logger.info((
+                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                    f"to {output_bucket_name}"
+                ))
                 print((
                     f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
                     f"to {output_bucket_name}"
@@ -721,15 +709,17 @@ def main():
                     .starmap(cleanup)
                 future = b.persist()
                 progress(future)
+                # clear memory of objects once computations are done
+                client.restart()
+                print(f"Restarted client after finishing processing batch {n + 1}")
+                logger.info(f"Restarted client after finishing processing batch {n + 1}")
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
             print(e)
-            if cluster:
-                cluster.close()
+            client.shutdown()
         finally:
-            if cluster:
-                cluster.close()
+            client.shutdown()
 
         logger.info("---------- Done ----------")
         print("---------- Done ----------")

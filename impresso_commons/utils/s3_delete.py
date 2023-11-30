@@ -11,7 +11,6 @@ Options:
 
 from docopt import docopt
 
-import boto3
 from impresso_commons.utils.s3 import get_s3_resource
 from impresso_commons.utils import user_confirmation
 

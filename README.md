@@ -18,7 +18,7 @@ pip install impresso-commons
 
 ## License
 
-The second project 'impresso - Media Monitoring of the Past II. Beyond Borders: Connecting Historical Newspapers and Radio' is funded by the Swiss National Science Foundation (SNSF) under grant number [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891. 
+The second project 'impresso - Media Monitoring of the Past II. Beyond Borders: Connecting Historical Newspapers and Radio' is funded by the Swiss National Science Foundation (SNSF) under grant number [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891.
 
 Aiming to develop and consolidate tools to process and explore large-scale collections of historical newspapers and radio archives, and to study the impact of this tooling on historical research practices, _Impresso II_ builds upon the first project – 'impresso - Media Monitoring of the Past' (grant number [CRSII5_173719](http://p3.snf.ch/project-173719), Sinergia program). More information at https://impresso-project.ch.
 

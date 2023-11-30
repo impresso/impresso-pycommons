@@ -212,4 +212,3 @@ xyzservices>=2023.7.0
 yarl>=1.9.2
 zict>=3.0.0
 zipp>=3.16.2
-#-e git+https://github.com/impresso/dask_k8.git

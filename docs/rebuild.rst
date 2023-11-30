@@ -1,5 +1,5 @@
 Text Rebuild
-============
+==============================
 
 Command Line interface
 ----------------------
@@ -21,17 +21,25 @@ Config file example
 
 
 Rebuild functions
---------------------
+-----------------
 
 A set of functions to transform JSON files in **impresso's canonical format**
 into a number of JSON-based formats for different purposes.
-
-.. autofunction:: impresso_commons.text.rebuilder.rebuild_for_solr
-.. autofunction:: impresso_commons.text.rebuilder.rebuild_text
-
+.. automodule:: impresso_commons.text.rebuilder
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Helpers
 -------
 
 .. automodule:: impresso_commons.text.helpers
-    :members:
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Running Rebuild on Runai
+------------------------
+
+.. include:: ../scripts/rebuild_on_runai.md
+    :parser: myst_parser.sphinx_
