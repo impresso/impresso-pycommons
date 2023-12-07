@@ -437,12 +437,12 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
 
 
 def alternative_read_text(s3_key, s3_credentials):
-    """Read from S3 a line-separated text file (e.g. *.jsonl.bz2).
+    """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
     Note:
         The reason for this function is a bug in `dask.bag.read_text()`
-        which breaks on buckets having >= 1000 keys (it raises a
-        `FileNotFoundError`).
+        which breaks on buckets having >= 1000 keys.
+        It raises a `FileNotFoundError`.
     """
     logger.info(f'reading {s3_key}')
     session = boto3.Session(

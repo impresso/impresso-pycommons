@@ -117,7 +117,7 @@ def rebuilt2xmi(ci, output_dir, typesystem_path, iiif_mappings, pct_coordinates=
     :param output_dir: the path to the output directory
     :type output_dir: str
     :param typesystem_path: TypeSystem file containing defitions of annotation
-    layers.
+        layers.
     :type typesystem_path: str
     """
 

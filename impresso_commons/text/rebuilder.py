@@ -1,4 +1,6 @@
 """Functions and CLI to rebuild text from impresso's canonical format.
+For EPFL members, this script can be scaled by running it using Runai, 
+as documented on https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md.
 
 Usage:
     rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw>]

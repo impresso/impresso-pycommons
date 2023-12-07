@@ -362,12 +362,14 @@ e.g. { “GDL”: [1950, 1960], “JDG”: [1890, 1900] }. Last year is excluded
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">s3_filter_archives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.jsonl.bz2'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.s3_filter_archives" title="Link to this definition"></a></dt>
 <dd><p>Iterate over bucket and filter according to config and suffix.
 Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
-Example: config = { “GDL” : [1960, 1970], =&gt; will take all years in interval</p>
-<blockquote>
-<div><p>“JDG”: [], =&gt; Empty array means no filter, all years.
-“GDL”: [1798, 1999, 10] =&gt; take each 10th item within sequence of years
-}.</p>
-</div></blockquote>
+.. rubric:: Example</p>
+<dl class="simple">
+<dt>config = {</dt><dd><p>“GDL” : [1960, 1970], =&gt; will take all years in interval
+“JDG”: [], =&gt; Empty array means no filter, all years.
+“GDL”: [1798, 1999, 10] =&gt; take each 10th item within sequence of years</p>
+</dd>
+</dl>
+<p>}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -376,8 +378,10 @@ Example: config = { “GDL” : [1960, 1970], =&gt; will take all years in inter
 <li><p><strong>key_suffix</strong> – end of the key</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of keys</p>
+</dd>
 </dl>
-<p>&#64;return: array of keys</p>
 </dd></dl>
 
 <dl class="py function">

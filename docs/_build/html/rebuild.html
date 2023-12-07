@@ -46,9 +46,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="io.html">Input/Output</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Text Rebuild</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#config-file-example">Config file example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#rebuild-functions">Rebuild functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rebuild-functions">Rebuild functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.cleanup"><code class="docutils literal notranslate"><span class="pre">cleanup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.compress"><code class="docutils literal notranslate"><span class="pre">compress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.init_logging"><code class="docutils literal notranslate"><span class="pre">init_logging()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.rebuild_for_passim"><code class="docutils literal notranslate"><span class="pre">rebuild_for_passim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.rebuild_for_solr"><code class="docutils literal notranslate"><span class="pre">rebuild_for_solr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.rebuild_issues"><code class="docutils literal notranslate"><span class="pre">rebuild_issues()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.rebuild_text"><code class="docutils literal notranslate"><span class="pre">rebuild_text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.rebuild_text_passim"><code class="docutils literal notranslate"><span class="pre">rebuild_text_passim()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.rebuilder.upload"><code class="docutils literal notranslate"><span class="pre">upload()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.text.helpers">Helpers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.pages_to_article"><code class="docutils literal notranslate"><span class="pre">pages_to_article()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_issue"><code class="docutils literal notranslate"><span class="pre">read_issue()</span></code></a></li>
@@ -58,16 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.text_apply_breaks"><code class="docutils literal notranslate"><span class="pre">text_apply_breaks()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#running-rebuild-on-runai">Running Rebuild on Runai</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#steps-and-how-to-run-impresso-s-rebuilder-on-runai">Steps and How-to run <em>impresso</em>’s rebuilder on Runai</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#step-1-setup-runai">Step 1: Setup Runai</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#step-2-code-version-and-ic-registry">Step 2: Code version and IC Registry</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#step-3-prep-the-pvc">Step 3: Prep the PVC</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#step-4-sumbit-the-runai-job">Step 4: Sumbit the RunAi job</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#config-file-example">Config file example</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
@@ -100,22 +101,229 @@
              
   <section id="text-rebuild">
 <h1>Text Rebuild<a class="headerlink" href="#text-rebuild" title="Link to this heading"></a></h1>
-<section id="command-line-interface">
-<h2>Command Line interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h2>
-</section>
-<section id="config-file-example">
-<h2>Config file example<a class="headerlink" href="#config-file-example" title="Link to this heading"></a></h2>
-<p>(from file: <cite>cluster.json</cite>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;GDL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1900</span><span class="p">,</span> <span class="mi">1999</span><span class="p">]</span>
-    <span class="p">}</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-</section>
 <section id="rebuild-functions">
 <h2>Rebuild functions<a class="headerlink" href="#rebuild-functions" title="Link to this heading"></a></h2>
+<p>A set of functions to transform JSON files in <strong>impresso’s canonical format</strong>
+into a number of JSON-based formats for different purposes.</p>
+<p id="module-impresso_commons.text.rebuilder">Functions and CLI to rebuild text from impresso’s canonical format.
+For EPFL members, this script can be scaled by running it using Runai,
+as documented on <a class="reference external" href="https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md">https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md</a>.</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>rebuilder.py rebuild_articles –input-bucket=&lt;b&gt; –log-file=&lt;f&gt; –output-dir=&lt;od&gt; –filter-config=&lt;fc&gt; [–format=&lt;fo&gt; –scheduler=&lt;sch&gt; –output-bucket=&lt;ob&gt; –verbose –clear –languages=&lt;lgs&gt; –nworkers=&lt;nw&gt;]</p>
+</dd>
+</dl>
+<p>Options:</p>
+<dl class="option-list">
+<dt><kbd><span class="option">--input-bucket=<var>&lt;b&gt;</var></span></kbd></dt>
+<dd><p>S3 bucket where canonical JSON data will be read from</p>
+</dd>
+<dt><kbd><span class="option">--output-bucket=<var>&lt;ob&gt;</var></span></kbd></dt>
+<dd><p>Rebuilt data will be uploaded to the specified s3 bucket (otherwise no upload)</p>
+</dd>
+<dt><kbd><span class="option">--log-file=<var>&lt;f&gt;</var></span></kbd></dt>
+<dd><p>Path to log file</p>
+</dd>
+<dt><kbd><span class="option">--scheduler=<var>&lt;sch&gt;</var></span></kbd></dt>
+<dd><p>Tell dask to use an existing scheduler (otherwise it’ll create one)</p>
+</dd>
+<dt><kbd><span class="option">--filter-config=<var>&lt;fc&gt;</var></span></kbd></dt>
+<dd><p>A JSON configuration file specifying which newspaper issues will be rebuilt</p>
+</dd>
+<dt><kbd><span class="option">--verbose</span></kbd></dt>
+<dd><p>Set logging level to DEBUG (by default is INFO)</p>
+</dd>
+<dt><kbd><span class="option">--clear</span></kbd></dt>
+<dd><p>Remove output directory before and after rebuilding</p>
+</dd>
+<dt><kbd><span class="option">--format=<var>&lt;fo&gt;</var></span></kbd></dt>
+<dd><p>stuff</p>
+</dd>
+<dt><kbd><span class="option">--nworkers=<var>&lt;nw&gt;</var></span></kbd></dt>
+<dd><p>number of workers for (local) dask client</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.cleanup">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upload_success</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.cleanup" title="Link to this definition"></a></dt>
+<dd><p>Removes a file if it has been successfully uploaded to S3.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>upload_success</strong> (<em>bool</em>) – whether the upload was successful</p></li>
+<li><p><strong>filepath</strong> (<em>str</em>) – path to the uploaded file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.compress">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.compress" title="Link to this definition"></a></dt>
+<dd><p>Merges a set of JSON line files into a single compressed archive.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – signature of the newspaper issue (e.g. GDL-1900)</p></li>
+<li><p><strong>json_files</strong> (<em>list</em>) – input JSON line files</p></li>
+<li><p><strong>output_dir</strong> – directory where to write the output file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple with: sorting key [0] and path to serialized file [1].</p>
+</dd>
+<dt class="field-odd">Rytpe<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><cite>sort_key</cite> is expected to be the concatenation of newspaper ID and year
+(e.g. GDL-1900).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.init_logging">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">init_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.init_logging" title="Link to this definition"></a></dt>
+<dd><p>Initialises the root logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>int</em>) – desired level of logging (default: logging.INFO)</p></li>
+<li><p><strong>file</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the initialised logger</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>logging.RootLogger</cite></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It’s basically a duplicate of <cite>impresso_commons.utils.init_logger</cite> but
+I could not get it to work properly, so keeping this duplicate.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.main">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_for_passim">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_passim" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_for_solr">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_solr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_solr" title="Link to this definition"></a></dt>
+<dd><p>Rebuilds the text of an article given its metadata as input.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This rebuild function is thought especially for ingesting the newspaper
+data into our Solr index.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>article_metadata</strong> (<em>dict</em>) – the article’s metadata</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dictionary with the following keys: TBD</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_issues">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_issues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dask_client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'solr'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_language</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_issues" title="Link to this definition"></a></dt>
+<dd><p>Rebuild a set of newspaper issues into a given format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>issues</strong> (list of <cite>IssueDir</cite> objects) – issues to rebuild</p></li>
+<li><p><strong>input_bucket</strong> (<em>str</em>) – name of input s3 bucket</p></li>
+<li><p><strong>outp_dir</strong> (<em>str</em>) – local directory where to store the rebuilt files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of tuples (see return type of <cite>upload</cite>)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of tuples</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_text">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text" title="Link to this definition"></a></dt>
+<dd><p>The text rebuilding function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>page</strong> (<em>dict</em>) – a newspaper page conforming to the impresso JSON schema
+for pages.</p></li>
+<li><p><strong>string</strong> (<em>str</em>) – the rebuilt text of the previous page. If <cite>string</cite> is not
+<cite>None</cite>, then the rebuilt text is appended to it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+[2] coordinates of token regions (dict of lists).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_text_passim">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text_passim" title="Link to this definition"></a></dt>
+<dd><p>The text rebuilding function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>page</strong> (<em>dict</em>) – a newspaper page conforming to the impresso JSON schema
+for pages.</p></li>
+<li><p><strong>string</strong> (<em>str</em>) – the rebuilt text of the previous page. If <cite>string</cite> is not
+<cite>None</cite>, then the rebuilt text is appended to it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple with: [0] fulltext, [1] offsets (dict of lists) and
+[2] coordinates of token regions (dict of lists).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.rebuilder.upload">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.upload" title="Link to this definition"></a></dt>
+<dd><p>Uploads a file to a given S3 bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sort_key</strong> (<em>str</em>) – the key used to group articles (e.g. “GDL-1900”)</p></li>
+<li><p><strong>filepath</strong> (<em>str</em>) – path of the file to upload to S3</p></li>
+<li><p><strong>bucket_name</strong> (<em>str</em>) – name of S3 bucket where to upload the file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple with [0] whether the upload was successful (boolean) and
+[1] the path of the uploaded file (string)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><cite>sort_key</cite> is expected to be the concatenation of newspaper ID and year
+(e.g. GDL-1900).</p>
+</div>
+</dd></dl>
+
 </section>
 <section id="module-impresso_commons.text.helpers">
 <span id="helpers"></span><h2>Helpers<a class="headerlink" href="#module-impresso_commons.text.helpers" title="Link to this heading"></a></h2>
@@ -186,115 +394,16 @@ function. It applies to <cite>fulltext</cite> the characte offsets contained in
 </dd></dl>
 
 </section>
-<section id="running-rebuild-on-runai">
-<h2>Running Rebuild on Runai<a class="headerlink" href="#running-rebuild-on-runai" title="Link to this heading"></a></h2>
-<section id="steps-and-how-to-run-impresso-s-rebuilder-on-runai">
-<h3>Steps and How-to run <em>impresso</em>’s rebuilder on Runai<a class="headerlink" href="#steps-and-how-to-run-impresso-s-rebuilder-on-runai" title="Link to this heading"></a></h3>
-<p>Documentation to setup Runai and run the <code class="docutils literal notranslate"><span class="pre">rebuilder.py</span></code> script on the iccluster using it.
-Last modification: Nov. 2023.</p>
-<section id="step-1-setup-runai">
-<h4>Step 1: Setup Runai<a class="headerlink" href="#step-1-setup-runai" title="Link to this heading"></a></h4>
-<p>Before anything else, Runai should be setup and configured. This can be done by following the tutorial(s) on the following sources:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://docs.google.com/document/d/1--QB_9PLSK6LAEDfIirR5aptWHi9Ri5BxCwT7LXz29M/edit">RunAi Starter gDoc</a></p></li>
-<li><p><a class="reference external" href="https://docs.google.com/presentation/d/15UY_8wZGGQW_sLzcaOPaMjeU5nneraRfsWPjf8uF7cc/edit#slide=id.p">RunAi Crash Course gSlides</a></p></li>
-<li><p><a class="reference external" href="https://icitdocs.epfl.ch/display/clusterdocs/Getting+Started+with+RunAI">IC-IT RunAi Documentation</a></p></li>
-</ul>
-<p>To verify the setup was correctly done, run <code class="docutils literal notranslate"><span class="pre">runai</span> <span class="pre">list</span></code> on the terminal (while on EPFL intranet, use VPN if not on campus). The output should be similar to:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Showing</span> <span class="n">jobs</span> <span class="k">for</span> <span class="n">project</span> <span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span>
-<span class="n">NAME</span>  <span class="n">STATUS</span>  <span class="n">AGE</span>  <span class="n">NODE</span>  <span class="n">IMAGE</span>  <span class="n">TYPE</span>  <span class="n">PROJECT</span>  <span class="n">USER</span>  <span class="n">GPUs</span> <span class="n">Allocated</span> <span class="p">(</span><span class="n">Requested</span><span class="p">)</span>  <span class="n">PODs</span> <span class="n">Running</span> <span class="p">(</span><span class="n">Pending</span><span class="p">)</span>  <span class="n">SERVICE</span> <span class="n">URL</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+<section id="config-file-example">
+<h2>Config file example<a class="headerlink" href="#config-file-example" title="Link to this heading"></a></h2>
+<p>(from file: <cite>cluster.json</cite>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span>
 </pre></div>
 </div>
-<p>Once the setup is done, no need to repeat this step on future run.</p>
-</section>
-<section id="step-2-code-version-and-ic-registry">
-<h4>Step 2: Code version and IC Registry<a class="headerlink" href="#step-2-code-version-and-ic-registry" title="Link to this heading"></a></h4>
-<p>Ensure the correct Docker image is currently in the <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects">EPFL IC registry</a>.
-If you have done significant code changes since, consider updating the <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects/25/repositories/dhlab%2Fimpresso_pycommons">dhlab/impresso_pycommons</a> Docker image there.
-If you wish to modify the version tag of the image uploaded, do so in the bash script <code class="docutils literal notranslate"><span class="pre">/impresso_commons/scripts/docker_image.sh</span></code>.</p>
-<p>Once the <code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> and <code class="docutils literal notranslate"><span class="pre">docker_image.sh</span></code> match your needs, run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">docker_image</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>Current image version to use: <a class="reference external" href="https://ic-registry.epfl.ch/harbor/projects/25/repositories/dhlab%2Fimpresso_pycommons/tags/v3">v3</a></p>
-</section>
-<section id="step-3-prep-the-pvc">
-<h4>Step 3: Prep the PVC<a class="headerlink" href="#step-3-prep-the-pvc" title="Link to this heading"></a></h4>
-<p>PVC is persistent storage available on RunAi pods. Therefore any code, configurations, logs etc you might want to access for each job should be put there.</p>
-<p><strong>Create user folder on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code></strong> (only once):
-First, if it doesn’t already exist, create the folder for you user on <code class="docutils literal notranslate"><span class="pre">cdhvm0002.xaas.epfl.ch</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span>
-</pre></div>
-</div>
-<p>Any files put in this folder will be accessible within the pod in folder:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">/</span><span class="n">dhlab</span><span class="o">-</span><span class="n">data</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
-</pre></div>
-</div>
-<p><strong>Create or modify the desired config file</strong></p>
-<p>A script named <code class="docutils literal notranslate"><span class="pre">config_rebuilt_runai.sh</span></code> instantiating all necessary options and environment variables for the <code class="docutils literal notranslate"><span class="pre">text/rebuilder.py</span></code> script is expected to be on the PCV.
-An example for this script is <code class="docutils literal notranslate"><span class="pre">example_config_rebuilt_runai.sh</span></code>, which should be modified for <em>each run</em> and uploaded to the pvc:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="n">config_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span> <span class="p">{</span><span class="n">gaspar_user</span><span class="p">}</span><span class="nd">@cdhvm0002</span><span class="o">.</span><span class="n">xaas</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
-</pre></div>
-</div>
-<p>Of course, the file can also be directly modified on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code> between runs, as well as configuration files etc.
-The example script should <em>not be modified in this repository and pushed</em> as it contains sensitive information.</p>
-<p><strong>Upload your code on <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code></strong></p>
-<p>Upload your <code class="docutils literal notranslate"><span class="pre">impresso-pycommons</span></code> folder to <code class="docutils literal notranslate"><span class="pre">cdhvm0002</span></code>. This code will be the one executed, allowing for faster changes between code versions (eg. during development), and maintaining the filestructure and paths. Hence, logs will remain on the pvc in <code class="docutils literal notranslate"><span class="pre">impresso-pycommons/impresso_commons/data/logs</span></code> even once the pod is destroyed.
-Remember however to update the docker image with significant or impactful code changes.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">scp</span> <span class="o">-</span><span class="n">r</span> <span class="n">impresso</span><span class="o">-</span><span class="n">pycommons</span> <span class="p">{</span><span class="n">gaspar_user</span><span class="p">}</span><span class="nd">@cdhvm0002</span><span class="o">.</span><span class="n">xaas</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="p">:</span><span class="o">/</span><span class="n">mnt</span><span class="o">/</span><span class="n">u12632_cdh_dhlab_002_files_nfs</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data</span><span class="o">/</span>
-</pre></div>
-</div>
-</section>
-<section id="step-4-sumbit-the-runai-job">
-<h4>Step 4: Sumbit the RunAi job<a class="headerlink" href="#step-4-sumbit-the-runai-job" title="Link to this heading"></a></h4>
-<p><strong>1. Launch the Runai job</strong></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">submit</span> <span class="o">--</span><span class="n">name</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">--</span><span class="n">image</span> <span class="n">ic</span><span class="o">-</span><span class="n">registry</span><span class="o">.</span><span class="n">epfl</span><span class="o">.</span><span class="n">ch</span><span class="o">/</span><span class="n">dhlab</span><span class="o">/</span><span class="n">impresso_pycommons</span><span class="p">:{</span><span class="n">version_to_use</span><span class="p">}</span> <span class="o">--</span><span class="n">pvc</span> <span class="n">runai</span><span class="o">-</span><span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">-</span><span class="n">data1</span><span class="p">:</span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span><span class="o">/</span><span class="n">dhlab</span><span class="o">-</span><span class="n">data</span> <span class="o">--</span><span class="n">environment</span> <span class="n">USER_NAME</span><span class="o">=</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span> <span class="o">--</span><span class="n">environment</span> <span class="n">USER_ID</span><span class="o">=</span><span class="p">{</span><span class="nb">id</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">USER_ID</span></code> can be found on <a class="reference external" href="https://people.epfl.ch/">people.epfl</a> under <code class="docutils literal notranslate"><span class="pre">UID</span></code>.</p>
-<p>You can monitor the job creation by running</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">describe</span> <span class="n">job</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">-</span><span class="n">p</span> <span class="n">dhlab</span><span class="o">-</span><span class="p">{</span><span class="n">gaspar_username</span><span class="p">}</span>
-</pre></div>
-</div>
-<p><strong>2. Enable port forwarding</strong>
-Once the job has successfully started, in another terminal window (optionally in a screen based on the expected runtime), enable port forwarding to have access to the Dask dashboard at <code class="docutils literal notranslate"><span class="pre">http://localhost:8787/status</span></code>.
-(Note: when multiple jobs run at the same time, the port needs to be adapted).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">port</span><span class="o">-</span><span class="n">forward</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span><span class="o">-</span><span class="mi">0</span><span class="o">-</span><span class="mi">0</span> <span class="mi">8787</span><span class="p">:</span><span class="mi">8787</span>
-</pre></div>
-</div>
-<p><strong>3. Launch the script from the pod</strong>
-You can connect to a bash session on the pod using:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">bash</span>
-</pre></div>
-</div>
-<p>Then, the script can directly be launched with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">start_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span>
-</pre></div>
-</div>
-<p>By default, this script will start a local Dask cluster with 64 workers. Alternatively, the number of workers can be modified by specifying the corresponding option:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">.</span> <span class="n">scripts</span><span class="o">/</span><span class="n">start_rebuilt_runai</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">nworkers</span> <span class="o">&lt;</span><span class="n">num</span><span class="o">&gt;</span>
-</pre></div>
-</div>
-<p>Note: The docker image can also easily be modified to directly run the script upon start. It was not added to the current Dockerfile to allow for slightly more control and a possibility to modify scripts on the pod if necessary.</p>
-<p><strong>4. Monitor the progress from Runai and Dask dashboard</strong></p>
-<p>Once the job is launched, it’s progress and resource consumption can be monitored on both <a class="reference external" href="https://epfl.run.ai/jobs?sortBy=%5B%7B%22key%22:%22creationTime%22,%22direction%22:%22desc%22%7D%5D&amp;amp;query=&amp;amp;page=1&amp;amp;items_per_page=20">RunAi</a> and the <a class="reference external" href="http://localhost:8787/status">Dask Dashboard</a>.</p>
-<ul class="simple">
-<li><p><strong>Runai</strong>: Allows to monitor CPU and memory usage or the job, stores metadata about previous runs. Note however that the CPU and CPU memory usage are <em>not</em> available after the job is deleted.</p></li>
-<li><p><strong>Dask dashboard</strong>: Provides in-depth monitoring of the tasks performed, worker health and other metrics, more information available <a class="reference external" href="https://docs.dask.org/en/latest/dashboard.html">here</a>.</p></li>
-</ul>
-<p>Additionally, the user can access the stdout by entering the screen where the scrip is running.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">screen</span> <span class="o">-</span><span class="n">r</span> <span class="n">rebuilder</span>
-</pre></div>
-</div>
-<p><strong>5. Delete the job</strong></p>
-<p>Once the processing is over, the screen in which the rebuild script was launched will automatically terminate.
-The user can then stop all other processes (namely the dask scheduler and workers), and possibly launch the rebuild script again with another configuration (cf. Step 3).</p>
-<p>Once fully done with the Runai job, it should be deleted to stop using the resources:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runai</span> <span class="n">delete</span> <span class="n">job</span> <span class="p">{</span><span class="n">job_name</span><span class="p">}</span>
-</pre></div>
-</div>
-</section>
-</section>
+<blockquote>
+<div><p>“GDL”: [1900, 1999]</p>
+</div></blockquote>
+<p>}]</p>
 </section>
 </section>
 

@@ -153,7 +153,7 @@ def get_scale_factor(issue_dir_path, archive, page_xml, box_strategy, img_source
     Here we do an additional check to see if the page_width|height are the same as the image ones.
     The only danger is if Olive used another image file and did not provide it.
 
-    Case 4: one jpg only.
+    Case 4: one jpg only
     --------------------
     Same as Case 3, scale factor of 1.
     Here we do an additional check to see if the page_width|height are the same as the image ones.
