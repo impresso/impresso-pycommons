@@ -27,7 +27,6 @@ dynamic = ["version"]
 
 dependencies = [
     "dask[complete]",
-    "distributed",
     "boto3",
     "beautifulsoup4",
     "docopt",
