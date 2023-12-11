@@ -18,10 +18,3 @@ Python module with bits of code (objects, functions) highly reusable within impr
    utils
    images
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
