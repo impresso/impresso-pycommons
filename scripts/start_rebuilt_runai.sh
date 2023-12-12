@@ -1,5 +1,6 @@
 #!/bin/bash
 # Script to be used to launch the dask local cluster and rebuilder script. 
+# If using Runai, more information available https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md.
 # Will use the environment variables in pvc (on mnt point of cdhvm0002)
 # "/home/$USER_NAME/dhlab-data/data/$USER_NAME-data/init_rebuilt_runai.sh" for the various options necessary.
 

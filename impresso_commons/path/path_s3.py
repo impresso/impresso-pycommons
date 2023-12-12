@@ -234,17 +234,21 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
     """
     Iterate over bucket and filter according to config and suffix.
     Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
-    Example: config = { "GDL" : [1960, 1970], => will take all years in interval
-                        "JDG": [], => Empty array means no filter, all years.
-                        "GDL": [1798, 1999, 10] => take each 10th item within sequence of years
-                        }.
+    Example: 
+        config = { 
+            "GDL" : [1960, 1970], => will take all years in interval
+            "JDG": [], => Empty array means no filter, all years.
+            "GDL": [1798, 1999, 10] => take each 10th item within sequence of years
+
+        }
+        
     :param bucket_name: the name of the bucket
     :type bucket_name: str
     :param config: newspaper/years to consider
     :type config: Dict
     :param key_suffix: end of the key
     :type prefix: str
-    @return: array of keys
+    :return: array of keys
     """
     filtered_keys = []
     accept_key = lambda k: True

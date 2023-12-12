@@ -73,8 +73,18 @@
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.upload"><code class="docutils literal notranslate"><span class="pre">upload()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#dask-utils-functions">Dask Utils Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#apache-uima-xmi-utils-functions">Apache UIMA XMI Utils Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.daskutils">Dask Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.create_even_partitions"><code class="docutils literal notranslate"><span class="pre">create_even_partitions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.partitioner"><code class="docutils literal notranslate"><span class="pre">partitioner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.uima">Apache UIMA XMI Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.compute_image_links"><code class="docutils literal notranslate"><span class="pre">compute_image_links()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.get_iiif_links"><code class="docutils literal notranslate"><span class="pre">get_iiif_links()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.rebuilt2xmi"><code class="docutils literal notranslate"><span class="pre">rebuilt2xmi()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.config_loader">Config File Loader</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base.check_bucket"><code class="docutils literal notranslate"><span class="pre">Base.check_bucket()</span></code></a></li>
@@ -166,12 +176,12 @@ Warning: 2 boto libraries are used, and need to be kept until third party lib de
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.alternative_read_text">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">alternative_read_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s3_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_credentials</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.alternative_read_text" title="Link to this definition"></a></dt>
-<dd><p>Read from S3 a line-separated text file (e.g. <a href="#id1"><span class="problematic" id="id2">*</span></a>.jsonl.bz2).</p>
+<dd><p>Read from S3 a line-separated text file (e.g. <cite>*.jsonl.bz2</cite>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The reason for this function is a bug in <cite>dask.bag.read_text()</cite>
-which breaks on buckets having &gt;= 1000 keys (it raises a
-<cite>FileNotFoundError</cite>).</p>
+which breaks on buckets having &gt;= 1000 keys.
+It raises a <cite>FileNotFoundError</cite>.</p>
 </div>
 </dd></dl>
 
@@ -433,11 +443,102 @@ If None, will be the number of detected CPUs.</p></li>
 <dd></dd></dl>
 
 </section>
-<section id="dask-utils-functions">
-<h2>Dask Utils Functions<a class="headerlink" href="#dask-utils-functions" title="Link to this heading"></a></h2>
+<section id="module-impresso_commons.utils.daskutils">
+<span id="dask-utils-functions"></span><h2>Dask Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.daskutils" title="Link to this heading"></a></h2>
+<p>Utility which help preparing data in view of parallel or distributed computing, in a dask-oriented view.</p>
+<dl>
+<dt>Usage:</dt><dd><p>daskutils.py partition –config-file=&lt;cf&gt; –nb-partitions=&lt;p&gt; [–log-file=&lt;f&gt; –verbose]</p>
+</dd>
+<dt>Options:</dt><dd><dl class="option-list">
+<dt><kbd><span class="option">--config-file=<var>&lt;cf&gt;</var></span></kbd></dt>
+<dd><p>json configuration dict specifying various arguments</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.create_even_partitions">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">create_even_partitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_newspapers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_partition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.create_even_partitions" title="Link to this definition"></a></dt>
+<dd><p>Convert yearly bz2 archives to even bz2 archives, i.e. partitions.</p>
+<p>Enables efficient (distributed) processing, bypassing the size discrepancies of newspaper archives.
+N.B.: in resulting partitions articles are all shuffled.
+Warning: consider well the config_newspapers as it decides what will be in the partitions and loaded in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket</strong> – name of the bucket where the files to partition are</p></li>
+<li><p><strong>config_newspapers</strong> – json dict specifying the sources to consider (name(s) of newspaper(s) and year span(s))</p></li>
+<li><p><strong>output_dir</strong> – classic FS repository where to write the produced partitions</p></li>
+<li><p><strong>local_fs</strong> – </p></li>
+<li><p><strong>keep_full</strong> – whether to filter out metadata or not (i.e. keeping only text and leaving out coordinates)</p></li>
+<li><p><strong>nb_partition</strong> – number of partitions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.main">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.partitioner">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">partitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbpart</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.partitioner" title="Link to this definition"></a></dt>
+<dd><p>Partition a bag into n partitions and write each partition in a file</p>
+</dd></dl>
+
 </section>
-<section id="apache-uima-xmi-utils-functions">
-<h2>Apache UIMA XMI Utils Functions<a class="headerlink" href="#apache-uima-xmi-utils-functions" title="Link to this heading"></a></h2>
+<section id="module-impresso_commons.utils.uima">
+<span id="apache-uima-xmi-utils-functions"></span><h2>Apache UIMA XMI Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.uima" title="Link to this heading"></a></h2>
+<p>Utility functions to export data in Apache UIMA XMI format.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.compute_image_links">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">compute_image_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ContentItem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://dhlabsrv17.epfl.ch/iiif_impresso/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.uima.compute_image_links" title="Link to this definition"></a></dt>
+<dd><p>Short summary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ci</strong> (<em>type</em>) – Description of parameter <cite>ci</cite>.</p></li>
+<li><p><strong>padding</strong> (<em>type</em>) – Description of parameter <cite>padding</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Description of returned object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.get_iiif_links">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">get_iiif_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contentitems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ContentItem</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.uima.get_iiif_links" title="Link to this definition"></a></dt>
+<dd><p>Retrieves from S3 IIIF links for a set of canonical pages where the input content items are found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.rebuilt2xmi">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">rebuilt2xmi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typesystem_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_mappings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#impresso_commons.utils.uima.rebuilt2xmi" title="Link to this definition"></a></dt>
+<dd><p>Converts a rebuilt ContentItem into Apache UIMA/XMI format.</p>
+<p>The resulting file will be named after the content item’s ID, adding
+the <cite>.xmi</cite> extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ci</strong> (<cite>impresso_commons.classes.ContentItem</cite>) – the content item to be converted</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em>) – the path to the output directory</p></li>
+<li><p><strong>typesystem_path</strong> (<em>str</em>) – TypeSystem file containing defitions of annotation
+layers.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="module-impresso_commons.utils.config_loader">
 <span id="config-file-loader"></span><h2>Config File Loader<a class="headerlink" href="#module-impresso_commons.utils.config_loader" title="Link to this heading"></a></h2>

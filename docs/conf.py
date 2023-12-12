@@ -11,7 +11,6 @@
 #
 import os
 import sys
-import impresso_commons
 
 sys.path.insert(0, os.path.abspath('../'))
 
@@ -43,7 +42,6 @@ source_suffix = ['.rst', '.md']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
 
 autodoc_mock_imports = [
     'jsonlines',

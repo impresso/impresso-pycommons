@@ -2,7 +2,8 @@ Proper generic configuration handling will follow.
 
 As of now, here is a generic config:
 
-```{
+```
+{
   "solr_server" : URL of the server,
   "solr_core": name of the core,
   "s3_host": S3 host,
