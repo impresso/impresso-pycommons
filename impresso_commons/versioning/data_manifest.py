@@ -19,7 +19,8 @@ from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import read_s3_issues
 from impresso_commons.versioning.helpers import (DataFormat, read_manifest_contents, 
-                                                 validate_format, clone_git_repo)
+                                                 validate_format, clone_git_repo,
+                                                 write_and_push_to_git, write_dump_to_fs)
 from impresso_commons.versioning.data_statistics import DataStatistics
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.utils import init_logger
@@ -53,13 +54,20 @@ class DataManifest:
         
         # get code version used for processing.
         self.commit_hash = git_repo.head.commit
-
+        # clone the data release repository locally
         self.out_repo = clone_git_repo(self.temp_folder, branch = self.branch)
+
+
         # initialize the dict containing the manifest data
         self.manifest_data = {}
 
     def add_processing_statistics(self, proc_stats: DataStatistics) -> None:
         if proc_stats.type == self.format and proc_stats.granularity == 'year':
+            if self.processing_stats is not None:
+                logger.debug(
+                    f"`processing_stats`: {proc_stats} has been added to this "
+                    " manifest but this attribute was already defined: "
+                    f"{self.processing_stats}, updating the current value.")
             self.processing_stats = proc_stats
         else:
             logger.critical("Provided data statistics don't match with this "
@@ -98,21 +106,39 @@ class DataManifest:
 
         return f"{data_type}_{version_suffix}.json"
 
-    
+    def _get_out_path_within_repo(
+        self, folder_prefix: str = "data-processing-versioning"
+    ) -> str:
+        if self.format in ['canonical', 'rebuilt']:
+            sub_folder = "data-preparation"
+        else:
+            sub_folder = "data-processing"
 
-    def validate_and_export_manifest(self, write_in_git: bool = False):
+        return os.path.join(folder_prefix, sub_folder)
+
+    def validate_and_export_manifest(self, write_in_git_folder: bool = False):
         # TODO add verification against JSON schema
         manifest_dump = json.dumps(self.manifest_data, indent=4)
 
         manifest_filename = self._manifest_filename_from_data()
 
-        if write_in_git:
-            out_path = os.path.join(repo.git_dir.split('.')[0])
-
-        out_path = os.path.join(slef.temp_folder, manifest_filename)
-
-        with open(out_path, "w") as outfile:
-            outfile.write(manifest_dump)
+        if not write_in_git_folder:
+            # for debug purposes, write in temp file and not in git repo
+            out_file_path = write_dump_to_fs(manifest_dump, self.temp_folder, 
+                                             manifest_filename)
+        else:
+            # write file and push to git
+            local_path_in_repo = self._get_out_path_within_repo()
+            pushed, out_file_path = write_and_push_to_git(manifest_dump, 
+                                                          self.out_repo, 
+                                                          local_path_in_repo, 
+                                                          manifest_filename, 
+                                                          commit_msg = None)
 
         # upload to s3
-        s3.upload(manifest_dump, bucket_name=self.output_bucket_name)
+        s3.upload(out_file_path, bucket_name=self.output_bucket_name)
+        
+        if not pushed:
+            logger.critical(
+                f"Push manifest to git manually using the file added on S3: "
+                f"\ns3://{self.output_bucket_name}/{out_file_path}.")

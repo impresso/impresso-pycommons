@@ -439,7 +439,9 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
     return filenames
 
 
-def alternative_read_text(s3_key, s3_credentials):
+def alternative_read_text(
+    s3_key: str, s3_credentials: dict, line_by_line: bool=True
+) -> list[str] | str:
     """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
     Note:
@@ -458,6 +460,9 @@ def alternative_read_text(s3_key, s3_credentials):
     }
 
     with s_open(s3_key, 'r', transport_params=transport_params) as infile:
-        lines = infile.readlines()
+        if line_by_line:
+            text = infile.readlines()
+        else:
+            text = infile.read()
 
-    return lines
+    return text

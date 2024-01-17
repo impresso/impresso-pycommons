@@ -14,9 +14,12 @@ from impresso_commons.versioning.helpers import (DataFormat, validate_format,
 
 logger = logging.getLogger(__name__)
 
+POSSIBLE_ACTIONS = ['addition', 'modification']
+
 class DataStatistics:
 
-    def __init__(self, process_type: DataFormat | str, granularity: str) -> None:
+    def __init__(self, process_type: DataFormat | str, granularity: str, addition: bool) -> None:
 
         self.type = validate_format(process_type)
         self.granularity = validate_granularity(granularity, for_stats=True)
+        self.action_type = 'addition' if addition else 'modification'

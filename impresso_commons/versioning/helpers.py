@@ -5,10 +5,13 @@ import logging
 import git
 from enum import StrEnum
 from typing import Any
+from impresso_commons.utils.s3 import (fixed_s3fs_glob, alternative_read_text,
+                                       get_storage_options, get_boto3_bucket)
 
 logger = logging.getLogger(__name__)
 
 POSSIBLE_GRANULARITIES = ['collection', 'title', 'year', 'issue']
+IMPRESSO_STORAGEOPT = get_storage_options()
 
 class DataFormat(StrEnum):
 
@@ -51,6 +54,7 @@ def clone_git_repo(path: str, repo_name: str = "impresso/impresso-data-release",
 
     # if the repository was already cloned, return it.
     if is_git_repo(repo_path):
+        logger.debug(f"Git repository {repo_name} had already been cloned.")
         return git.Repo(repo_path)
 
     # try to clone using ssh, if it fails, retry with https.
@@ -86,15 +90,91 @@ def validate_granularity(value: str, for_stats: bool = True):
                     " is not a valid granulartiy.")
     raise e
 
-def read_manifest_contents(man_dict: dict[str, Any]) :
+def extract_version(name_or_path: str, as_int: bool=False) -> list[str | int]:
+    # in the case it's a path
+    basename = os.path.basename(name_or_path)
+    version = basename.replace('.json', '').split('_')[-1]
+    if as_int:
+        return int(version[1:].replace('-', ''))
+    else:
+        return version.replace('-', '.')
+
+def find_s3_data_manifest_path(
+    bucket: boto3.resources.factory.s3.Bucket, data_format: str
+) -> str:
+    bucket = s3.get_boto3_bucket(bucket_name)
+    # manifests have a json and are named after the format
+    path_filter = f"{data_format}_v*.json"
+    # processed data are all in the same bucket
+    if data_format not in ['canonical', 'rebuilt']:
+        path_filter = os.path.join(data_format, path_filter)
+    
+    matches = fixed_s3fs_glob(path_filter, boto3_bucket=bucket)
+    # matches will always be a list
+    if len(matches) == 1:
+        return matches[0]
+    else:
+        # if multiple versions exist, return the latest one
+        return sorted(matches, 
+                      key = lambda x: extract_version(x, as_int=True))[-1]
+
+def read_manifest_from_s3(bucket_name: str, data_format: str) :
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
-    pass
+    bucket = s3.get_boto3_bucket(bucket_name)
+    manifest_s3_path = find_s3_data_manifest_path(bucket, data_format)
+    
+    raw_text = s3.alternative_read_text(manifest_s3_path, 
+                                        IMPRESSO_STORAGEOPT, 
+                                        line_by_line=False)
+
+    return json.loads(raw_text)
+
 
 def list_and_date_s3_files():
     # return a list of (file, date) pairs from a given s3 bucket, 
     # to extract their last modification date if no previous manifest exists.
     pass
 
-def push_to_git():
-    # given the serialized json of a manifest, push it to the given subfolder on git
-    pass
+def write_dump_to_fs(
+    file_contents: str, abs_path: str, filename: str
+) -> str:
+    full_file_path = os.path.join(abs_path, filename)
+    
+    # write file to absolute path provided
+    with open(full_file_path, "w") as outfile:
+        outfile.write(file_contents)
+
+    return full_file_path
+
+def write_and_push_to_git(
+    file_contents: str, git_repo: git.Repo, path_in_repo: str, 
+    filename: str, commit_msg: str | None = None) -> tuple[bool, str]:
+    # given the serialized dump or a json file, write it in local git repo
+    # folder and push it to the given subpath on git
+    local_repo_base_dir = git_repo.working_tree_dir
+
+    git_path = os.path.join(local_repo_base_dir, path_in_repo)
+    # write file in git repo cloned locally
+    full_git_path = write_dump_to_fs(file_contents, git_path, filename)
+
+    return git_commit_push(full_git_path, git_repo, commit_msg), full_git_path
+
+def git_commit_push(
+    full_git_filepath: str, git_repo: git.Repo, commit_msg: str | None = None
+) -> bool:
+    # add, commit and push the file at the given path.
+    filename = os.path.basename(full_git_filepath)
+    # git add file
+    git_repo.index.add([full_git_filepath])
+    try:
+        # git commit and push
+        if commit_msg is None:
+            commit_msg = f'Add generated manifest file {filename}.'
+        git_repo.index.commit(commit_msg)
+        origin = git_repo.remote(name='origin')
+        logger.info(f"Pushing {filename} with commit message {commit_msg}.")
+        origin.push()  
+        return True
+    except Exception as e:
+        logger.error(f"Error while pushing {filename}. \n{e}")
+        return False
