@@ -392,9 +392,12 @@ def readtext_jsonlines(key_name, bucket_name):
                 yield json.dumps(article_reduced)
 
 
-def upload(partition_name, newspaper_prefix, bucket_name=None):
+def upload(partition_name, newspaper_prefix=None, bucket_name=None):
 
-    key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
+    if newspaper_prefix is not None:
+        key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
+    else:
+        key_name = partition_name.split("/")[-1]
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)

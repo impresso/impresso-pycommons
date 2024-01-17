@@ -10,13 +10,13 @@ import os
 import shutil
 #from impresso_commons.versioning.data_manifest import DataFormat
 from impresso_commons.versioning.helpers import (DataFormat, validate_format,
-                                                 validate_ganularity)
+                                                 validate_granularity)
 
 logger = logging.getLogger(__name__)
 
 class DataStatistics:
 
-    def __init__(self, process_type: DataFormat | str, ganularity: str) -> None:
+    def __init__(self, process_type: DataFormat | str, granularity: str) -> None:
 
         self.type = validate_format(process_type)
-        self.granularity = validate_ganularity(ganularity, for_stats=True)
+        self.granularity = validate_granularity(granularity, for_stats=True)
