@@ -3,6 +3,9 @@
 import os
 import logging
 import git
+import boto3 
+import json
+
 from enum import StrEnum
 from typing import Any
 from impresso_commons.utils.s3 import (fixed_s3fs_glob, alternative_read_text,
@@ -84,11 +87,11 @@ def validate_format(data_format: str) -> DataFormat | None:
 def validate_granularity(value: str, for_stats: bool = True):
     lower = value.lower()
     if lower in POSSIBLE_GRANULARITIES:
-        if for_stats and lower!= 'issue':
+        if not for_stats or (for_stats and lower!= 'issue'):
             return lower
-    logger.critical(f"{e} \nProvided granularity '{lower}'"
-                    " is not a valid granulartiy.")
-    raise e
+    # only incorrect granularity values will not be returned
+    logger.critical(f"Provided granularity '{lower}' isn't a valid.")
+    raise ValueError
 
 def extract_version(name_or_path: str, as_int: bool=False) -> list[str | int]:
     # in the case it's a path
@@ -99,10 +102,7 @@ def extract_version(name_or_path: str, as_int: bool=False) -> list[str | int]:
     else:
         return version.replace('-', '.')
 
-def find_s3_data_manifest_path(
-    bucket: boto3.resources.factory.s3.Bucket, data_format: str
-) -> str:
-    bucket = s3.get_boto3_bucket(bucket_name)
+def find_s3_data_manifest_path(bucket, data_format: str) -> str:
     # manifests have a json and are named after the format
     path_filter = f"{data_format}_v*.json"
     # processed data are all in the same bucket
@@ -118,16 +118,18 @@ def find_s3_data_manifest_path(
         return sorted(matches, 
                       key = lambda x: extract_version(x, as_int=True))[-1]
 
-def read_manifest_from_s3(bucket_name: str, data_format: str) :
+def read_manifest_from_s3(
+    bucket_name: str, data_format: str
+) -> tuple[str, dict[str, Any]]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
-    bucket = s3.get_boto3_bucket(bucket_name)
+    bucket = get_boto3_bucket(bucket_name)
     manifest_s3_path = find_s3_data_manifest_path(bucket, data_format)
     
-    raw_text = s3.alternative_read_text(manifest_s3_path, 
-                                        IMPRESSO_STORAGEOPT, 
-                                        line_by_line=False)
+    raw_text = alternative_read_text(manifest_s3_path, 
+                                     IMPRESSO_STORAGEOPT, 
+                                     line_by_line=False)
 
-    return json.loads(raw_text)
+    return manifest_s3_path, json.loads(raw_text)
 
 
 def list_and_date_s3_files():

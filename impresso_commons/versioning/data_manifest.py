@@ -14,17 +14,20 @@ import dask.bag as db
 import datetime
 import pathlib
 from git import Repo, Commit
+from typing import Any
+from collections import defaultdict
 
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import read_s3_issues
-from impresso_commons.versioning.helpers import (DataFormat, read_manifest_contents, 
+from impresso_commons.versioning.helpers import (DataFormat, read_manifest_from_s3, 
                                                  validate_format, clone_git_repo,
                                                  write_and_push_to_git, write_dump_to_fs)
-from impresso_commons.versioning.data_statistics import DataStatistics
+from impresso_commons.versioning.data_statistics import DataStatistics, NewspaperStatistics
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.utils import init_logger
-from impresso_commons.utils.s3 import get_s3_resource, get_storage_options, get_boto3_bucket
+from impresso_commons.utils.s3 import (get_s3_resource, get_storage_options, 
+                                       get_boto3_bucket, upload)
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +36,18 @@ REPO_BRANCH_URL = "https://github.com/impresso/impresso-data-release/tree/{branc
 
 IMPRESSO_STORAGEOPT = get_storage_options()
 
+VERSION_CHANGE = {
+    'collection': 'major',
+    'title': 'minor',
+    'year': 'patch',
+    'issue': 'patch'
+}
+
 class DataManifest:
 
     def __init__(
         self, data_format: DataFormat|str, s3_input_bucket: str, 
-        s3_output_bucket: str, git_repo: Repo, temp_folder: str,
-        processing_stats: dict[str, DataStatistics]|None = None, 
+        s3_output_bucket: str, git_repo: Repo, temp_folder: str, 
         staging: bool|None = None
     ) -> None:
 
@@ -49,19 +58,21 @@ class DataManifest:
         self.input_bucket_name = s3_input_bucket
         self.output_bucket_name = s3_output_bucket
         self.temp_folder = temp_folder
+
+        # attributes relating to GitHub
         self.branch = self._get_output_branch(staging)
-        self.processing_stats = processing_stats
-        
         # get code version used for processing.
         self.commit_hash = git_repo.head.commit
-        # clone the data release repository locally
-        self.out_repo = clone_git_repo(self.temp_folder, branch = self.branch)
+
+        self.processing_stats = defaultdict(self.default_stats_value()) # TODO fix
 
 
-        # initialize the dict containing the manifest data
-        self.manifest_data = {}
+    def default_stats_value(self) -> NewspaperStatistics: 
+        return NewspaperStatistics(self.format, 'year')
+        
 
     def add_processing_statistics(self, proc_stats: DataStatistics) -> None:
+        # TODO review/correct
         if proc_stats.type == self.format and proc_stats.granularity == 'year':
             if self.processing_stats is not None:
                 logger.debug(
@@ -87,14 +98,21 @@ class DataManifest:
         return 'staging' if staging_out_bucket or for_staging else 'master'
 
 
-    def get_prev_version_manifest(self):
-        pass
-        
-        
-    def read_prev_version_manifest(self) -> None:
-        pass
+    def get_prev_version_manifest(self) -> dict[str, Any]:
+        logger.debug(f"Reading the previous version of the manifest from S3.")
+        (
+            self.prev_manifest_s3_path, 
+            self.prev_v_manifest
+        ) = read_manifest_from_s3(self.output_bucket_name, self.format)
 
-    def read_input_data_manifest(self) -> None:
+        self.prev_version = self.prev_v_manifest['version']
+
+    def get_current_version(self) -> str:
+        pass
+        #modif_granularity = compute_update_granularty(self.processing_stats)
+        #version_change = 
+
+    def get_input_data_manifest(self) -> None:
         pass
 
     def generate_modification_stats(self):
@@ -136,9 +154,21 @@ class DataManifest:
                                                           commit_msg = None)
 
         # upload to s3
-        s3.upload(out_file_path, bucket_name=self.output_bucket_name)
+        upload(out_file_path, bucket_name=self.output_bucket_name)
         
         if not pushed:
             logger.critical(
                 f"Push manifest to git manually using the file added on S3: "
                 f"\ns3://{self.output_bucket_name}/{out_file_path}.")
+    
+    def compute(self) -> None:
+        # function that will perform all the logic to construct the manifest 
+        # (similarly to NewsPaperPages)
+
+        # clone the data release repository locally
+        self.out_repo = clone_git_repo(self.temp_folder, branch = self.branch)
+
+        # initialize the dict containing the manifest data
+        self.manifest_data = {}
+
+        #### IMPLEMENT LOGIC AND FILL MANIFEST DATA
