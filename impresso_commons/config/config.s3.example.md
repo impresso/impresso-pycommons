@@ -9,8 +9,3 @@ To filter keys when using `impresso_iter_bucket`, provide a dictionary such as:
 ```
 
 Compared to the filtering based on prefix, this brings only the year interval feature.
-
-
-
-
-

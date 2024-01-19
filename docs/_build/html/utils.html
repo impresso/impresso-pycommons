@@ -1,236 +1,631 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Utilities &mdash; Impresso PyCommons  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-
-  
-  
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Image handling" href="images.html" />
     <link rel="prev" title="Text Rebuild" href="rebuild.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
+        <div class="wy-side-nav-search" >
 
           
-            <a href="index.html" class="icon icon-home"> Impresso PyCommons
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Impresso PyCommons
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="io.html">Input/Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebuild.html">Text Rebuild</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#basic-utils">Basic utils</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#s3-utils-functions">S3 Utils Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dask-utils-functions">Dask Utils Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.utils">Basic Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.chunk"><code class="docutils literal notranslate"><span class="pre">chunk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.get_pkg_resource"><code class="docutils literal notranslate"><span class="pre">get_pkg_resource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.parse_json"><code class="docutils literal notranslate"><span class="pre">parse_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.s3">S3 Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.alternative_read_text"><code class="docutils literal notranslate"><span class="pre">alternative_read_text()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.fixed_s3fs_glob"><code class="docutils literal notranslate"><span class="pre">fixed_s3fs_glob()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_boto3_bucket"><code class="docutils literal notranslate"><span class="pre">get_boto3_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_bucket"><code class="docutils literal notranslate"><span class="pre">get_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_bucket_boto3"><code class="docutils literal notranslate"><span class="pre">get_bucket_boto3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_or_create_bucket"><code class="docutils literal notranslate"><span class="pre">get_or_create_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_client"><code class="docutils literal notranslate"><span class="pre">get_s3_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_connection"><code class="docutils literal notranslate"><span class="pre">get_s3_connection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_resource"><code class="docutils literal notranslate"><span class="pre">get_s3_resource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions"><code class="docutils literal notranslate"><span class="pre">get_s3_versions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions_client"><code class="docutils literal notranslate"><span class="pre">get_s3_versions_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_storage_options"><code class="docutils literal notranslate"><span class="pre">get_storage_options()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.read_jsonlines"><code class="docutils literal notranslate"><span class="pre">read_jsonlines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.readtext_jsonlines"><code class="docutils literal notranslate"><span class="pre">readtext_jsonlines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.s3_get_articles"><code class="docutils literal notranslate"><span class="pre">s3_get_articles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.s3_get_pages"><code class="docutils literal notranslate"><span class="pre">s3_get_pages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.upload"><code class="docutils literal notranslate"><span class="pre">upload()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.daskutils">Dask Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.create_even_partitions"><code class="docutils literal notranslate"><span class="pre">create_even_partitions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.daskutils.partitioner"><code class="docutils literal notranslate"><span class="pre">partitioner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.uima">Apache UIMA XMI Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.compute_image_links"><code class="docutils literal notranslate"><span class="pre">compute_image_links()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.get_iiif_links"><code class="docutils literal notranslate"><span class="pre">get_iiif_links()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.uima.rebuilt2xmi"><code class="docutils literal notranslate"><span class="pre">rebuilt2xmi()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.config_loader">Config File Loader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base"><code class="docutils literal notranslate"><span class="pre">Base</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base.check_bucket"><code class="docutils literal notranslate"><span class="pre">Base.check_bucket()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base.check_params"><code class="docutils literal notranslate"><span class="pre">Base.check_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base.from_json"><code class="docutils literal notranslate"><span class="pre">Base.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#impresso_commons.utils.config_loader.Base.to_dict"><code class="docutils literal notranslate"><span class="pre">Base.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.config_loader.PartitionerConfig"><code class="docutils literal notranslate"><span class="pre">PartitionerConfig</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.config_loader.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Impresso PyCommons</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
-      <li>Utilities</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Utilities</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/utils.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="utilities">
-<h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="command-line-interface">
-<h2>Command Line interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
-<p>to come…</p>
+             
+  <section id="utilities">
+<h1>Utilities<a class="headerlink" href="#utilities" title="Link to this heading"></a></h1>
+<section id="module-impresso_commons.utils.utils">
+<span id="basic-utils-functions"></span><h2>Basic Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.chunk">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.chunk" title="Link to this definition"></a></dt>
+<dd><p>Yield successive n-sized chunks from list.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.get_pkg_resource">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_pkg_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_manager</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ExitStack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'impresso_commons'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PosixPath</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.get_pkg_resource" title="Link to this definition"></a></dt>
+<dd><p>Return the resource at <cite>path</cite> in <cite>package</cite>, using a context manager.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The context manager <cite>file_manager</cite> needs to be instantiated prior to
+calling this function and should be closed once the package resource
+is no longer of use.</p>
 </div>
-<div class="section" id="basic-utils">
-<h2>Basic utils<a class="headerlink" href="#basic-utils" title="Permalink to this headline">¶</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_manager</strong> (<em>contextlib.ExitStack</em>) – Context manager.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to the desired resource in given package.</p></li>
+<li><p><strong>package</strong> (<em>str</em><em>, </em><em>optional</em>) – Package name. Defaults to “impresso_commons”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Path to desired managed resource.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pathlib.PosixPath</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.parse_json">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">parse_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.parse_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-impresso_commons.utils.s3">
+<span id="s3-utils-functions"></span><h2>S3 Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.s3" title="Link to this heading"></a></h2>
+<p>Reusable functions to read/write data from/to our S3 drive.
+Warning: 2 boto libraries are used, and need to be kept until third party lib dependencies are solved.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.alternative_read_text">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">alternative_read_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s3_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_credentials</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.alternative_read_text" title="Link to this definition"></a></dt>
+<dd><p>Read from S3 a line-separated text file (e.g. <cite>*.jsonl.bz2</cite>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The reason for this function is a bug in <cite>dask.bag.read_text()</cite>
+which breaks on buckets having &gt;= 1000 keys.
+It raises a <cite>FileNotFoundError</cite>.</p>
 </div>
-<div class="section" id="s3-utils-functions">
-<h2>S3 Utils Functions<a class="headerlink" href="#s3-utils-functions" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.fixed_s3fs_glob">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">fixed_s3fs_glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boto3_bucket</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.fixed_s3fs_glob" title="Link to this definition"></a></dt>
+<dd><p>From Benoit, impresso-pyimages package
+A custom glob function as the s3fs one seems to be unable to list more than 1000 elements on the switch S3
+:param path:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_boto3_bucket">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_boto3_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_boto3_bucket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_bucket">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">versioning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_bucket" title="Link to this definition"></a></dt>
+<dd><p>Create a boto s3 connection and returns the requested bucket.</p>
+<p>It is possible to ask for creating a new bucket
+with the specified name (in case it does not exist), and (optionally)
+to turn on the versioning on the newly created bucket.
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=False)
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=True)
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=True, versioning=False)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function is depreciated, please prioritize using
+get_or_create_bucket or get_boto3_bucket instead.</p>
 </div>
-<div class="section" id="dask-utils-functions">
-<h2>Dask Utils Functions<a class="headerlink" href="#dask-utils-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>string</em>) – the bucket’s name</p></li>
+<li><p><strong>create</strong> (<em>boolean</em>) – creates the bucket if not yet existing</p></li>
+<li><p><strong>versioning</strong> (<em>boolean</em>) – whether the new bucket should be versioned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an s3 bucket</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>boto3.resources.factory.s3.Bucket</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_bucket_boto3">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_bucket_boto3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">versioning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_bucket_boto3" title="Link to this definition"></a></dt>
+<dd><p>Get a boto3 s3 resource and returns the requested bucket.</p>
+<p>It is possible to ask for creating a new bucket
+with the specified name (in case it does not exist), and (optionally)
+to turn on the versioning on the newly created bucket.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">(</span><span class="s1">&#39;testb&#39;</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">(</span><span class="s1">&#39;testb&#39;</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">get_bucket</span><span class="p">(</span><span class="s1">&#39;testb&#39;</span><span class="p">,</span> <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">versioning</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function is depreciated, please prioritize using
+get_or_create_bucket or get_boto3_bucket instead.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>string</em>) – the bucket’s name</p></li>
+<li><p><strong>create</strong> (<em>boolean</em>) – creates the bucket if not yet existing</p></li>
+<li><p><strong>versioning</strong> (<em>boolean</em>) – whether the new bucket should be versioned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an s3 bucket</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>boto3.resources.factory.s3.Bucket</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_or_create_bucket">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_or_create_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">versioning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_or_create_bucket" title="Link to this definition"></a></dt>
+<dd><p>Create a boto3 s3 connection and returns the requested bucket.</p>
+<p>It is possible to ask for creating a new bucket
+with the specified name (in case it does not exist), and (optionally)
+to turn on the versioning on the newly created bucket.
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=False)
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=True)
+&gt;&gt;&gt; b = get_bucket(‘testb’, create=True, versioning=False)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>string</em>) – the bucket’s name</p></li>
+<li><p><strong>create</strong> (<em>boolean</em>) – creates the bucket if not yet existing</p></li>
+<li><p><strong>versioning</strong> (<em>boolean</em>) – whether the new bucket should be versioned</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an s3 bucket</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><cite>boto3.resources.factory.s3.Bucket</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_client">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://os.zhdk.cloud.switch.ch/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_client" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_connection">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'os.zhdk.cloud.switch.ch'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_connection" title="Link to this definition"></a></dt>
+<dd><p>Create a boto connection to impresso’s S3 drive.</p>
+<p>Assumes that two environment variables are set: <cite>SE_ACCESS_KEY</cite> and
+<cite>SE_SECRET_KEY</cite>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function is depreciated, as it used boto instead of boto3,
+please prioritize using get_s3_resource instead.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>host_url</strong> (<em>string</em>) – the s3 endpoint’s URL</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>boto3.resources.factory.s3.ServiceResource</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_resource">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://os.zhdk.cloud.switch.ch/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_resource" title="Link to this definition"></a></dt>
+<dd><p>Get a boto3 resource object related to an S3 drive.</p>
+<p>Assumes that two environment variables are set:
+<cite>SE_ACCESS_KEY</cite> and <cite>SE_SECRET_KEY</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>host_url</strong> (<em>string</em>) – the s3 endpoint’s URL</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>boto3.resources.factory.s3.ServiceResource</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_versions">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_versions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_versions" title="Link to this definition"></a></dt>
+<dd><p>Get versioning information for a given key.</p>
+<p><strong>NB:</strong> it assumes a versioned bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>string</em>) – the bucket’s name</p></li>
+<li><p><strong>key_name</strong> (<em>string</em>) – the key’s name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>for each version, the version id and the last modified date</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of tuples, where tuple[0] is a string and tuple[1] a
+<cite>datetime</cite> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_versions_client">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_versions_client</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_versions_client" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_storage_options">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_storage_options</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_storage_options" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.read_jsonlines">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">read_jsonlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.read_jsonlines" title="Link to this definition"></a></dt>
+<dd><p>Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line).
+Usage example:
+&gt;&gt;&gt; lines = db.from_sequence(read_jsonlines(s3r, key_name , bucket_name))
+&gt;&gt;&gt; print(lines.count().compute())
+&gt;&gt;&gt; lines.map(json.loads).pluck(‘ft’).take(10)
+:param bucket_name: name of bucket
+:type bucket_name: str
+:param key_name: name of key, without S3 prefix
+:type key_name: str
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.readtext_jsonlines">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">readtext_jsonlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.readtext_jsonlines" title="Link to this definition"></a></dt>
+<dd><p>Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line)
+with limited textual information, leaving out OCR metadata (box, offsets).
+This can serve as the starting point for pure textual processing (NE, text-reuse, topics)
+Usage example:
+&gt;&gt;&gt; lines = db.from_sequence(readtext_jsonlines(s3r, key_name , bucket_name))
+&gt;&gt;&gt; print(lines.count().compute())
+&gt;&gt;&gt; lines.map(json.loads).pluck(‘ft’).take(10)
+:param bucket_name: name of bucket
+:type bucket_name: str
+:param key_name: name of key, without S3 prefix
+:type key_name: str
+:return: JSON formatted str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.s3_get_articles">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">s3_get_articles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.s3_get_articles" title="Link to this definition"></a></dt>
+<dd><p>Read a newspaper issue from S3 and return the articles it contains.</p>
+<p>NB: Content items with type = “ad” (advertisement) are filtered out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>issue</strong> (an instance of <cite>impresso_commons.path.IssueDir</cite>) – the newspaper issue</p></li>
+<li><p><strong>bucket</strong> (<cite>boto.s3.bucket.Bucket</cite>) – the input s3 bucket</p></li>
+<li><p><strong>workers</strong> – number of workers for the iter_bucket function.
+If None, will be the number of detected CPUs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of articles (dictionaries)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.s3_get_pages">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">s3_get_pages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">issue_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.s3_get_pages" title="Link to this definition"></a></dt>
+<dd><p>Read in canonical text data for all pages in a given newspaper issue.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>issue_id</strong> (<em>string</em>) – the canonical issue id (e.g. “IMP-1990-03-15-a”)</p></li>
+<li><p><strong>page_names</strong> (<em>list</em><em> of </em><em>strings</em>) – a list of canonical page filenames
+(e.g. “IMP-1990-03-15-a-p0001.json”)</p></li>
+<li><p><strong>bucket</strong> (instance of <cite>boto.Bucket</cite>) – the s3 bucket where the pages to be read are stored</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dictionary with page filenames as keys, and JSON data as values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.upload">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspaper_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.upload" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-impresso_commons.utils.daskutils">
+<span id="dask-utils-functions"></span><h2>Dask Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.daskutils" title="Link to this heading"></a></h2>
+<p>Utility which help preparing data in view of parallel or distributed computing, in a dask-oriented view.</p>
+<dl>
+<dt>Usage:</dt><dd><p>daskutils.py partition –config-file=&lt;cf&gt; –nb-partitions=&lt;p&gt; [–log-file=&lt;f&gt; –verbose]</p>
+</dd>
+<dt>Options:</dt><dd><dl class="option-list">
+<dt><kbd><span class="option">--config-file=<var>&lt;cf&gt;</var></span></kbd></dt>
+<dd><p>json configuration dict specifying various arguments</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.create_even_partitions">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">create_even_partitions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config_newspapers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_fs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_partition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.create_even_partitions" title="Link to this definition"></a></dt>
+<dd><p>Convert yearly bz2 archives to even bz2 archives, i.e. partitions.</p>
+<p>Enables efficient (distributed) processing, bypassing the size discrepancies of newspaper archives.
+N.B.: in resulting partitions articles are all shuffled.
+Warning: consider well the config_newspapers as it decides what will be in the partitions and loaded in memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket</strong> – name of the bucket where the files to partition are</p></li>
+<li><p><strong>config_newspapers</strong> – json dict specifying the sources to consider (name(s) of newspaper(s) and year span(s))</p></li>
+<li><p><strong>output_dir</strong> – classic FS repository where to write the produced partitions</p></li>
+<li><p><strong>local_fs</strong> – </p></li>
+<li><p><strong>keep_full</strong> – whether to filter out metadata or not (i.e. keeping only text and leaving out coordinates)</p></li>
+<li><p><strong>nb_partition</strong> – number of partitions</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.main">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.daskutils.partitioner">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">partitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbpart</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.partitioner" title="Link to this definition"></a></dt>
+<dd><p>Partition a bag into n partitions and write each partition in a file</p>
+</dd></dl>
+
+</section>
+<section id="module-impresso_commons.utils.uima">
+<span id="apache-uima-xmi-utils-functions"></span><h2>Apache UIMA XMI Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.uima" title="Link to this heading"></a></h2>
+<p>Utility functions to export data in Apache UIMA XMI format.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.compute_image_links">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">compute_image_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ContentItem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_endpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://dhlabsrv17.epfl.ch/iiif_impresso/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_links</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.uima.compute_image_links" title="Link to this definition"></a></dt>
+<dd><p>Short summary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ci</strong> (<em>type</em>) – Description of parameter <cite>ci</cite>.</p></li>
+<li><p><strong>padding</strong> (<em>type</em>) – Description of parameter <cite>padding</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Description of returned object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.get_iiif_links">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">get_iiif_links</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">contentitems</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ContentItem</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical_bucket</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.uima.get_iiif_links" title="Link to this definition"></a></dt>
+<dd><p>Retrieves from S3 IIIF links for a set of canonical pages where the input content items are found.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.uima.rebuilt2xmi">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.uima.</span></span><span class="sig-name descname"><span class="pre">rebuilt2xmi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typesystem_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iiif_mappings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pct_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#impresso_commons.utils.uima.rebuilt2xmi" title="Link to this definition"></a></dt>
+<dd><p>Converts a rebuilt ContentItem into Apache UIMA/XMI format.</p>
+<p>The resulting file will be named after the content item’s ID, adding
+the <cite>.xmi</cite> extension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ci</strong> (<cite>impresso_commons.classes.ContentItem</cite>) – the content item to be converted</p></li>
+<li><p><strong>output_dir</strong> (<em>str</em>) – the path to the output directory</p></li>
+<li><p><strong>typesystem_path</strong> (<em>str</em>) – TypeSystem file containing defitions of annotation
+layers.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-impresso_commons.utils.config_loader">
+<span id="config-file-loader"></span><h2>Config File Loader<a class="headerlink" href="#module-impresso_commons.utils.config_loader" title="Link to this heading"></a></h2>
+<p>A class to load configuration files in json format, handling different task setting.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.Base">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.config_loader.</span></span><span class="sig-name descname"><span class="pre">Base</span></span><a class="headerlink" href="#impresso_commons.utils.config_loader.Base" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for initial loading and default checking methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.Base.check_bucket">
+<span class="sig-name descname"><span class="pre">check_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.Base.check_bucket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.Base.check_params">
+<span class="sig-name descname"><span class="pre">check_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.Base.check_params" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.Base.from_json">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.Base.from_json" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.Base.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.Base.to_dict" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.PartitionerConfig">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.config_loader.</span></span><span class="sig-name descname"><span class="pre">PartitionerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.PartitionerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#impresso_commons.utils.config_loader.Base" title="impresso_commons.utils.config_loader.Base"><code class="xref py py-class docutils literal notranslate"><span class="pre">Base</span></code></a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.config_loader.main">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.config_loader.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.config_loader.main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p>Proper generic configuration handling will follow.</p>
+<p>As of now, here is a generic config:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;solr_server&quot;</span> <span class="p">:</span> <span class="n">URL</span> <span class="n">of</span> <span class="n">the</span> <span class="n">server</span><span class="p">,</span>
+  <span class="s2">&quot;solr_core&quot;</span><span class="p">:</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">core</span><span class="p">,</span>
+  <span class="s2">&quot;s3_host&quot;</span><span class="p">:</span> <span class="n">S3</span> <span class="n">host</span><span class="p">,</span>
+  <span class="s2">&quot;s3_bucket_rebuilt&quot;</span><span class="p">:</span> <span class="n">s3</span> <span class="n">bucket</span><span class="p">,</span>
+  <span class="s2">&quot;s3_bucket_partitions&quot;</span><span class="p">:</span> <span class="n">s3</span> <span class="n">bucket</span><span class="p">,</span>
+  <span class="s2">&quot;s3_bucket_processed&quot;</span><span class="p">:</span> <span class="n">s3</span> <span class="n">bucket</span><span class="p">,</span>
+  <span class="s2">&quot;key_batches&quot;</span><span class="p">:</span> <span class="n">number</span> <span class="n">of</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">,</span>
+  <span class="s2">&quot;number_partitions&quot;</span><span class="p">:</span> <span class="n">number</span> <span class="n">of</span> <span class="n">partition</span><span class="p">,</span>
+  <span class="s2">&quot;newspapers&quot;</span> <span class="p">:</span> <span class="p">{</span>              <span class="o">//</span> <span class="n">newspaper</span> <span class="n">config</span><span class="p">,</span> <span class="n">to</span> <span class="n">be</span> <span class="n">detailed</span>
+        <span class="s2">&quot;GDL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1991</span><span class="p">,</span><span class="mi">1998</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="images.html" class="btn btn-neutral float-right" title="Image handling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="rebuild.html" class="btn btn-neutral" title="Text Rebuild" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rebuild.html" class="btn btn-neutral float-left" title="Text Rebuild" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="images.html" class="btn btn-neutral float-right" title="Image handling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018, impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..
-
-    </p>
+    <p>&#169; Copyright 2023, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });

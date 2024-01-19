@@ -16,18 +16,17 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: AGPL License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dynamic = ["version"]
 
 dependencies = [
     "dask[complete]",
-    "distributed",
-    "boto",
     "boto3",
     "beautifulsoup4",
     "docopt",
