@@ -72,17 +72,17 @@ class DataStatistics(ABC):
 class NewspaperStatistics(DataStatistics):
 
     possible_count_keys = [
-        'newspapers',
+        'titles',
         'issues',
         'pages', 
-        'content_items',
-        'tokens',
+        'content_items_out',
+        'ft_tokens',
         'images',
-        'embeddings',
-        'languages',
-        'mentions',
-        'text_reuse_clusters',
-        'topics'
+        'content_items_in',
+        'embeddings_le',
+        'ne_entities',
+        'ne_mentions',
+        'ne_links',
     ]
 
     def __init__(self, process_type: DataFormat | str, granularity: str, 

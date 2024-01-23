@@ -48,7 +48,7 @@ class DataManifest:
     def __init__(
         self, data_format: DataFormat|str, s3_input_bucket: str, 
         s3_output_bucket: str, git_repo: Repo, temp_folder: str, 
-        staging: bool|None = None
+        staging: bool|None = None, version_increment: str|None=None
     ) -> None:
 
         # TODO check logger initialization
