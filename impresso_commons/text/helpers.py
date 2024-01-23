@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 IIIF_ENDPOINT_BASE_2_SUFFIX = {
     'https://ub-sipi.ub.unibas.ch/impresso': 'max/0/default.jpg', # suffix for SWA data
-    'https://scriptorium.bcu-lausanne.ch/api': '600,/0/default.jpg' # suffix for BCUL data
+    'https://scriptorium.bcu-lausanne.ch/api': '450,/0/default.jpg' # suffix for BCUL data
 }
 
 def read_issue(issue, bucket_name, s3_client=None):
