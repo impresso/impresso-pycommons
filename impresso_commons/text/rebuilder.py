@@ -441,11 +441,12 @@ def cleanup(upload_success, filepath):
     :param filepath: path to the uploaded file
     :type filepath: str
     """
-    if upload_success:
+    if upload_success and os.path.exists(filepath):
         os.remove(filepath)
         logger.info(f'Removed temporary file {filepath}')
     else:
-        logger.info(f'Not removing {filepath} as upload has failed')
+        logger.info(f'Not removing {filepath} as upload has failed '
+                    'or file does not exist.')
 
 
 def _article_has_problem(article):
