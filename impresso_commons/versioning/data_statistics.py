@@ -9,19 +9,20 @@ import logging
 import os
 import shutil
 from abc import ABC, abstractmethod
+from typing import Self
 
-#from impresso_commons.versioning.data_manifest import DataFormat
-from impresso_commons.versioning.helpers import (DataFormat, validate_format,
+#from impresso_commons.versioning.data_manifest import DataStage
+from impresso_commons.versioning.helpers import (DataStage, validate_format,
                                                  validate_granularity)
 
 logger = logging.getLogger(__name__)
 
 POSSIBLE_ACTIONS = ['addition', 'modification']
-POSSIBLE_GRANULARITIES = ['collection', 'title', 'year', 'issue']
+POSSIBLE_GRANULARITIES = ['corpus', 'title', 'year', 'issue']
 
 class DataStatistics(ABC):
 
-    def __init__(self, process_type: DataFormat | str, granularity: str, 
+    def __init__(self, process_type: DataStage | str, granularity: str, 
                  element: str = '', counts: dict[str, int] | None = None) -> None:
 
         self.format = validate_format(process_type)
@@ -57,7 +58,7 @@ class DataStatistics(ABC):
             for k, v in new_counts.items():
                 self.counts[k] += v
 
-    """def __add__(self, other):
+    """def __add__(self, other: Self):
         if self.format == other.format:
             sum_stats = DataStatistics(self.format, )
             for (k1, v1), (k2, v2) in zip(self.counts, other.counts):
@@ -79,42 +80,44 @@ class NewspaperStatistics(DataStatistics):
         'ft_tokens',
         'images',
         'content_items_in',
-        'embeddings_le',
         'ne_entities',
         'ne_mentions',
         'ne_links',
+        'embeddings_el',
+        'topics',
     ]
 
-    def __init__(self, process_type: DataFormat | str, granularity: str, 
+    def __init__(self, process_type: DataStage | str, granularity: str, 
                  element: str = '', counts: dict[str, int] | None = None) -> None:
 
         super().__init__(process_type, granularity, element, counts)
 
     def _define_count_keys(self) -> list[str]:
         # TODO correct/update the count_keys
-        start_index = int(self.granularity != 'collection')
-        # all counts should have ['issues','pages', 'content_items', 'tokens']
-        count_keys = self.possible_count_keys[start_index:5] 
+        start_index = int(self.granularity != 'corpus')
+        # all counts should have 'content_items_out'
+        count_keys = [self.possible_count_keys[3]] 
         match self.format:
-            case DataFormat.canonical:
+            case DataStage.canonical:
                 # add 'images'
+                count_keys.extend(self.possible_count_keys[start_index:3])
                 count_keys.append(self.possible_count_keys[5])
-            case DataFormat.embeddings:
+            case DataStage.embeddings:
                 # add 'embeddings'
                 count_keys.append(self.format.value)
-            case DataFormat.entities:
+            case DataStage.entities:
                 # add 'entities'
                 count_keys.append(self.format.value)
-            case DataFormat.langident:
+            case DataStage.langident:
                 # add 'languages'
                 count_keys.append(self.possible_count_keys[7])
-            case DataFormat.mentions:
+            case DataStage.mentions:
                 # add 'mentions'
                 count_keys.append(self.format.value)
-            case DataFormat.text_reuse:
+            case DataStage.text_reuse:
                 # add 'text_reuse_clusters'
                 count_keys.append(self.possible_count_keys[-1])
-            case DataFormat.topics:
+            case DataStage.topics:
                 # add 'topics'
                 count_keys.append(self.format.topics)
         return count_keys

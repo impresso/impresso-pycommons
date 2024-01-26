@@ -13,10 +13,10 @@ from impresso_commons.utils.s3 import (fixed_s3fs_glob, alternative_read_text,
 
 logger = logging.getLogger(__name__)
 
-POSSIBLE_GRANULARITIES = ['collection', 'title', 'year', 'issue']
+POSSIBLE_GRANULARITIES = ['corpus', 'title', 'year', 'issue']
 IMPRESSO_STORAGEOPT = get_storage_options()
 
-class DataFormat(StrEnum):
+class DataStage(StrEnum):
 
     canonical = 'canonical'
     rebuilt = 'rebuilt'
@@ -76,9 +76,9 @@ def clone_git_repo(path: str, repo_name: str = "impresso/impresso-data-release",
                         f"possible to clone it with ssh or https. \n{e}")
         raise e
 
-def validate_format(data_format: str) -> DataFormat | None:
+def validate_format(data_format: str) -> DataStage | None:
     try:
-        return DataFormat[data_format]
+        return DataStage[data_format]
     except ValueError as e:
         logger.critical(f"{e} \nProvided data format '{data_format}'"
                         " is not a valid data format.")

@@ -20,7 +20,7 @@ from collections import defaultdict
 from impresso_commons.path import parse_canonical_filename
 from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import read_s3_issues
-from impresso_commons.versioning.helpers import (DataFormat, read_manifest_from_s3, 
+from impresso_commons.versioning.helpers import (DataStage, read_manifest_from_s3, 
                                                  validate_format, clone_git_repo,
                                                  write_and_push_to_git, write_dump_to_fs)
 from impresso_commons.versioning.data_statistics import DataStatistics, NewspaperStatistics
@@ -46,7 +46,7 @@ VERSION_CHANGE = {
 class DataManifest:
 
     def __init__(
-        self, data_format: DataFormat|str, s3_input_bucket: str, 
+        self, data_format: DataStage|str, s3_input_bucket: str, 
         s3_output_bucket: str, git_repo: Repo, temp_folder: str, 
         staging: bool|None = None, version_increment: str|None=None
     ) -> None:
