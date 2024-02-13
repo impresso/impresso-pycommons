@@ -23,6 +23,23 @@ POSSIBLE_GRANULARITIES = ["corpus", "title", "year"]
 
 
 class DataStatistics(ABC):
+    """Count statistics computed on a specific portion and granularity of the data.
+
+    Args:
+        data_stage (DataStage | str): The stage of data the stats are computed on.
+        granularity (str): The granularity of the statistics with respect to the data.
+        element (str, optional): The specific element associated with the statistics.
+            Defaults to "" (empty string).
+        counts (dict[str, int] | None, optional): Initial counts for statistics.
+            Defaults to None.
+
+    Attributes:
+        stage (DataStage): The stage of data the stats are computed on.
+        granularity (str): The granularity of the statistics with respect to the data.
+        element (str): The specific element associated with the statistics.
+        count_keys (list[str]): The count keys for these statistics.
+        counts (dict[str, int]): The count statistics computed on the specific data.
+    """
 
     def __init__(
         self,
@@ -46,34 +63,29 @@ class DataStatistics(ABC):
 
     @abstractmethod
     def _define_count_keys(self) -> list[str]:
-        # define the count keys for this object
-        pass
+        """Define the count keys for these specific statistics."""
 
     @abstractmethod
     def _validate_count_keys(self, new_counts: dict[str, int]) -> bool:
-        # validate the keys of counts provided during instantiation
-        pass
+        """Validate the keys of new counts provided against defined count keys."""
 
     def init_counts(self) -> dict[str, int]:
-        # initialize a dict with all the keys associated to this object,
-        # 0 for all values.
+        """Initialize a dict with all the keys associated to this object.
+
+        Returns:
+            dict[str, int]: A dict with all defined keys, and values initialized to 0.
+        """
         return {k: 0 for k in self.count_keys}
 
     def add_counts(self, new_counts: dict[str, int]) -> None:
-        # ensure the incoming counts fits the current count keys
+        """Add new counts to the existing counts if the new keys are validated.
+
+        Args:
+            new_counts (dict[str, int]): New counts to be added.
+        """
         if self._validate_count_keys(new_counts):
             for k, v in new_counts.items():
                 self.counts[k] += v
-
-    """def __add__(self, other: Self):
-        if self.format == other.format:
-            sum_stats = DataStatistics(self.format, )
-            for (k1, v1), (k2, v2) in zip(self.counts, other.counts):
-
-        return DataStatistics(self.num+other.num)
-
-    def __radd__(self,other):
-        return MyNum(self.num+other)"""
 
     def pretty_print(self, add_counts: bool = False) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
@@ -105,6 +117,24 @@ class DataStatistics(ABC):
 
 
 class NewspaperStatistics(DataStatistics):
+    """Count statistics computed on a specific portion and granularity of the data.
+
+    Args:
+        data_stage (DataStage | str): The stage of data the stats are computed on.
+        granularity (str): The granularity of the statistics with respect to the data.
+        element (str, optional): The specific element associated with the statistics.
+            Defaults to "" (empty string).
+        counts (dict[str, int] | None, optional): Initial counts for statistics.
+            Defaults to None.
+
+    Attributes:
+        stage (DataStage): The stage of data the stats are computed on.
+        granularity (str): The granularity of the statistics with respect to the data.
+        element (str): The specific element associated with the statistics.
+        count_keys (list[str]): The count keys for these statistics.
+        counts (dict[str, int]): The count statistics computed on the specific data.
+        possible_count_keys (list[str]): All possible count keys for newspaper data.
+    """
 
     possible_count_keys = [
         "titles",
@@ -122,6 +152,11 @@ class NewspaperStatistics(DataStatistics):
     ]
 
     def _define_count_keys(self) -> list[str]:
+        """Define the count keys to use for these specific statistics.
+
+        Returns:
+            list[str]: The count keys for this specific stage and granularity.
+        """
         # TODO correct/update the count_keys
         start_index = int(self.granularity != "corpus")
         # all counts should have 'content_items_out'
@@ -152,6 +187,17 @@ class NewspaperStatistics(DataStatistics):
         return count_keys
 
     def _validate_count_keys(self, new_counts: dict[str, int]) -> bool:
+        """Validate the keys of new counts provided against defined count keys.
+
+        Valid new counts shouldn't have keys absent from the defined `attr:count_keys`
+        or non-integer values.
+
+        Args:
+            new_counts (dict[str, int]): New counts to validate
+
+        Returns:
+            bool: True if `new_counts` are valid, False otherwise.
+        """
         if not all(k in self.count_keys for k in new_counts.keys()):
             warn_msg = (
                 f"Provided value `counts`: {new_counts} has keys not present in "
