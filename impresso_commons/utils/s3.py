@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 
 def get_storage_options():
     return {
-        'client_kwargs': {'endpoint_url': 'https://os.zhdk.cloud.switch.ch'},
-        'key': os.environ['SE_ACCESS_KEY'],
-        'secret': os.environ['SE_SECRET_KEY']
+        "client_kwargs": {"endpoint_url": "https://os.zhdk.cloud.switch.ch"},
+        "key": os.environ["SE_ACCESS_KEY"],
+        "secret": os.environ["SE_SECRET_KEY"],
     }
 
 
@@ -40,7 +40,8 @@ _WARNING = """As the boto library is being removed from this package the
 """
 _WARNED = False
 
-def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
+
+def get_s3_client(host_url="https://os.zhdk.cloud.switch.ch/"):
     if host_url is None:
         try:
             host_url = os.environ["SE_HOST_URL"]
@@ -58,14 +59,14 @@ def get_s3_client(host_url='https://os.zhdk.cloud.switch.ch/'):
         raise
 
     return boto3.client(
-        's3',
+        "s3",
         aws_secret_access_key=secret_key,
         aws_access_key_id=access_key,
-        endpoint_url=host_url
+        endpoint_url=host_url,
     )
 
 
-def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
+def get_s3_resource(host_url="https://os.zhdk.cloud.switch.ch/"):
     """Get a boto3 resource object related to an S3 drive.
 
     Assumes that two environment variables are set:
@@ -93,10 +94,10 @@ def get_s3_resource(host_url='https://os.zhdk.cloud.switch.ch/'):
         raise
 
     return boto3.resource(
-        's3',
+        "s3",
         aws_secret_access_key=secret_key,
         aws_access_key_id=access_key,
-        endpoint_url=host_url
+        endpoint_url=host_url,
     )
 
 
@@ -106,8 +107,8 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
     Assumes that two environment variables are set: `SE_ACCESS_KEY` and
     `SE_SECRET_KEY`.
 
-    Note: 
-        This function is depreciated, as it used boto instead of boto3, 
+    Note:
+        This function is depreciated, as it used boto instead of boto3,
         please prioritize using get_s3_resource instead.
 
     :param host_url: the s3 endpoint's URL
@@ -120,6 +121,7 @@ def get_s3_connection(host="os.zhdk.cloud.switch.ch"):
         warnings.warn(_WARNING, DeprecationWarning)
         _WARNED = True
     return get_s3_resource()
+
 
 def get_or_create_bucket(name, create=False, versioning=True):
     """Create a boto3 s3 connection and returns the requested bucket.
@@ -152,9 +154,9 @@ def get_or_create_bucket(name, create=False, versioning=True):
     except AssertionError:
         if create:
             bucket = s3r.create_bucket(Bucket=name)
-            print(f'New bucket {name} was created')
+            print(f"New bucket {name} was created")
         else:
-            print(f'Bucket {name} not found')
+            print(f"Bucket {name} not found")
             return None
 
     # enable versioning
@@ -165,6 +167,7 @@ def get_or_create_bucket(name, create=False, versioning=True):
     print(f"Versioning: {bucket_versioning.status}")
 
     return bucket
+
 
 def get_bucket(name, create=False, versioning=True):
     """Create a boto s3 connection and returns the requested bucket.
@@ -177,7 +180,7 @@ def get_bucket(name, create=False, versioning=True):
     >>> b = get_bucket('testb', create=True, versioning=False)
 
     Note:
-        This function is depreciated, please prioritize using 
+        This function is depreciated, please prioritize using
         get_or_create_bucket or get_boto3_bucket instead.
 
     :param name: the bucket's name
@@ -209,7 +212,7 @@ def get_bucket_boto3(name, create=False, versioning=True):
     >>> b = get_bucket('testb', create=True, versioning=False)
 
     Note:
-        This function is depreciated, please prioritize using 
+        This function is depreciated, please prioritize using
         get_or_create_bucket or get_boto3_bucket instead.
 
     :param name: the bucket's name
@@ -238,7 +241,7 @@ def s3_get_articles(issue, bucket, workers=None):
     :type issue: an instance of `impresso_commons.path.IssueDir`
     :param bucket: the input s3 bucket
     :type bucket: `boto.s3.bucket.Bucket`
-    :param workers: number of workers for the iter_bucket function. 
+    :param workers: number of workers for the iter_bucket function.
         If None, will be the number of detected CPUs.
     :return: a list of articles (dictionaries)
     """
@@ -246,11 +249,8 @@ def s3_get_articles(issue, bucket, workers=None):
     issue_data = list(iter_bucket(bucket, prefix=issue.path, workers=nb_workers))
     print(issue_data)
     issue_data = issue_data[0][1]
-    issue_json = json.loads(issue_data.decode('utf-8'))
-    articles = [
-        item
-        for item in issue_json["i"]
-        if item["m"]["tp"] == "article"]
+    issue_json = json.loads(issue_data.decode("utf-8"))
+    articles = [item for item in issue_json["i"] if item["m"]["tp"] == "article"]
     return articles
 
 
@@ -269,11 +269,11 @@ def s3_get_pages(issue_id, page_names, bucket):
     pages = {}
 
     for page in page_names.values():
-        key_name = os.path.join(issue_id.replace('-', '/'), page)
+        key_name = os.path.join(issue_id.replace("-", "/"), page)
         key = bucket.get_key(key_name, validate=False)
-        logger.info(f'reading page {key_name}')
+        logger.info(f"reading page {key_name}")
         content = key.get_contents_as_string()
-        pages[key.name.split('/')[-1]] = json.loads(content.decode('utf-8'))
+        pages[key.name.split("/")[-1]] = json.loads(content.decode("utf-8"))
     return pages
     """
     return {
@@ -305,14 +305,10 @@ def get_s3_versions(bucket_name, key_name):
 
     # may be worth comparing with
     # client.list_object_versions(prefix)
-    versions = client.Bucket(bucket_name).\
-        object_versions.filter(Prefix=key_name)
+    versions = client.Bucket(bucket_name).object_versions.filter(Prefix=key_name)
 
     version_ids = [
-        (
-            v.get().get('VersionId'),
-            v.get().get('LastModified')
-        )
+        (v.get().get("VersionId"), v.get().get("LastModified"))
         for v in versions
         if v.size is not None
     ]
@@ -321,14 +317,10 @@ def get_s3_versions(bucket_name, key_name):
 
 def get_s3_versions_client(client, bucket_name, key_name):
 
-    versions = client.Bucket(bucket_name).\
-        object_versions.filter(Prefix=key_name)
+    versions = client.Bucket(bucket_name).object_versions.filter(Prefix=key_name)
 
     version_ids = [
-        (
-            v.get().get('VersionId'),
-            v.get().get('LastModified')
-        )
+        (v.get().get("VersionId"), v.get().get("LastModified"))
         for v in versions
         if v.size is not None
     ]
@@ -349,11 +341,11 @@ def read_jsonlines(key_name, bucket_name):
     :return:
     """
     s3r = get_s3_resource()
-    body = s3r.Object(bucket_name, key_name).get()['Body']
+    body = s3r.Object(bucket_name, key_name).get()["Body"]
     data = body.read()
-    text = bz2.decompress(data).decode('utf-8')
-    for line in text.split('\n'):
-        if line != '':
+    text = bz2.decompress(data).decode("utf-8")
+    for line in text.split("\n"):
+        if line != "":
             yield line
 
 
@@ -373,22 +365,26 @@ def readtext_jsonlines(key_name, bucket_name):
     :return: JSON formatted str
     """
     s3r = get_s3_resource()
-    body = s3r.Object(bucket_name, key_name).get()['Body']
+    body = s3r.Object(bucket_name, key_name).get()["Body"]
     data = body.read()
-    text = bz2.decompress(data).decode('utf-8')
-    for line in text.split('\n'):
-        if line != '':
+    text = bz2.decompress(data).decode("utf-8")
+    for line in text.split("\n"):
+        if line != "":
             article_json = json.loads(line)
             text = article_json["ft"]
             if len(text) != 0:
-                article_reduced = {k: article_json[k] for k in article_json if k == "id"
-                                   or k == "s3v"
-                                   or k == "ts"
-                                   or k == "ft"
-                                   or k == "tp"
-                                   or k == "pp"
-                                   or k == "lg"
-                                   or k == "t"}
+                article_reduced = {
+                    k: article_json[k]
+                    for k in article_json
+                    if k == "id"
+                    or k == "s3v"
+                    or k == "ts"
+                    or k == "ft"
+                    or k == "tp"
+                    or k == "pp"
+                    or k == "lg"
+                    or k == "t"
+                }
                 yield json.dumps(article_reduced)
 
 
@@ -403,11 +399,11 @@ def upload(partition_name, newspaper_prefix=None, bucket_name=None):
         bucket = s3.Bucket(bucket_name)
         logger.info(bucket.name)
         bucket.upload_file(partition_name, key_name)
-        logger.info(f'Uploaded {partition_name} to {key_name}')
+        logger.info(f"Uploaded {partition_name} to {key_name}")
         return True, partition_name
     except Exception as e:
         logger.error(e)
-        logger.error(f'The upload of {partition_name} failed with error {e}')
+        logger.error(f"The upload of {partition_name} failed with error {e}")
         return False, partition_name
 
 
@@ -425,7 +421,7 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
     """
     if boto3_bucket is None:
         if path.startswith("s3://"):
-            path = path[len("s3://"):]
+            path = path[len("s3://") :]
         bucket_name = path.split("/")[0]
         base_path = "/".join(path.split("/")[1:])  # Remove bucket name
         boto3_bucket = get_boto3_bucket(bucket_name)
@@ -433,14 +429,19 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
         bucket_name = boto3_bucket.name
         base_path = path
     base_path, suffix_path = base_path.split("*")
-    filenames = ["s3://"+os.path.join(bucket_name, o.key)  # prepend bucket-name as it is necessary for s3fs
-                 for o in boto3_bucket.objects.filter(Prefix=base_path)
-                 if o.key.endswith(suffix_path)]
+    filenames = [
+        "s3://"
+        + os.path.join(
+            bucket_name, o.key
+        )  # prepend bucket-name as it is necessary for s3fs
+        for o in boto3_bucket.objects.filter(Prefix=base_path)
+        if o.key.endswith(suffix_path)
+    ]
     return filenames
 
 
 def alternative_read_text(
-    s3_key: str, s3_credentials: dict, line_by_line: bool=True
+    s3_key: str, s3_credentials: dict, line_by_line: bool = True
 ) -> list[str] | str:
     """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
@@ -449,17 +450,17 @@ def alternative_read_text(
         which breaks on buckets having >= 1000 keys.
         It raises a `FileNotFoundError`.
     """
-    logger.info(f'reading {s3_key}')
+    logger.info(f"reading {s3_key}")
     session = boto3.Session(
-        aws_access_key_id=s3_credentials['key'],
-        aws_secret_access_key=s3_credentials['secret'],
+        aws_access_key_id=s3_credentials["key"],
+        aws_secret_access_key=s3_credentials["secret"],
     )
-    s3_endpoint = s3_credentials['client_kwargs']['endpoint_url']
+    s3_endpoint = s3_credentials["client_kwargs"]["endpoint_url"]
     transport_params = {
-        'client': session.client('s3', endpoint_url=s3_endpoint),
+        "client": session.client("s3", endpoint_url=s3_endpoint),
     }
 
-    with s_open(s3_key, 'r', transport_params=transport_params) as infile:
+    with s_open(s3_key, "r", transport_params=transport_params) as infile:
         if line_by_line:
             text = infile.readlines()
         else:

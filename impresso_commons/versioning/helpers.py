@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+import re
 
 from typing import Any, Self
 from enum import StrEnum
@@ -22,6 +23,8 @@ logger = logging.getLogger(__name__)
 POSSIBLE_GRANULARITIES = ["corpus", "title", "year"]
 IMPRESSO_STORAGEOPT = get_storage_options()
 
+VERSION_INCREMENTS = ["major", "minor", "patch"]
+
 
 class DataStage(StrEnum):
     """Enum all stages requiring a versioning manifest.
@@ -36,7 +39,7 @@ class DataStage(StrEnum):
     canonical = "canonical"
     rebuilt = "rebuilt"
     evenized = "evenized-rebuilt"
-    embeddings = "embeddings"
+    embeddings = "embeddings"  # todo change to have each type of embedding represented
     entities = "entities"
     langident = "langident"
     linguistic_processing = "lingproc"
@@ -111,13 +114,30 @@ def clone_git_repo(
         raise e
 
 
-def validate_stage(data_stage: str) -> DataStage | None:
+def validate_stage(
+    data_stage: str, return_value_str: bool = False
+) -> DataStage | str | None:
+    """Validate the provided data stage if it's in the DataStage Enum (key or value).
+
+    Args:
+        data_stage (str): Data stage key or value to validate.
+        return_value_str (bool, optional): Whether to return the data stage's value if
+            it was valid. Defaults to False.
+
+    Raises:
+        e: The provided str is neither a data stage key nor value.
+
+    Returns:
+        DataStage | str | None: The corresponding DataStage or value string if valid.
+    """
     try:
-        return DataStage[data_stage]
+        if DataStage.has_value(data_stage):
+            stage = DataStage(data_stage)
+        else:
+            stage = DataStage[data_stage]
+        return stage.value if return_value_str else stage
     except ValueError as e:
-        err_msg = (
-            f"{e} \nProvided data format '{data_stage}'" " is not a valid data format."
-        )
+        err_msg = f"{e} \nProvided data stage '{data_stage}' is not a valid data stage."
         logger.critical(err_msg)
         raise e
 
@@ -132,38 +152,74 @@ def validate_granularity(value: str, for_stats: bool = True):
     raise ValueError
 
 
-def extract_version(name_or_path: str, as_int: bool = False) -> list[str | int]:
+def version_as_list(version: str) -> list[int]:
+    start = 1 if version[0] == "v" else 0
+    sep = "." if "." in version else "-"
+    return version[start:].split(sep)
+
+
+def extract_version(name_or_path: str, as_int: bool = False) -> str | list[str]:
     # in the case it's a path
     basename = os.path.basename(name_or_path)
     version = basename.replace(".json", "").split("_")[-1]
-    if as_int:
-        return int(version[1:].replace("-", ""))
+
+    return int(version[1:].replace("-", "")) if as_int else version.replace("-", ".")
+
+
+def increment_version(prev_version: str, increment: str) -> str:
+
+    try:
+        incr_val = VERSION_INCREMENTS.index(increment)
+        list_v = version_as_list(prev_version)
+        list_v[incr_val] = str(int(list_v[incr_val]) + 1)
+        if incr_val < 2:
+            list_v[incr_val + 1 :] = ["0"] * (2 - incr_val)
+        return "v" + ".".join(list_v)
+    except ValueError as e:
+        logger.error("Provided invalid increment %s: %s", increment, e)
+        raise e
+
+
+def find_s3_data_manifest_path(bucket_name: str, data_stage: str) -> str | None:
+
+    # fetch the data stage as the naming value
+    if type(data_stage) == DataStage:
+        stage_value = data_stage.value
     else:
-        return version.replace("-", ".")
+        stage_value = validate_stage(data_stage, return_value_str=True)
 
+    # manifests have a json extension and are named after the format (value)
+    path_filter = f"{stage_value}_v*.json"
 
-def find_s3_data_manifest_path(bucket, data_format: str) -> str:
-    # manifests have a json extension and are named after the format
-    path_filter = f"{data_format}_v*.json"
-    # processed data are all in the same bucket
-    if data_format not in ["canonical", "rebuilt"]:
-        path_filter = os.path.join(data_format, path_filter)
+    if stage_value in ["canonical", "rebuilt", "evenized-rebuilt"]:
+        # manifest in top-level partition of bucket
+        bucket = get_boto3_bucket(bucket_name)
+        matches = fixed_s3fs_glob(path_filter, boto3_bucket=bucket)
+    else:
+        # processed data are all in the same bucket,
+        # manifest should be directly fetched from path
+        full_s3_path = os.path.join(bucket_name, path_filter)
+        matches = fixed_s3fs_glob(full_s3_path)
 
-    matches = fixed_s3fs_glob(path_filter, boto3_bucket=bucket)
     # matches will always be a list
     if len(matches) == 1:
         return matches[0]
-    else:
-        # if multiple versions exist, return the latest one
-        return sorted(matches, key=lambda x: extract_version(x, as_int=True))[-1]
+    if len(matches) == 0:
+        # no matches means it's hte first manifest for the stage or bucket
+        return None
+    # if multiple versions exist, return the latest one
+    return sorted(matches, lambda x: extract_version(x, as_int=True))[-1]
 
 
 def read_manifest_from_s3(
-    bucket_name: str, data_format: str
-) -> tuple[str, dict[str, Any]]:
+    bucket_name: str, data_stage: DataStage | str
+) -> tuple[str, dict[str, Any]] | tuple[None, None]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
-    bucket = get_boto3_bucket(bucket_name)
-    manifest_s3_path = find_s3_data_manifest_path(bucket, data_format)
+    manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage)
+
+    if manifest_s3_path is None:
+        logger.info("No %s manifest found in bucket %s", data_stage, bucket_name)
+        return None, None
 
     raw_text = alternative_read_text(
         manifest_s3_path, IMPRESSO_STORAGEOPT, line_by_line=False
@@ -229,3 +285,26 @@ def git_commit_push(
         err_msg = f"Error while pushing {filename} to its remote repository. \n{e}"
         logger.error(err_msg)
         return False
+
+
+def yearly_stats_keys_from_mft(prev_mft: dict[str, Any]) -> dict[str, dict]:
+    # extract list of title-year pairs present in the statistics of a manifest dict.
+    pass
+
+
+def get_head_commit_url(repo: git.Repo) -> str:
+    commit_hash = str(repo.head.commit)
+    # url of shape 'git@github.com:[orga_name]/[repo_name].git'
+    raw_url = repo.remotes.origin.url
+    # now list with contents ['git', 'github', 'com', [orga_name]/[repo_name], 'git']
+    url_pieces = re.split(r"[@.:]", raw_url)
+    # replace the start and end of the list
+    url_pieces[0] = "https:/"
+    url_pieces[-1] = "commit"
+    # merge back the domain name and remove excedentary element
+    url_pieces[1] = ".".join(url_pieces[1:3])
+    del url_pieces[2]
+    # add the commit hash at the end
+    url_pieces.append(commit_hash)
+
+    return "/".join(url_pieces)

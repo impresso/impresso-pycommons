@@ -9,7 +9,6 @@ import os
 import json
 
 from typing import Any
-from collections import defaultdict
 from git import Repo
 
 from impresso_commons.versioning.helpers import (
@@ -19,6 +18,8 @@ from impresso_commons.versioning.helpers import (
     clone_git_repo,
     write_and_push_to_git,
     write_dump_to_fs,
+    get_head_commit_url,
+    increment_version,
 )
 from impresso_commons.versioning.data_statistics import (
     DataStatistics,
@@ -51,7 +52,12 @@ class DataManifest:
         git_repo: Repo,
         temp_folder: str,
         staging: bool | None = None,
-        version_increment: str | None = None,
+        # to directly provide the next version
+        new_version: str | None = None,
+        # to indicate if patch in later stages
+        is_patch: bool | None = None,
+        # to indcate patch in canonical/rebuilt
+        patched_fields: dict[str, list[str]] | list[str] | None = None,
     ) -> None:
 
         # TODO check logger initialization
@@ -65,23 +71,31 @@ class DataManifest:
         # attributes relating to GitHub
         self.branch = self._get_output_branch(staging)
         # get code version used for processing.
-        self.commit_hash = git_repo.head.commit
+        self.commit_url = get_head_commit_url(git_repo)
         self.out_repo = None
 
         # init attributes of previous manifest
-        self.prev_manifest_s3_path = None
-        self.prev_v_manifest = None
+        self.prev_mft_s3_path = None
+        self.prev_v_mft = None
+        self.prev_v_mft_yearly_stats = None
         self.prev_version = None
 
-        self.processing_stats = defaultdict(self.default_stats_value())  # TODO fix
+        # if user already knows the target version
+        self.version = new_version
+        # if update is a patch, patched fields should be provided
+        # either as list of fields or dict mapping each media to its patched fields
+        self.patched_fields = patched_fields
+        self.is_patch = is_patch
+
+        self.processing_stats = None  # TODO fix
         self.manifest_data = None
 
-    def default_stats_value(self) -> NewspaperStatistics:
+    def default_yearly_stats(self) -> NewspaperStatistics:
         return NewspaperStatistics(self.stage, "year")
 
     def add_processing_statistics(self, proc_stats: DataStatistics) -> None:
         # TODO review/correct
-        if proc_stats.type == self.stage and proc_stats.granularity == "year":
+        if proc_stats.stage == self.stage and proc_stats.granularity == "year":
             if self.processing_stats is not None:
                 logger.debug(
                     "`processing_stats`: %s has been added to this manifest but this "
@@ -111,19 +125,50 @@ class DataManifest:
 
     def get_prev_version_manifest(self) -> dict[str, Any]:
         logger.debug("Reading the previous version of the manifest from S3.")
-        (self.prev_manifest_s3_path, self.prev_v_manifest) = read_manifest_from_s3(
+        (self.prev_mft_s3_path, self.prev_v_mft) = read_manifest_from_s3(
             self.output_bucket_name, self.stage
         )
 
-        self.prev_version = self.prev_v_manifest["version"]
+        if self.prev_mft_s3_path is None or self.prev_v_mft is None:
+            logger.info(
+                "No existing previous version of this manifest. Version will be v0.0.1"
+            )
+            self.prev_version = "v.0.0.0"
 
-    def get_current_version(self) -> str:
-        pass
-        # modif_granularity = compute_update_granularty(self.processing_stats)
-        # version_change =
+        else:
+            self.prev_version = self.prev_v_mft["version"]
+            # self.prev_v_mft_yearly_stats = extract_yearly_stats_from_mft(self.prev_v_mft)
 
-    def get_input_data_manifest(self) -> None:
-        pass
+    def get_current_version(self, addition: bool = False) -> str:
+        # First manifest for this data stage.
+        if self.prev_version is None:
+            return "v.0.0.1"
+
+        # major increment -> any new title-year pair was added
+        if addition:
+            return increment_version(self.prev_version, "major")
+        # if patch --> self.patched_fields is not null
+        if self.is_patch or self.patched_fields is not None:
+            return increment_version(self.prev_version, "patch")
+        # minor increment -> same title-year keys but not patched
+        # TODO also van check the update_targets are indeed years
+        return increment_version(self.prev_version, "minor")
+
+    def get_input_data_overall_stats(self) -> list[dict[str, Any]] | None:
+        if self.stage != DataStage.canonical:
+            logger.debug("Reading the input data's manifest from S3.")
+            # only the rebuilt uses the canonical as input
+            input_stage = (
+                DataStage.canonical
+                if self.stage == DataStage.rebuilt
+                else DataStage.rebuilt
+            )
+            (_, input_v_mft) = read_manifest_from_s3(
+                self.input_bucket_name, input_stage
+            )
+
+            # fetch the overall statistics from the input data (it's a list!)
+            return input_v_mft["overall_statistics"]
 
     def generate_modification_stats(self):
         pass
@@ -187,3 +232,21 @@ class DataManifest:
         self.manifest_data = {}
 
         #### IMPLEMENT LOGIC AND FILL MANIFEST DATA
+
+        # initializing all base info
+
+        # compare current stats to previous version stats
+
+        #   if new keys exist --> addition flag --> major increment
+
+        #   update previous version media list with current processing media list:
+        #       - setting new modification date & git url for each modified title
+        #       - compute update level & targets if not patch
+
+        #   if no previous version media list, generate new one from scratch
+
+        # generate title-level stats
+
+        # generate overall stats & append input manifest overall stats
+
+        # pretty print all stats where needed
