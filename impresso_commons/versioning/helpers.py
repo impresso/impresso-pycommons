@@ -62,56 +62,8 @@ class DataStage(StrEnum):
         return value in cls._value2member_map_
 
 
-def is_git_repo(path: str) -> bool:
-    """Check if a directory contains a Git repository.
-
-    Args:
-        path (str): The path to the directory to be checked.
-
-    Returns:
-        bool: True if the directory contains a Git repository, False otherwise.
-    """
-    try:
-        _ = git.Repo(path).git_dir
-        return True
-    except git.exc.InvalidGitRepositoryError:
-        return False
-
-
-def clone_git_repo(
-    path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
-) -> git.Repo:
-    repo_ssh_url = f"git@github.com:{repo_name}.git"
-    repo_https_url = f"https://github.com/{repo_name}.git"
-
-    repo_path = os.path.join(path, repo_name.split("/")[1])
-
-    # if the repository was already cloned, return it.
-    if is_git_repo(repo_path):
-        logger.debug("Git repository %s had already been cloned.", repo_name)
-        return git.Repo(repo_path)
-
-    # try to clone using ssh, if it fails, retry with https.
-    try:
-        logger.info("Cloning the %s git repository with ssh.", repo_name)
-        return git.Repo.clone_from(repo_ssh_url, repo_path, branch=branch)
-    except git.exc.GitCommandError as e:
-        err_msg = (
-            f"Error while cloning the git repository {repo_name} using ssh, trying "
-            f"with https. \n{e}"
-        )
-        logger.warning(err_msg)
-    # Fallback to https
-    try:
-        logger.info("Cloning the %s git repository with https.", repo_name)
-        return git.Repo.clone_from(repo_https_url, repo_path, branch=branch)
-    except Exception as e:
-        err_msg = (
-            f"Error while cloning the git repository {repo_name}, it was not possible "
-            f"to clone it with ssh or https. \n{e}"
-        )
-        logger.critical(err_msg)
-        raise e
+##################################
+###### VALIDATION FUNCTIONS ######
 
 
 def validate_stage(
@@ -152,6 +104,10 @@ def validate_granularity(value: str, for_stats: bool = True):
     raise ValueError
 
 
+###############################
+###### VERSION FUNCTIONS ######
+
+
 def version_as_list(version: str) -> list[int]:
     start = 1 if version[0] == "v" else 0
     sep = "." if "." in version else "-"
@@ -178,6 +134,10 @@ def increment_version(prev_version: str, increment: str) -> str:
     except ValueError as e:
         logger.error("Provided invalid increment %s: %s", increment, e)
         raise e
+
+
+#####################################
+###### S3 READ/WRITE FUNCTIONS ######
 
 
 def find_s3_data_manifest_path(bucket_name: str, data_stage: str) -> str | None:
@@ -234,6 +194,10 @@ def list_and_date_s3_files():
     pass
 
 
+###########################
+###### GIT FUNCTIONS ######
+
+
 def write_dump_to_fs(file_contents: str, abs_path: str, filename: str) -> str:
     full_file_path = os.path.join(abs_path, filename)
 
@@ -242,6 +206,58 @@ def write_dump_to_fs(file_contents: str, abs_path: str, filename: str) -> str:
         outfile.write(file_contents)
 
     return full_file_path
+
+
+def is_git_repo(path: str) -> bool:
+    """Check if a directory contains a Git repository.
+
+    Args:
+        path (str): The path to the directory to be checked.
+
+    Returns:
+        bool: True if the directory contains a Git repository, False otherwise.
+    """
+    try:
+        _ = git.Repo(path).git_dir
+        return True
+    except git.exc.InvalidGitRepositoryError:
+        return False
+
+
+def clone_git_repo(
+    path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
+) -> git.Repo:
+    repo_ssh_url = f"git@github.com:{repo_name}.git"
+    repo_https_url = f"https://github.com/{repo_name}.git"
+
+    repo_path = os.path.join(path, repo_name.split("/")[1])
+
+    # if the repository was already cloned, return it.
+    if is_git_repo(repo_path):
+        logger.debug("Git repository %s had already been cloned.", repo_name)
+        return git.Repo(repo_path)
+
+    # try to clone using ssh, if it fails, retry with https.
+    try:
+        logger.info("Cloning the %s git repository with ssh.", repo_name)
+        return git.Repo.clone_from(repo_ssh_url, repo_path, branch=branch)
+    except git.exc.GitCommandError as e:
+        err_msg = (
+            f"Error while cloning the git repository {repo_name} using ssh, trying "
+            f"with https. \n{e}"
+        )
+        logger.warning(err_msg)
+    # Fallback to https
+    try:
+        logger.info("Cloning the %s git repository with https.", repo_name)
+        return git.Repo.clone_from(repo_https_url, repo_path, branch=branch)
+    except Exception as e:
+        err_msg = (
+            f"Error while cloning the git repository {repo_name}, it was not possible "
+            f"to clone it with ssh or https. \n{e}"
+        )
+        logger.critical(err_msg)
+        raise e
 
 
 def write_and_push_to_git(
@@ -287,11 +303,6 @@ def git_commit_push(
         return False
 
 
-def yearly_stats_keys_from_mft(prev_mft: dict[str, Any]) -> dict[str, dict]:
-    # extract list of title-year pairs present in the statistics of a manifest dict.
-    pass
-
-
 def get_head_commit_url(repo: git.Repo) -> str:
     commit_hash = str(repo.head.commit)
     # url of shape 'git@github.com:[orga_name]/[repo_name].git'
@@ -308,3 +319,17 @@ def get_head_commit_url(repo: git.Repo) -> str:
     url_pieces.append(commit_hash)
 
     return "/".join(url_pieces)
+
+
+##########################################
+###### MEDIA LIST & STATS FUNCTIONS ######
+
+
+def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
+    # extract a media list (np_title -> "media" dict) from a manifest json
+    pass
+
+
+def yearly_stats_keys_from_mft(prev_mft: dict[str, Any]) -> dict[str, dict]:
+    # extract list of title-year pairs present in the statistics of a manifest dict.
+    pass

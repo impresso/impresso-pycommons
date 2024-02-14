@@ -45,7 +45,7 @@ class DataStatistics(ABC):
         self,
         data_stage: DataStage | str,
         granularity: str,
-        element: str = "",
+        element: str | None = None,
         counts: dict[str, int] | None = None,
     ) -> None:
 
@@ -57,6 +57,7 @@ class DataStatistics(ABC):
         if counts is not None and self._validate_count_keys(counts):
             self.counts = counts
         else:
+            logger.debug("Initializing counts to 0 for %s.", self.element)
             self.counts = self.init_counts()  # defaultdict(int) ?
 
     # TODO if needed, define combination functions that allow summing/aggregating DataStats
@@ -77,25 +78,39 @@ class DataStatistics(ABC):
         """
         return {k: 0 for k in self.count_keys}
 
-    def add_counts(self, new_counts: dict[str, int]) -> None:
+    def add_counts(self, new_counts: dict[str, int], replace: bool = False) -> bool:
         """Add new counts to the existing counts if the new keys are validated.
 
         Args:
             new_counts (dict[str, int]): New counts to be added.
+
+        Returns:
+            bool: True if the counts were valid and could be added, False otherwise.
         """
         if self._validate_count_keys(new_counts):
-            for k, v in new_counts.items():
-                self.counts[k] += v
+            if replace:
+                logger.debug(
+                    "Replacing the counts by %s for %s. This will erase previous counts.",
+                    new_counts,
+                    self.element,
+                )
+                self.counts = new_counts
+            else:
+                for k, v in new_counts.items():
+                    self.counts[k] += v
+            return True
 
-    def pretty_print(self, add_counts: bool = False) -> dict[str, Any]:
+        return False
+
+    def pretty_print(self, include_counts: bool = False) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
         These stats are agnostic to the type of statistics they represent so the values
         of `self.counts` are excluded by default, to be included in child classes.
 
         Args:
-            add_counts (bool, optional): Whether to include the current counts with key
-                "stats". Defaults to False.
+            include_counts (bool, optional): Whether to include the current counts with
+                key "stats". Defaults to False.
 
         Returns:
             dict[str, Any]: A dict with the general information about these statistics.
@@ -103,15 +118,17 @@ class DataStatistics(ABC):
         stats_dict = {
             "stage": self.stage.value,
             "granularity": self.granularity,
-            "element": self.element,
         }
 
-        if add_counts:
-            stats_dict["stats"] = {k: v for k, v in self.counts.items() if v > 0}
-
         # no element for the overall stats
-        if stats_dict["granularity"] == "corpus":
-            del stats_dict["element"]
+        if self.granularity != "corpus":
+            if self.element is not None:
+                stats_dict["element"] = self.element
+            else:
+                logger.warning("Missing the element when pretty-printing!")
+
+        if include_counts:
+            stats_dict["stats"] = {k: v for k, v in self.counts.items() if v > 0}
 
         return stats_dict
 
@@ -203,11 +220,11 @@ class NewspaperStatistics(DataStatistics):
                 f"Provided value `counts`: {new_counts} has keys not present in "
                 f"`count_keys`: {self.count_keys}. The counts provided won't be used."
             )
-            logger.warning(warn_msg)
+            logger.error(warn_msg)
             return False
 
         if not all(v >= 0 for v in new_counts.values()):
-            logger.warning(
+            logger.error(
                 "Provided count values are not all integers and will not be used."
             )
             return False
@@ -215,11 +232,11 @@ class NewspaperStatistics(DataStatistics):
         # the provided counts were conforming
         return True
 
-    def pretty_print(self, add_counts: bool = True) -> dict[str, Any]:
+    def pretty_print(self, include_counts: bool = True) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
         Args:
-            add_counts (bool, optional): Whether to include the current newspaper
+            include_counts (bool, optional): Whether to include the current newspaper
                 counts with key "nps_stats". Defaults to True.
 
         Returns:
@@ -227,7 +244,7 @@ class NewspaperStatistics(DataStatistics):
         """
         stats_dict = super().pretty_print()
         # add the newspaper stats
-        if add_counts:
+        if include_counts:
             stats_dict["nps_stats"] = {k: v for k, v in self.counts.items() if v > 0}
 
         return stats_dict

@@ -12,24 +12,10 @@ logger = logging.getLogger(__name__)
 
 # a simple data structure to represent input directories
 # a `Document.zip` file is expected to be found in `IssueDir.path`
-IssueDir = namedtuple(
-    "IssueDir", [
-        'journal',
-        'date',
-        'edition',
-        'path'
-    ]
-)
+IssueDir = namedtuple("IssueDir", ["journal", "date", "edition", "path"])
 
 ContentItem = namedtuple(
-    "Item", [
-        'journal',
-        'date',
-        'edition',
-        'number',
-        'path',
-        'type'
-    ]
+    "Item", ["journal", "date", "edition", "number", "path", "type"]
 )
 
 
@@ -105,18 +91,23 @@ KNOWN_JOURNALS = [
     "SRT",
     "WHD",
     "ZBT",
-    "CON", "DTT",
-    "FCT", "GAV",
-    "GAZ", "LLS",
-    "OIZ", "SAX",
-    "SDT", "SMZ",
-    "VDR", "VHT"
-
+    "CON",
+    "DTT",
+    "FCT",
+    "GAV",
+    "GAZ",
+    "LLS",
+    "OIZ",
+    "SAX",
+    "SDT",
+    "SMZ",
+    "VDR",
+    "VHT",
 ]
 
 
 def pair_issue(issue_list1, issue_list2):
-    """ Associates pairs of issues originating from original and canonical repositories.
+    """Associates pairs of issues originating from original and canonical repositories.
 
     :param issue_list1: list of IssueDir
     :type issue_list1: array
@@ -162,10 +153,11 @@ def canonical_path(dir, name=None, extension=None, path_type="file"):
                     str(dir.date.month).zfill(2),
                     str(dir.date.day).zfill(2),
                     dir.edition,
-                    name
+                    name,
                 ]
             ),
-            extension)
+            extension,
+        )
     else:
         return sep.join(
             [
@@ -173,7 +165,7 @@ def canonical_path(dir, name=None, extension=None, path_type="file"):
                 str(dir.date.year),
                 str(dir.date.month).zfill(2),
                 str(dir.date.day).zfill(2),
-                dir.edition
+                dir.edition,
             ]
         )
 
@@ -204,14 +196,14 @@ def _apply_datefilter(filter_dict, issues, year_only):
         # date filter is not a range
         elif isinstance(dates, list):
             if not dates:
-                filtered_issues += [
-                    i
-                    for i in issues
-                    if i.journal == newspaper
-                ]
+                filtered_issues += [i for i in issues if i.journal == newspaper]
             else:
                 filter_date = [
-                    datetime.strptime(d, "%Y/%m/%d").date().year if year_only else datetime.strptime(d, "%Y/%m/%d").date()
+                    (
+                        datetime.strptime(d, "%Y/%m/%d").date().year
+                        if year_only
+                        else datetime.strptime(d, "%Y/%m/%d").date()
+                    )
                     for d in dates
                 ]
 
@@ -232,7 +224,7 @@ def _apply_datefilter(filter_dict, issues, year_only):
 
 
 def select_issues(config_dict, inp_dir):
-    """ Reads a configuration file and select newspapers/issues to consider
+    """Reads a configuration file and select newspapers/issues to consider
     See config.example.md for explanations.
 
     Usage example:
@@ -255,26 +247,44 @@ def select_issues(config_dict, inp_dir):
         exclude_list = config_dict["exclude_newspapers"]
         year_flag = config_dict["year_only"]
     except KeyError:
-        logger.critical(f"The key [newspapers|exclude_newspapers|year_only] is missing in the config file.")
+        logger.critical(
+            f"The key [newspapers|exclude_newspapers|year_only] is missing in the config file."
+        )
         return
     exclude_flag = False if not exclude_list else True
-    logger.debug(f"got filter_dict: {filter_dict}, "
-                 f"\nexclude_list: {exclude_list}, "
-                 f"\nyear_flag: {year_flag}"
-                 f"\nexclude_flag: {exclude_flag}")
+    logger.debug(
+        f"got filter_dict: {filter_dict}, "
+        f"\nexclude_list: {exclude_list}, "
+        f"\nyear_flag: {year_flag}"
+        f"\nexclude_flag: {exclude_flag}"
+    )
 
     # detect issues to be imported
-    if not filter_dict and not exclude_list:  # todo: remove this case? should be detect issue
-        logger.debug("No positive nor negative filter definition, all issues in {inp_dir} will be considered.")
+    if (
+        not filter_dict and not exclude_list
+    ):  # todo: remove this case? should be detect issue
+        logger.debug(
+            "No positive nor negative filter definition, all issues in {inp_dir} will be considered."
+        )
         issues = detect_issues(inp_dir)
         return issues
     else:
-        filter_newspapers = set(filter_dict.keys()) if not exclude_list else set(exclude_list)
-        logger.debug(f"got filter_newspapers: {filter_newspapers}, with exclude flag: {exclude_flag}")
-        issues = detect_issues(inp_dir, journal_filter=filter_newspapers, exclude=exclude_flag)
+        filter_newspapers = (
+            set(filter_dict.keys()) if not exclude_list else set(exclude_list)
+        )
+        logger.debug(
+            f"got filter_newspapers: {filter_newspapers}, with exclude flag: {exclude_flag}"
+        )
+        issues = detect_issues(
+            inp_dir, journal_filter=filter_newspapers, exclude=exclude_flag
+        )
 
         # apply date filter if not exclusion mode
-        filtered_issues = _apply_datefilter(filter_dict, issues, year_only=year_flag) if not exclude_flag else issues
+        filtered_issues = (
+            _apply_datefilter(filter_dict, issues, year_only=year_flag)
+            if not exclude_flag
+            else issues
+        )
         return filtered_issues
 
 
@@ -298,13 +308,9 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
         journal_dirs = [d for d in dirs if d.split("_")[-1] in KNOWN_JOURNALS]
     else:
         if not exclude:
-            filtrd_journals = list(
-                set(KNOWN_JOURNALS).intersection(journal_filter)
-            )
+            filtrd_journals = list(set(KNOWN_JOURNALS).intersection(journal_filter))
         else:
-            filtrd_journals = list(
-                set(KNOWN_JOURNALS).difference(journal_filter)
-            )
+            filtrd_journals = list(set(KNOWN_JOURNALS).difference(journal_filter))
         journal_dirs = [d for d in dirs if d.split("_")[-1] in filtrd_journals]
 
     for journal in journal_dirs:
@@ -330,18 +336,14 @@ def detect_issues(base_dir, journal_filter=None, exclude=False):
                         detected_issue = IssueDir(
                             journal,
                             date(int(year), int(month), int(day)),
-                            'a',
-                            day_path
+                            "a",
+                            day_path,
                         )
-                        logger.debug("Found an issue: {}".format(
-                            str(detected_issue))
-                        )
+                        logger.debug("Found an issue: {}".format(str(detected_issue)))
                         detected_issues.append(detected_issue)
                     except ValueError:
                         logger.warning(
-                            "Path {} is not a valid issue directory".format(
-                                day_path
-                            )
+                            "Path {} is not a valid issue directory".format(day_path)
                         )
     return detected_issues
 
@@ -390,10 +392,10 @@ def detect_canonical_issues(base_dir, newspapers):
                                 journal,
                                 date(int(year), int(month), int(day)),
                                 edition,
-                                edition_path
+                                edition_path,
                             )
-                            logger.debug("Found an issue: {}".format(
-                                str(detected_issue))
+                            logger.debug(
+                                "Found an issue: {}".format(str(detected_issue))
                             )
                             detected_issues.append(detected_issue)
                         except ValueError:
@@ -415,7 +417,7 @@ def detect_journal_issues(base_dir, newspapers):
     :return: list of `IssueDir` instances
     :rtype: list
     """
-    #newspapers = [journal.split("_")[-1] if "_" in journal else journal for journal in newspapers]
+    # newspapers = [journal.split("_")[-1] if "_" in journal else journal for journal in newspapers]
 
     detected_issues = []
     dir_path, dirs, files = next(os.walk(base_dir))
@@ -445,18 +447,18 @@ def detect_journal_issues(base_dir, newspapers):
                                 detected_issue = IssueDir(
                                     journal,
                                     date(int(year), int(month), int(day)),
-                                    'a',
-                                    day_path
+                                    "a",
+                                    day_path,
                                 )
-                                logger.debug("Found an issue: {}".format(
-                                    str(detected_issue))
+                                logger.debug(
+                                    "Found an issue: {}".format(str(detected_issue))
                                 )
                                 detected_issues.append(detected_issue)
     return detected_issues
 
 
 def check_filenaming(file_basename):
-    """ Checks whether a filename complies with our naming convention (GDL-1900-01-10-a-p0001)
+    """Checks whether a filename complies with our naming convention (GDL-1900-01-10-a-p0001)
 
     :param file_basename: page file (txt or image)
     :type file_basename: str
@@ -466,7 +468,7 @@ def check_filenaming(file_basename):
 
 
 def get_issueshortpath(issuedir):
-    """ Returns short version of issue dir path"""
+    """Returns short version of issue dir path"""
 
     path = issuedir.path
-    return path[path.index(issuedir.journal):]
+    return path[path.index(issuedir.journal) :]

@@ -67,6 +67,7 @@ class DataManifest:
         self.input_bucket_name = s3_input_bucket  # path to actual data partition
         self.output_bucket_name = s3_output_bucket
         self.temp_folder = temp_folder
+        self.notes = None
 
         # attributes relating to GitHub
         self.branch = self._get_output_branch(staging)
@@ -75,9 +76,9 @@ class DataManifest:
         self.out_repo = None
 
         # init attributes of previous manifest
-        self.prev_mft_s3_path = None
-        self.prev_v_mft = None
-        self.prev_v_mft_yearly_stats = None
+        self._prev_mft_s3_path = None
+        self._prev_v_mft = None
+        self._prev_v_mft_yearly_stats = None
         self.prev_version = None
 
         # if user already knows the target version
@@ -87,21 +88,30 @@ class DataManifest:
         self.patched_fields = patched_fields
         self.is_patch = is_patch
 
-        self.processing_stats = None  # TODO fix
+        # example of 1 yearly stats format to gather the necessary keys
+        self._eg_yearly_stats = self.default_yearly_stats()
+
+        # dict mapping from title to year to np_stat,
+        # where the statistics will be aggregated during the processing
+        self._processing_stats = None  # TODO fix
         self.manifest_data = None
 
+        logger.info("DataManifest for %s successfully initialized.", self.stage)
+
     def default_yearly_stats(self) -> NewspaperStatistics:
+        # return an example of the default yearly stats object.
         return NewspaperStatistics(self.stage, "year")
 
+    # TODO delete???
     def add_processing_statistics(self, proc_stats: DataStatistics) -> None:
         # TODO review/correct
         if proc_stats.stage == self.stage and proc_stats.granularity == "year":
-            if self.processing_stats is not None:
+            if self._processing_stats is not None:
                 logger.debug(
                     "`processing_stats`: %s has been added to this manifest but this "
                     "attribute was already defined: %s, updating the current value.",
                     proc_stats,
-                    self.processing_stats,
+                    self._processing_stats,
                 )
             self.processing_stats = proc_stats
         else:
@@ -112,6 +122,7 @@ class DataManifest:
             raise ValueError
 
     def _get_output_branch(self, for_staging: bool | None) -> str:
+        # TODO recheck logic
         staging_out_bucket = "staging" in self.output_bucket_name
         final_out_bucket = "final" in self.output_bucket_name
         if for_staging is None:
@@ -123,23 +134,23 @@ class DataManifest:
         # --> `for_staging` overrides the result.
         return "staging" if staging_out_bucket or for_staging else "master"
 
-    def get_prev_version_manifest(self) -> dict[str, Any]:
+    def _get_prev_version_manifest(self) -> None:
         logger.debug("Reading the previous version of the manifest from S3.")
-        (self.prev_mft_s3_path, self.prev_v_mft) = read_manifest_from_s3(
+        (self._prev_mft_s3_path, self._prev_v_mft) = read_manifest_from_s3(
             self.output_bucket_name, self.stage
         )
 
-        if self.prev_mft_s3_path is None or self.prev_v_mft is None:
+        if self._prev_mft_s3_path is None or self._prev_v_mft is None:
             logger.info(
                 "No existing previous version of this manifest. Version will be v0.0.1"
             )
             self.prev_version = "v.0.0.0"
 
         else:
-            self.prev_version = self.prev_v_mft["version"]
-            # self.prev_v_mft_yearly_stats = extract_yearly_stats_from_mft(self.prev_v_mft)
+            self.prev_version = self._prev_v_mft["version"]
+            # self._prev_v_mft_yearly_stats = extract_yearly_stats_from_mft(self._prev_v_mft)
 
-    def get_current_version(self, addition: bool = False) -> str:
+    def _get_current_version(self, addition: bool = False) -> str:
         # First manifest for this data stage.
         if self.prev_version is None:
             return "v.0.0.1"
@@ -154,7 +165,7 @@ class DataManifest:
         # TODO also van check the update_targets are indeed years
         return increment_version(self.prev_version, "minor")
 
-    def get_input_data_overall_stats(self) -> list[dict[str, Any]] | None:
+    def _get_input_data_overall_stats(self) -> list[dict[str, Any]] | None:
         if self.stage != DataStage.canonical:
             logger.debug("Reading the input data's manifest from S3.")
             # only the rebuilt uses the canonical as input
@@ -212,14 +223,83 @@ class DataManifest:
             )
             if not pushed:
                 logger.critical(
-                    "Push manifest to git manually using the file added on S3: "
-                    "\ns3://%s/%s.",
+                    "Push manifest to git manually using the file added on S3: \ns3://%s/%s.",
                     self.output_bucket_name,
                     out_file_path,
                 )
 
         # upload to s3
         upload(out_file_path, bucket_name=self.output_bucket_name)
+
+    def get_count_keys(self) -> list[str]:
+        return self._eg_yearly_stats.count_keys
+
+    def init_yearly_count_dict(self) -> dict[str, int]:
+        return self._eg_yearly_stats.init_counts()
+
+    def _log_failed_action(self, title: str, year: str, action: str) -> None:
+
+        failed_note = f"{title}-{year}: {action} provided counts failed (invalid)."
+
+        logger.warning(" ".join([failed_note, "Adding information to notes."]))
+        self.notes = (
+            failed_note if self.notes is None else "\n".join([self.notes, failed_note])
+        )
+
+    def _init_new_stats(
+        self, title: str, year: str, counts: dict[str, int]
+    ) -> tuple[NewspaperStatistics, bool]:
+        elem = f"{title}-{year}"
+        np_stats = NewspaperStatistics(self.stage, "year", elem, counts=counts)
+        success = True
+        # if the created count keys
+        if np_stats.counts != counts:
+            success = False
+            self._log_failed_action(title, year, "initializing with")
+
+        return np_stats, success
+
+    def _modif_processing_stats(
+        self, title: str, year: str, counts: dict[str, int], adding: bool = True
+    ) -> bool:
+        # check if title/year pair is already in processing stats
+        if title in self.processing_stats:
+            if year in self.processing_stats[title]:
+                success = self.processing_stats[title][year].add_counts(
+                    counts, replace=not adding
+                )
+
+                if not success:
+                    action = "adding" if adding else "replacing with"
+                    self._log_failed_action(title, year, action)
+                # notify user of outcome
+                return success
+        else:
+            self.processing_stats[title] = {}
+
+        # initialize new statistics for this title-year pair:
+        self.processing_stats[title][year], success = self._init_new_stats(
+            title, year, counts
+        )
+
+        return success
+
+    # TODO replace by add & replace with different parameters set to None by default?
+    def add_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
+        title, year = ci_id.split("-")[0:2]
+        return self._modif_processing_stats(title, year, counts)
+
+    def add_by_title_year(self, title: str, year: str, counts: dict[str, int]) -> bool:
+        return self._modif_processing_stats(title, year, counts)
+
+    def replace_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
+        title, year = ci_id.split("-")[0:2]
+        return self._modif_processing_stats(title, year, counts, adding=False)
+
+    def replace_by_title_year(
+        self, title: str, year: str, counts: dict[str, int]
+    ) -> bool:
+        return self._modif_processing_stats(title, year, counts, adding=False)
 
     def compute(self) -> None:
         # function that will perform all the logic to construct the manifest
