@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import re
+import copy
 
 from typing import Any, Self
 from enum import StrEnum
@@ -108,6 +109,18 @@ def validate_granularity(value: str, for_stats: bool = True):
 ###### VERSION FUNCTIONS ######
 
 
+def validate_version(v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$") -> str | None:
+    # accept versions with hyphens in case of mistake
+    v = v.replace("-", ".")
+
+    if re.match(regex, v) is not None:
+        return v
+
+    msg = f"Non conforming version {v} provided: ({regex}), version will be inferred."
+    logger.critical(msg)
+    return None
+
+
 def version_as_list(version: str) -> list[int]:
     start = 1 if version[0] == "v" else 0
     sep = "." if "." in version else "-"
@@ -127,12 +140,15 @@ def increment_version(prev_version: str, increment: str) -> str:
     try:
         incr_val = VERSION_INCREMENTS.index(increment)
         list_v = version_as_list(prev_version)
+        # increase the value of the correct "sub-version" and reset the ones right of it
         list_v[incr_val] = str(int(list_v[incr_val]) + 1)
         if incr_val < 2:
             list_v[incr_val + 1 :] = ["0"] * (2 - incr_val)
         return "v" + ".".join(list_v)
     except ValueError as e:
-        logger.error("Provided invalid increment %s: %s", increment, e)
+        logger.error(
+            "Provided invalid increment %s: not in %s", increment, VERSION_INCREMENTS
+        )
         raise e
 
 
@@ -140,7 +156,9 @@ def increment_version(prev_version: str, increment: str) -> str:
 ###### S3 READ/WRITE FUNCTIONS ######
 
 
-def find_s3_data_manifest_path(bucket_name: str, data_stage: str) -> str | None:
+def find_s3_data_manifest_path(
+    bucket_name: str, data_stage: str, partition: str | None = None
+) -> str | None:
 
     # fetch the data stage as the naming value
     if type(data_stage) == DataStage:
@@ -151,14 +169,20 @@ def find_s3_data_manifest_path(bucket_name: str, data_stage: str) -> str | None:
     # manifests have a json extension and are named after the format (value)
     path_filter = f"{stage_value}_v*.json"
 
-    if stage_value in ["canonical", "rebuilt", "evenized-rebuilt"]:
+    if partition is None and stage_value in [
+        "canonical",
+        "rebuilt",
+        "evenized-rebuilt",
+    ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
         matches = fixed_s3fs_glob(path_filter, boto3_bucket=bucket)
     else:
+        assert partition is not None, "partition should be provided for processed data"
         # processed data are all in the same bucket,
         # manifest should be directly fetched from path
-        full_s3_path = os.path.join(bucket_name, path_filter)
+        full_s3_path = os.path.join(bucket_name, partition, path_filter)
+        print(full_s3_path)
         matches = fixed_s3fs_glob(full_s3_path)
 
     # matches will always be a list
@@ -172,10 +196,10 @@ def find_s3_data_manifest_path(bucket_name: str, data_stage: str) -> str | None:
 
 
 def read_manifest_from_s3(
-    bucket_name: str, data_stage: DataStage | str
+    bucket_name: str, data_stage: DataStage | str, partition: str | None = None
 ) -> tuple[str, dict[str, Any]] | tuple[None, None]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
-    manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage)
+    manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
 
     if manifest_s3_path is None:
         logger.info("No %s manifest found in bucket %s", data_stage, bucket_name)
@@ -222,18 +246,21 @@ def is_git_repo(path: str) -> bool:
         return True
     except git.exc.InvalidGitRepositoryError:
         return False
+    except git.NoSuchPathError:
+        return False
 
 
 def clone_git_repo(
     path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
 ) -> git.Repo:
+    # WARNING: path should be absolute path!!!
     repo_ssh_url = f"git@github.com:{repo_name}.git"
     repo_https_url = f"https://github.com/{repo_name}.git"
 
     repo_path = os.path.join(path, repo_name.split("/")[1])
 
     # if the repository was already cloned, return it.
-    if is_git_repo(repo_path):
+    if os.path.exists(repo_path) and is_git_repo(repo_path):
         logger.debug("Git repository %s had already been cloned.", repo_name)
         return git.Repo(repo_path)
 
@@ -327,7 +354,35 @@ def get_head_commit_url(repo: git.Repo) -> str:
 
 def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
     # extract a media list (np_title -> "media" dict) from a manifest json
-    pass
+    # where  "media" dict also contains stats organized as a dict with years as keys.
+    # prevent modification or original manifest, to recover later
+    manifest = copy.deepcopy(json_mft)
+    new_media_list = {}
+    for media in manifest["media_list"]:
+        yearly_media_stats = {
+            year_stats["element"].split("-")[1]: year_stats
+            for year_stats in media["media_statistics"]
+            if year_stats["granularity"] == "year"
+        }
+
+        new_media_list[media["media_title"]] = media
+        new_media_list[media["media_title"]]["stats_as_dict"] = yearly_media_stats
+
+    return new_media_list
+
+
+def init_media_info(
+    add: bool = True,
+    full_title: bool = True,
+    years: list[str] | None = None,
+    fields: list[str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "update_type": "addition" if add else "modification",
+        "update_level": "title" if full_title else "year",
+        "updated_years": sorted(years) if years is not None else [],
+        "updated_fields": fields if fields is not None else [],
+    }
 
 
 def yearly_stats_keys_from_mft(prev_mft: dict[str, Any]) -> dict[str, dict]:

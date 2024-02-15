@@ -311,7 +311,7 @@ def list_newspapers(
     bucket_name: str,
     s3_client=get_s3_client(),
     page_size: int = 10000,
-):
+) -> list[str]:
     """List newspapers contained in an s3 bucket with impresso data.
 
     Note:
@@ -350,7 +350,7 @@ def list_newspapers(
     return newspapers
 
 
-def list_issues(bucket_name: str):
+def list_issues(bucket_name: str) -> list[str]:
     """
     Note:
         copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py

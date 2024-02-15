@@ -407,6 +407,30 @@ def upload(partition_name, newspaper_prefix=None, bucket_name=None):
         return False, partition_name
 
 
+def upload_to_s3(local_path: str, path_within_bucket: str, bucket_name: str) -> bool:
+    """Upload a file to an S3 bucket.
+
+    Args:
+        local_path (str): The local file path to upload.
+        path_within_bucket (str): The path within the bucket where the file will be uploaded.
+        bucket_name (str): The name of the S3 bucket (without any partitions).
+
+    Returns:
+        bool: True if the upload is successful, False otherwise.
+    """
+    bucket = get_boto3_bucket(bucket_name)
+    try:
+        # ensure the path within the bucket is only the key
+        path_within_bucket = path_within_bucket.replace("s3://", "")
+        bucket.upload_file(local_path, path_within_bucket)
+        logger.info(f"Uploaded {path_within_bucket} to {bucket_name}.")
+        return True
+    except Exception as e:
+        logger.error(e)
+        logger.error(f"The upload of {local_path} failed with error {e}")
+        return False
+
+
 def get_boto3_bucket(bucket_name: str):
     s3 = get_s3_resource()
     return s3.Bucket(bucket_name)
