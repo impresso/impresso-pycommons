@@ -31,6 +31,7 @@ from impresso_commons.versioning.data_statistics import (
     DataStatistics,
 )
 from impresso_commons.utils.s3 import get_storage_options, upload_to_s3
+from impresso_commons.utils.utils import validate_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +252,10 @@ class DataManifest:
         self, push_to_git: bool = False, commit_msg: str | None = None
     ) -> bool:
         msg = "Validating and exporting manifest to s3"
+
+        # validate the manifest against the schema
+        validate_against_schema(self.manifest_data)
+
         if push_to_git:
             # clone the data release repository locally if not for debug
             out_repo = clone_git_repo(self.temp_dir, branch=self.branch)
