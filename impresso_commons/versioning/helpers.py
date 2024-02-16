@@ -37,17 +37,17 @@ class DataStage(StrEnum):
     TODO: add options for data indexing in Solr
     """
 
-    canonical = "canonical"
-    rebuilt = "rebuilt"
-    evenized = "evenized-rebuilt"
-    embeddings = "embeddings"  # todo change to have each type of embedding represented
-    entities = "entities"
-    langident = "langident"
-    linguistic_processing = "lingproc"
-    mentions = "mentions"
-    orcqa = "orcqa"
-    text_reuse = "text-reuse"
-    topics = "topics"
+    CANONICAL = "canonical"
+    REBUILT = "rebuilt"
+    EVENIZED = "evenized-rebuilt"
+    EMBEDDINGS = "embeddings"
+    ENTITIES = "entities"
+    LANGIDENT = "langident"
+    LINGUISTIC_PROCESSING = "lingproc"
+    MENTIONS = "mentions"
+    OCRQA = "orcqa"
+    TEXT_REUSE = "text-reuse"
+    TOPICS = "topics"
 
     @classmethod
     def has_value(cls: Self, value: str) -> bool:
@@ -192,7 +192,7 @@ def find_s3_data_manifest_path(
         # no matches means it's hte first manifest for the stage or bucket
         return None
     # if multiple versions exist, return the latest one
-    return sorted(matches, lambda x: extract_version(x, as_int=True))[-1]
+    return sorted(matches, key=lambda x: extract_version(x, as_int=True))[-1]
 
 
 def read_manifest_from_s3(
@@ -210,12 +210,6 @@ def read_manifest_from_s3(
     )
 
     return manifest_s3_path, json.loads(raw_text)
-
-
-def list_and_date_s3_files():
-    # return a list of (file, date) pairs from a given s3 bucket,
-    # to extract their last modification date if no previous manifest exists.
-    pass
 
 
 ###########################
@@ -324,16 +318,23 @@ def git_commit_push(
         origin.push()
 
         return True
-    except Exception as e:
+    except git.exc.GitError as e:
         err_msg = f"Error while pushing {filename} to its remote repository. \n{e}"
         logger.error(err_msg)
         return False
 
 
 def get_head_commit_url(repo: git.Repo) -> str:
+    # final url of shape 'https://github.com/[orga_name]/[repo_name]/commit/[hash]'
+    # warning --> commit on the repo's current branch!
     commit_hash = str(repo.head.commit)
     # url of shape 'git@github.com:[orga_name]/[repo_name].git'
+    # or of shape 'https://github.com/[orga_name]/[repo_name].git'
     raw_url = repo.remotes.origin.url
+    if raw_url.startswith("https://"):
+        url_end = "/".join(["", "commit", commit_hash])
+        return raw_url.replace(".git", url_end)
+
     # now list with contents ['git', 'github', 'com', [orga_name]/[repo_name], 'git']
     url_pieces = re.split(r"[@.:]", raw_url)
     # replace the start and end of the list
@@ -383,8 +384,3 @@ def init_media_info(
         "updated_years": sorted(years) if years is not None else [],
         "updated_fields": fields if fields is not None else [],
     }
-
-
-def yearly_stats_keys_from_mft(prev_mft: dict[str, Any]) -> dict[str, dict]:
-    # extract list of title-year pairs present in the statistics of a manifest dict.
-    pass

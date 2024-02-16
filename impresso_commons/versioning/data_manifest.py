@@ -10,8 +10,8 @@ import json
 import copy
 
 from typing import Any
-from git import Repo
 from time import strftime
+from git import Repo
 
 from impresso_commons.versioning.helpers import (
     DataStage,
@@ -26,7 +26,10 @@ from impresso_commons.versioning.helpers import (
     init_media_info,
     media_list_from_mft_json,
 )
-from impresso_commons.versioning.data_statistics import NewspaperStatistics
+from impresso_commons.versioning.data_statistics import (
+    NewspaperStatistics,
+    DataStatistics,
+)
 from impresso_commons.utils.s3 import get_storage_options, upload_to_s3
 
 logger = logging.getLogger(__name__)
@@ -42,10 +45,10 @@ class DataManifest:
     def __init__(
         self,
         data_stage: DataStage | str,
-        s3_input_bucket: str,
         s3_output_bucket: str,  # including partition
         git_repo: Repo,
         temp_dir: str,
+        s3_input_bucket: str | None = None,  # None if canonical
         staging: bool | None = None,
         # to directly provide the next version
         new_version: str | None = None,
@@ -92,7 +95,8 @@ class DataManifest:
         self.input_manifest_s3_path = None
 
         # if user already knows the target version
-        self.version = validate_version(new_version)
+        self.version = None if new_version is None else validate_version(new_version)
+
         # if update is a patch, patched fields should be provided
         # either as list of fields or dict mapping each media to its patched fields
         self.patched_fields = patched_fields
@@ -112,29 +116,42 @@ class DataManifest:
     @property
     def _input_stage(self) -> DataStage:
         return (
-            DataStage.canonical
-            if self.stage == DataStage.rebuilt
-            else DataStage.rebuilt
+            DataStage.CANONICAL
+            if self.stage == DataStage.REBUILT
+            else DataStage.REBUILT
         )
 
     @property
     def _manifest_filename(self) -> str:
+        if self.version is None:
+            logger.warning("The manifest name is only available once the version is.")
+            return ""
+
         return f"{self.stage.value}_{self.version.replace('.', '-')}.json"
 
     @property
     def output_mft_s3_path(self) -> str:
+        if self.version is None:
+            logger.warning(
+                "The manifest s3 path is only available once the version is."
+            )
+            return ""
+
         if self.output_s3_partition is not None:
             s3_path = os.path.join(self.output_s3_partition, self._manifest_filename)
         else:
             s3_path = self._manifest_filename
 
+        full_s3_path = os.path.join("s3://", self.output_bucket_name, s3_path)
+
+        # sanity check
         if self._prev_mft_s3_path is not None:
             assert (
                 self._prev_mft_s3_path.split(f"/{self.stage.value}_v")[0]
-                == self.output_s3_partition
-            ), "Mismatch between previous & current version of manifest."
+                == full_s3_path.split(f"/{self.stage.value}_v")[0]
+            ), "Mismatch between s3 path of previous & current version of manifest."
 
-        return os.path.join("s3:/", self.output_bucket_name, s3_path)
+        return full_s3_path
 
     def _get_output_branch(self, for_staging: bool | None) -> str:
         # TODO recheck logic
@@ -162,7 +179,7 @@ class DataManifest:
             self.prev_version = "v0.0.0"
 
         else:
-            self.prev_version = prev_v_mft["version"]
+            self.prev_version = prev_v_mft["mft_version"]
 
         return prev_v_mft
 
@@ -200,7 +217,7 @@ class DataManifest:
         return increment_version(self.prev_version, "minor")
 
     def _get_input_data_overall_stats(self) -> list[dict[str, Any]]:
-        if self.stage != DataStage.canonical:
+        if self.stage != DataStage.CANONICAL and self.input_bucket_name is not None:
             logger.debug("Reading the input data's manifest from S3.")
 
             # only the rebuilt uses the canonical as input
@@ -230,8 +247,21 @@ class DataManifest:
 
         return os.path.join(folder_prefix, sub_folder)
 
-    def validate_and_export_manifest(self, out_repo: Repo | None = None) -> bool:
+    def validate_and_export_manifest(
+        self, push_to_git: bool = False, commit_msg: str | None = None
+    ) -> bool:
+        msg = "Validating and exporting manifest to s3"
+        if push_to_git:
+            # clone the data release repository locally if not for debug
+            out_repo = clone_git_repo(self.temp_dir, branch=self.branch)
+
+            logger.info("%s and GitHub!", msg)
+        else:
+            out_repo = None
+            logger.info("%s!", msg)
+
         # TODO add verification against JSON schema
+
         manifest_dump = json.dumps(self.manifest_data, indent=4)
 
         mft_filename = self._manifest_filename
@@ -245,7 +275,7 @@ class DataManifest:
                 out_repo,
                 local_path_in_repo,
                 mft_filename,
-                commit_msg=None,
+                commit_msg=commit_msg,
             )
             if not pushed:
                 logger.critical(
@@ -314,7 +344,6 @@ class DataManifest:
 
         return success
 
-    # TODO replace by add & replace with different parameters set to None by default?
     def add_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
         title, year = ci_id.split("-")[0:2]
         return self._modify_processing_stats(title, year, counts)
@@ -343,12 +372,12 @@ class DataManifest:
         logger.info("Creating new media dict for %s.", title)
         media = {
             "media_title": title,
-            "last_modification_date": "self._generation_date",
+            "last_modification_date": self._generation_date,
         }
         media.update(init_media_info(fields=self.patched_fields))
         media.update(
             {
-                "code_git_commit": "self.commit_url",
+                "code_git_commit": self.commit_url,
                 "media_statistics": [],
                 "stats_as_dict": {},
             }
@@ -388,11 +417,15 @@ class DataManifest:
                     fields=self.patched_fields,
                 )
             )
-        new_info["code_git_commit"] = "self.commit_url"
+        new_info["code_git_commit"] = self.commit_url
 
         return new_info
 
     def generate_media_dict(self, old_media_list: dict[str, dict]) -> tuple[dict, bool]:
+        #   if new keys exist --> addition flag --> major increment
+        #   update previous version media list with current processing media list:
+        #       - setting new modification date & git url for each modified title
+        #       - compute update level & targets if not patch
         addition = False
         for title, yearly_stats in self._processing_stats.items():
             # if title not yet present in media list, initialize new media dict
@@ -445,14 +478,55 @@ class DataManifest:
 
         return media_dict, title_cumm_stats
 
-    def compute(self, push_to_git: bool = True) -> None:
+    def title_level_stats(
+        self, media_list: dict[str, dict]
+    ) -> tuple[list[DataStatistics], dict[str, dict]]:
+        full_title_stats = []
+        for title, media_as_dict in media_list.items():
+            # update the canonical_media_list with the new media_dict
+            media_as_dict, title_cumm_stats = self.aggregate_stats_for_title(
+                title, media_as_dict
+            )
+            # remove the stats in dict format
+            del media_as_dict["stats_as_dict"]
+            # save the title level statistics for the overall statistics
+            full_title_stats.append(title_cumm_stats)
+
+        return full_title_stats, media_list
+
+    def overall_stats(self, title_stats: list[DataStatistics]) -> list[dict]:
+        # generate overall stats & append input manifest overall stats
+
+        corpus_stats = NewspaperStatistics(self.stage, "corpus", "")
+        for np_stats in title_stats:
+            corpus_stats.add_counts(np_stats.counts)
+        # add the number of titles present in corpus
+        corpus_stats.add_counts({"titles": len(title_stats)})
+
+        # add these overall counts to the ones of previous stages
+        overall_stats = self._get_input_data_overall_stats()
+        overall_stats.append(corpus_stats.pretty_print())
+
+        return overall_stats
+
+    def compute(
+        self, export_to_git_and_s3: bool = True, commit_msg: str | None = None
+    ) -> None:
         # function that will perform all the logic to construct the manifest
         # (similarly to NewsPaperPages)
+
+        if not self._processing_stats:
+            msg = "The manifest cannot be computed without having provided any statistics!"
+            logger.warning(msg)
+            return None
+
+        logger.info("Starting to compute the manifest...")
 
         self._generation_date = strftime("%Y-%m-%d %H:%M:%S")
 
         #### IMPLEMENT LOGIC AND FILL MANIFEST DATA
 
+        logger.info("Loading the previous version of this manifest if it exists.")
         # load previous version of this manifest
         prev_version_mft = self._get_prev_version_manifest()
 
@@ -464,49 +538,21 @@ class DataManifest:
             # if no previous version media list, generate media list from scratch
             old_media_list = {}
 
+        logger.info("Updating the media statistics with the new information...")
         # compare current stats to previous version stats
-        updated_media_list, addition = self.generate_media_dict(old_media_list)
-        #   if new keys exist --> addition flag --> major increment
-        #   update previous version media list with current processing media list:
-        #       - setting new modification date & git url for each modified title
-        #       - compute update level & targets if not patch
+        updated_media, addition = self.generate_media_dict(old_media_list)
 
-        logger.info("Computing the title-level statistics.")
-        # generate title-level stats
-        full_title_stats = []
-        for title, media_as_dict in updated_media_list.items():
-            # update the canonical_media_list with the new media_dict
-            updated_media_list[title], title_cumm_stats = (
-                self.aggregate_stats_for_title(title, media_as_dict)
-            )
-            # remove the stats in dict format
-            del updated_media_list[title]["stats_as_dict"]
-            # save the title level statistics for the overall statistics
-            full_title_stats.append(title_cumm_stats)
+        logger.info("Computing the title-level statistics...")
+        full_title_stats, updated_media = self.title_level_stats(updated_media)
 
-        # generate overall stats & append input manifest overall stats
-        overall_stats = None
-
-        logger.info("Computing the overall statistics")
-        # compute the overall statistics
-        corpus_stats = NewspaperStatistics(self.stage, "corpus", "")
-        for np_stats in full_title_stats:
-            corpus_stats.add_counts(np_stats.counts)
-        # add the number of titles present in corpus
-        corpus_stats.add_counts({"titles": len(full_title_stats)})
-
-        # add these overall counts to the ones of previous stages
-        overall_stats = self._get_input_data_overall_stats()
-        overall_stats.append(corpus_stats.pretty_print())
+        logger.info("Computing the overall statistics...")
+        overall_stats = self.overall_stats(full_title_stats)
 
         # compute current version
         self.version = self._get_current_version(addition)
 
-        # clone the data release repository locally if not for debug
-        out_repo = clone_git_repo(self.temp_dir, branch=self.branch)
-
         # the canonical has no input stage
-        if self.stage != DataStage.canonical:
+        if self.stage != DataStage.CANONICAL:
             input_mft_git_path = os.path.join(
                 self._get_out_path_within_repo(stage=self._input_stage),
                 self.input_manifest_s3_path.split("/")[-1],
@@ -516,21 +562,26 @@ class DataManifest:
 
         # populate the dict with all gathered information
         self.manifest_data = {
+            "mft_version": self.version,
             "mft_generation_date": self._generation_date,
             "mft_s3_path": self.output_mft_s3_path,
             "input_mft_s3_path": self.input_manifest_s3_path,
             "input_mft_git_path": input_mft_git_path,
             "code_git_commit": self.commit_url,
-            "media_list": list(updated_media_list.values()),
+            "media_list": list(updated_media.values()),
             "overall_statistics": overall_stats,
             "notes": self.notes,
         }
 
-        success = self.validate_and_export_manifest(out_repo if push_to_git else None)
+        logger.info("%s Manifest successfully generated! %s", "-" * 15, "-" * 15)
 
-        if success:
-            logger.info(
-                "%s Manifest successfully generated and uploaded to S3! %s",
-                "-" * 15,
-                "-" * 15,
-            )
+        if export_to_git_and_s3:
+            # If exporting directly, wil both upload to s3 and push to git.
+            success = self.validate_and_export_manifest(True, commit_msg)
+
+            if success:
+                logger.info(
+                    "%s Manifest successfully uploaded to S3 and GitHub! %s",
+                    "-" * 15,
+                    "-" * 15,
+                )

@@ -58,9 +58,7 @@ class DataStatistics(ABC):
             self.counts = counts
         else:
             logger.debug("Initializing counts to 0 for %s.", self.element)
-            self.counts = self.init_counts()  # defaultdict(int) ?
-
-    # TODO if needed, define combination functions that allow summing/aggregating DataStats
+            self.counts = self.init_counts()
 
     @abstractmethod
     def _define_count_keys(self) -> list[str]:
@@ -171,34 +169,35 @@ class NewspaperStatistics(DataStatistics):
     def _define_count_keys(self) -> list[str]:
         """Define the count keys to use for these specific statistics.
 
+        TODO correct/update the count_keys
+
         Returns:
             list[str]: The count keys for this specific stage and granularity.
         """
-        # TODO correct/update the count_keys
         start_index = int(self.granularity != "corpus")
         # all counts should have 'content_items_out'
         count_keys = [self.possible_count_keys[3]]
         match self.stage:
-            case DataStage.canonical:
+            case DataStage.CANONICAL:
                 # add 'titles', 'issues', 'pages' and 'images'
                 count_keys.extend(self.possible_count_keys[start_index:3])
                 count_keys.append(self.possible_count_keys[5])
-            case DataStage.embeddings:
+            case DataStage.EMBEDDINGS:
                 # add 'embeddings'
                 count_keys.append(self.stage.value)
-            case DataStage.entities:
+            case DataStage.ENTITIES:
                 # add 'entities'
                 count_keys.append(self.stage.value)
-            case DataStage.langident:
+            case DataStage.LANGIDENT:
                 # add 'languages'
                 count_keys.append(self.possible_count_keys[7])
-            case DataStage.mentions:
+            case DataStage.MENTIONS:
                 # add 'mentions'
                 count_keys.append(self.stage.value)
-            case DataStage.text_reuse:
+            case DataStage.TEXT_REUSE:
                 # add 'text_reuse_clusters'
                 count_keys.append(self.possible_count_keys[-1])
-            case DataStage.topics:
+            case DataStage.TOPICS:
                 # add 'topics'
                 count_keys.append(self.stage.topics)
         return count_keys
