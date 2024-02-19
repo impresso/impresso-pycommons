@@ -70,7 +70,7 @@ class DataManifest:
 
         # TODO remove all non-necessary attributes
         self.stage = validate_stage(data_stage)  # update
-        self.input_bucket_name = s3_input_bucket.replace("s3://", "")
+        self.input_bucket_name = s3_input_bucket
 
         # s3_output_bucket is the path to actual data partition
         s3_output_bucket = s3_output_bucket.replace("s3://", "")
@@ -121,7 +121,7 @@ class DataManifest:
     def _input_stage(self) -> DataStage:
         return (
             DataStage.CANONICAL
-            if self.stage == DataStage.REBUILT
+            if self.stage in [DataStage.REBUILT, DataStage.CANONICAL]
             else DataStage.REBUILT
         )
 
@@ -234,7 +234,7 @@ class DataManifest:
 
             # only the rebuilt uses the canonical as input
             (self.input_manifest_s3_path, input_v_mft) = read_manifest_from_s3(
-                self.input_bucket_name, self._input_stage
+                self.input_bucket_name.replace("s3://", ""), self._input_stage
             )
 
             assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
