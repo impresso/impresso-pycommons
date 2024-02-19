@@ -112,7 +112,7 @@ class DataManifest:
         self.manifest_data = {}
         self._generation_date = None
 
-        logger.info("DataManifest for %s successfully initialized.", self.stage)
+        logger.info("DataManifest for %s stage successfully initialized.", self.stage)
 
     @property
     def _input_stage(self) -> DataStage:
@@ -272,7 +272,7 @@ class DataManifest:
         mft_filename = self._manifest_filename
 
         # if out_repo is None, in debug mode
-        if out_repo is not None:
+        if push_to_git:
             # write file and push to git
             local_path_in_repo = self._get_out_path_within_repo()
             pushed, out_file_path = write_and_push_to_git(
@@ -457,6 +457,7 @@ class DataManifest:
                 ):
                     assert year in old_media_list[title]["updated_years"]
                 print(title, year)
+                # todo, change to update??
                 old_media_list[title]["stats_as_dict"][year] = stats
 
         return old_media_list, addition

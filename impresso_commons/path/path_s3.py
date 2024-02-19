@@ -350,7 +350,9 @@ def list_newspapers(
     return newspapers
 
 
-def list_issues(bucket_name: str) -> list[str]:
+def list_issues(
+    bucket_name: str, newspapers_filter: list[str] | None = None
+) -> list[str]:
     """
     Note:
         copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
@@ -360,20 +362,27 @@ def list_issues(bucket_name: str) -> list[str]:
     issue_files = [
         file
         for np in newspapers
+        if newspapers_filter is not None and np in newspapers_filter
         for file in fixed_s3fs_glob(f"{os.path.join(bucket_name, f'{np}/issues/*')}")
     ]
-    print(f"{bucket_name} contains {len(issue_files)} .bz2 files with issues")
+    if newspapers_filter is not None:
+        suffix = f"for the provided newspapers {newspapers_filter}"
+    else:
+        suffix = ""
+    print(f"{bucket_name} contains {len(issue_files)} .bz2 files with issues {suffix}")
     return issue_files
 
 
-def fetch_issues(bucket_name: str, compute: bool = True):
+def fetch_issues(
+    bucket_name: str, compute: bool = True, newspapers_filter: list[str] | None = None
+):
     """
     Fetch issue JSON docs from an s3 bucket with impresso canonical data.
 
     Note:
         copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
     """
-    issue_files = list_issues(bucket_name)
+    issue_files = list_issues(bucket_name, newspapers_filter)
 
     print(
         (

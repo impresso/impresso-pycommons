@@ -384,3 +384,12 @@ def init_media_info(
         "updated_years": sorted(years) if years is not None else [],
         "updated_fields": fields if fields is not None else [],
     }
+
+
+def counts_for_canonical_issue(issue: dict[str, Any]) -> dict[str, int]:
+    return {
+        "issues": 1,
+        "pages": len(set(issue["pp"])),
+        "content_items_out": len(issue["i"]),
+        "images": len([item for item in issue["i"] if item["m"]["tp"] == "image"]),
+    }
