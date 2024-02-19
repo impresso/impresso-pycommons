@@ -25,6 +25,7 @@ from impresso_commons.versioning.helpers import (
     validate_version,
     init_media_info,
     media_list_from_mft_json,
+    read_manifest_from_s3_path,
 )
 from impresso_commons.versioning.data_statistics import (
     NewspaperStatistics,
@@ -57,6 +58,8 @@ class DataManifest:
         is_patch: bool | None = False,
         # to indcate patch in canonical/rebuilt
         patched_fields: dict[str, list[str]] | list[str] | None = None,
+        # directly provide the s3 path of the manifest to use as base
+        previous_mft_path: str | None = None,
     ) -> None:
 
         # TODO check logger initialization
@@ -67,7 +70,7 @@ class DataManifest:
 
         # TODO remove all non-necessary attributes
         self.stage = validate_stage(data_stage)  # update
-        self.input_bucket_name = s3_input_bucket
+        self.input_bucket_name = s3_input_bucket.replace("s3://", "")
 
         # s3_output_bucket is the path to actual data partition
         s3_output_bucket = s3_output_bucket.replace("s3://", "")
@@ -87,7 +90,7 @@ class DataManifest:
         self.commit_url = get_head_commit_url(git_repo)
 
         # init attributes of previous manifest
-        self._prev_mft_s3_path = None
+        self._prev_mft_s3_path = previous_mft_path
         # self._prev_v_mft = None
         self._prev_v_mft_yearly_stats = None
         self.prev_version = None
@@ -101,7 +104,7 @@ class DataManifest:
         # if update is a patch, patched fields should be provided
         # either as list of fields or dict mapping each media to its patched fields
         self.patched_fields = patched_fields
-        self.is_patch = is_patch
+        self.is_patch = is_patch or (patched_fields is not None)
 
         # example of 1 yearly stats format to gather the necessary keys
         self._eg_yearly_stats = NewspaperStatistics(self.stage, "year")
@@ -146,7 +149,10 @@ class DataManifest:
         full_s3_path = os.path.join("s3://", self.output_bucket_name, s3_path)
 
         # sanity check
-        if self._prev_mft_s3_path is not None:
+        if (
+            self._prev_mft_s3_path is not None
+            and self.output_bucket_name in self._prev_mft_s3_path
+        ):
             assert (
                 self._prev_mft_s3_path.split(f"/{self.stage.value}_v")[0]
                 == full_s3_path.split(f"/{self.stage.value}_v")[0]
@@ -168,19 +174,23 @@ class DataManifest:
         return "staging" if staging_out_bucket or for_staging else "master"
 
     def _get_prev_version_manifest(self) -> dict[str, Any] | None:
+        # previous version manifest is in the output bucket, except when:
+        # _prev_mft_s3_path is defined upon instantiation, then use it directly
         logger.debug("Reading the previous version of the manifest from S3.")
-        (self._prev_mft_s3_path, prev_v_mft) = read_manifest_from_s3(
-            self.output_bucket_name, self.stage, self.output_s3_partition
-        )
+        if self._prev_mft_s3_path is None:
+            (self._prev_mft_s3_path, prev_v_mft) = read_manifest_from_s3(
+                self.output_bucket_name, self.stage, self.output_s3_partition
+            )
+        else:
+            prev_v_mft = read_manifest_from_s3_path(self._prev_mft_s3_path)
 
         if self._prev_mft_s3_path is None or prev_v_mft is None:
             logger.info(
                 "No existing previous version of this manifest. Version will be v0.0.1"
             )
-            self.prev_version = "v0.0.0"
+            return None
 
-        else:
-            self.prev_version = prev_v_mft["mft_version"]
+        self.prev_version = prev_v_mft["mft_version"]
 
         return prev_v_mft
 
@@ -218,7 +228,8 @@ class DataManifest:
         return increment_version(self.prev_version, "minor")
 
     def _get_input_data_overall_stats(self) -> list[dict[str, Any]]:
-        if self.stage != DataStage.CANONICAL and self.input_bucket_name is not None:
+        # reading the input manifest only if the input s3 bucket is defined
+        if self.input_bucket_name is not None:
             logger.debug("Reading the input data's manifest from S3.")
 
             # only the rebuilt uses the canonical as input
@@ -228,11 +239,12 @@ class DataManifest:
 
             assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
 
-            # fetch the overall statistics from the input data (it's a list!)
-            return input_v_mft["overall_statistics"]
-
-        # The first stage of the data is canonical
-        return []
+        # fetch the overall statistics from the input data (it's a list!)
+        return (
+            input_v_mft["overall_statistics"]
+            if self.stage != DataStage.CANONICAL
+            else []
+        )
 
     def _get_out_path_within_repo(
         self,

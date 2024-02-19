@@ -200,7 +200,6 @@ def read_manifest_from_s3(
 ) -> tuple[str, dict[str, Any]] | tuple[None, None]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
-
     if manifest_s3_path is None:
         logger.info("No %s manifest found in bucket %s", data_stage, bucket_name)
         return None, None
@@ -210,6 +209,18 @@ def read_manifest_from_s3(
     )
 
     return manifest_s3_path, json.loads(raw_text)
+
+
+def read_manifest_from_s3_path(manifest_s3_path: str) -> dict[str, Any] | None:
+    # read and extract the contents of an arbitrary manifest, to be returned in dict format.
+    try:
+        raw_text = alternative_read_text(
+            manifest_s3_path, IMPRESSO_STORAGEOPT, line_by_line=False
+        )
+        return json.loads(raw_text)
+    except FileNotFoundError as e:
+        logger.error("No manifest found at s3 path %s. %s", manifest_s3_path, e)
+        return None
 
 
 ###########################
