@@ -423,7 +423,7 @@ def upload_to_s3(local_path: str, path_within_bucket: str, bucket_name: str) -> 
         # ensure the path within the bucket is only the key
         path_within_bucket = path_within_bucket.replace("s3://", "")
         bucket.upload_file(local_path, path_within_bucket)
-        logger.info(f"Uploaded {path_within_bucket} to {bucket_name}.")
+        logger.info(f"Uploaded {path_within_bucket} to s3://{bucket_name}.")
         return True
     except Exception as e:
         logger.error(e)

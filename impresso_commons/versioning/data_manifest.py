@@ -339,23 +339,30 @@ class DataManifest:
 
         return np_stats, success
 
+    def has_title_year_key(self, title: str, year: str) -> bool:
+        if title in self._processing_stats:
+            return year in self._processing_stats[title]
+
+        return False
+
     def _modify_processing_stats(
         self, title: str, year: str, counts: dict[str, int], adding: bool = True
     ) -> bool:
         # check if title/year pair is already in processing stats
-        if title in self._processing_stats:
-            if year in self._processing_stats[title]:
-                success = self._processing_stats[title][year].add_counts(
-                    counts, replace=(not adding)
-                )
+        if self.has_title_year_key(title, year):
+            # if title in self._processing_stats:
+            #    if year in self._processing_stats[title]:
+            success = self._processing_stats[title][year].add_counts(
+                counts, replace=(not adding)
+            )
 
-                if not success:
-                    action = "adding" if adding else "replacing with"
-                    self._log_failed_action(title, year, action)
-                # notify user of outcome
-                return success
-        else:
-            self._processing_stats[title] = {}
+            if not success:
+                action = "adding" if adding else "replacing with"
+                self._log_failed_action(title, year, action)
+            # notify user of outcome
+            return success
+
+        self._processing_stats[title] = {}
 
         # initialize new statistics for this title-year pair:
         self._processing_stats[title][year], success = self._init_yearly_stats(

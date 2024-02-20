@@ -266,7 +266,7 @@ def clone_git_repo(
 
     # if the repository was already cloned, return it.
     if os.path.exists(repo_path) and is_git_repo(repo_path):
-        logger.debug("Git repository %s had already been cloned.", repo_name)
+        logger.info("Git repository %s had already been cloned.", repo_name)
         return git.Repo(repo_path)
 
     # try to clone using ssh, if it fails, retry with https.
@@ -324,7 +324,7 @@ def git_commit_push(
         git_repo.index.commit(commit_msg)
         origin = git_repo.remote(name="origin")
 
-        push_msg = f"Pushing {filename} with commit message {commit_msg}."
+        push_msg = f"Pushing {filename} with commit message '{commit_msg}'"
         logger.info(push_msg)
         origin.push()
 
