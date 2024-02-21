@@ -329,6 +329,7 @@ class DataManifest:
     def _init_yearly_stats(
         self, title: str, year: str, counts: dict[str, int]
     ) -> tuple[NewspaperStatistics, bool]:
+        logger.debug("Initializing counts for %s-%s", title, year)
         elem = f"{title}-{year}"
         np_stats = NewspaperStatistics(self.stage, "year", elem, counts=counts)
         success = True
@@ -362,7 +363,9 @@ class DataManifest:
             # notify user of outcome
             return success
 
-        self._processing_stats[title] = {}
+        if title not in self._processing_stats:
+            logger.debug("Adding first stats for %s", title)
+            self._processing_stats[title] = {}
 
         # initialize new statistics for this title-year pair:
         self._processing_stats[title][year], success = self._init_yearly_stats(
