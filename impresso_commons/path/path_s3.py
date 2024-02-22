@@ -350,51 +350,83 @@ def list_newspapers(
     return newspapers
 
 
-def list_issues(
-    bucket_name: str, newspapers_filter: list[str] | None = None
-) -> list[str]:
+def list_files(
+    bucket_name: str, type: str = 'issues', newspapers_filter: list[str] | None = None,
+) -> tuple[list[str] | None, list[str] | None]:
     """
     Note:
-        copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
+        adapted from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
     """
+    if type not in ['issues', 'pages', 'both']:
+        logger.error("The provided type is not one of ['issues', 'pages', 'both']!")
+        raise NotImplementedError
+    
+    # initialize the output lists
+    issue_files, page_files = None, None
+    # list the newspapers in the bucket
     newspapers = list_newspapers(bucket_name)
 
-    issue_files = [
-        file
-        for np in newspapers
-        if newspapers_filter is not None and np in newspapers_filter
-        for file in fixed_s3fs_glob(f"{os.path.join(bucket_name, f'{np}/issues/*')}")
-    ]
     if newspapers_filter is not None:
         suffix = f"for the provided newspapers {newspapers_filter}"
     else:
         suffix = ""
-    print(f"{bucket_name} contains {len(issue_files)} .bz2 files with issues {suffix}")
-    return issue_files
+
+    if type in ['issues', 'both']:
+        issue_files = [
+            file
+            for np in newspapers
+            if newspapers_filter is not None and np in newspapers_filter
+            for file in fixed_s3fs_glob(f"{os.path.join(bucket_name, f'{np}/issues/*')}")
+        ]
+        print(f"{bucket_name} contains {len(issue_files)} .bz2 issue files {suffix}")
+    if type in ['pages', 'both']:
+        page_files = [
+            file
+            for np in newspapers
+            if newspapers_filter is not None and np in newspapers_filter
+            for file in fixed_s3fs_glob(f"{os.path.join(bucket_name, f'{np}/pages/*')}")
+        ]
+        print(f"{bucket_name} contains {len(page_files)} .bz2 page files {suffix}")
+
+    return issue_files, page_files
 
 
-def fetch_issues(
-    bucket_name: str, compute: bool = True, newspapers_filter: list[str] | None = None
-):
+def fetch_files(
+    bucket_name: str, compute: bool = True, type: str = 'issues', newspapers_filter: list[str] | None = None
+) -> tuple[db.core.Bag | None, db.core.Bag | None] | tuple[list[str] | None, list[str] | None]:
     """
-    Fetch issue JSON docs from an s3 bucket with impresso canonical data.
+    Fetch issue and/or page JSON docs from an s3 bucket with impresso canonical data.
 
     Note:
-        copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
+        adapted from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
     """
-    issue_files = list_issues(bucket_name, newspapers_filter)
+    if type not in ['issues', 'pages', 'both']:
+        logger.error("The provided type is not one of ['issues', 'pages', 'both']!")
+        raise NotImplementedError
+    
+    issue_files, page_files = list_files(bucket_name, type, newspapers_filter)
+    # initialize the outputs
+    issue_bag, page_bag = None, None
 
-    print(
-        (
-            f"Fetching issue ids from {len(issue_files)} .bz2 files "
-            f"(compute={compute})"
+    msg = "Fetching "
+    if issue_files is not None:
+        msg = f"{msg} issue ids from {len(issue_files)} .bz2 files, "
+        issue_bag = db.read_text(issue_files, storage_options=IMPRESSO_STORAGEOPT).map(
+            json.loads
         )
-    )
-    issue_bag = db.read_text(issue_files, storage_options=IMPRESSO_STORAGEOPT).map(
-        json.loads
-    )
+    if page_files is not None:
+        # make sure all files are .bz2 files and exactly have the naming format they should
+        prev_len = len(page_files)
+        page_files = [p for p in page_files if '.jsonl.bz2' in p and len(p.split('-'))==6]
+        msg = f"{msg} page ids from {len(page_files)} .bz2 files (after filtering {prev_len} files), "
+        page_bag = db.read_text(page_files, storage_options=IMPRESSO_STORAGEOPT).map(
+            json.loads
+        )
+
+    logger.info(f"{msg} (compute={compute})")
 
     if compute:
-        return issue_bag.compute()
-    else:
-        return issue_bag
+        page_bag = page_bag.compute() if page_files is not None else page_bag
+        issue_bag = issue_bag.compute() if issue_files is not None else issue_bag
+
+    return issue_bag, page_bag
