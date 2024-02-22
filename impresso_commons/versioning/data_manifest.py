@@ -237,9 +237,9 @@ class DataManifest:
             if input_v_mft is not None:
                 assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
 
-        # fetch the overall statistics from the input data (it's a list!)
-        if input_v_mft is not None and self.stage != DataStage.CANONICAL:
-            return input_v_mft["overall_statistics"]
+                # fetch the overall statistics from the input data (it's a list!)
+                if self.stage != DataStage.CANONICAL:
+                    return input_v_mft["overall_statistics"]
         return []
 
     def _get_out_path_within_repo(
@@ -374,7 +374,7 @@ class DataManifest:
         return self._modify_processing_stats(title, year, counts)
 
     def add_by_title_year(self, title: str, year: str, counts: dict[str, int]) -> bool:
-        return self._modify_processing_stats(title, year, counts)
+        return self._modify_processing_stats(title, str(year), counts)
 
     def replace_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
         title, year = ci_id.split("-")[0:2]
@@ -383,7 +383,7 @@ class DataManifest:
     def replace_by_title_year(
         self, title: str, year: str, counts: dict[str, int]
     ) -> bool:
-        return self._modify_processing_stats(title, year, counts, adding=False)
+        return self._modify_processing_stats(title, str(year), counts, adding=False)
 
     def append_to_notes(self, contents: str, to_start: bool = True) -> None:
         if self.notes is None:
@@ -427,7 +427,7 @@ class DataManifest:
                 init_media_info(
                     add=False,
                     full_title=False,
-                    years=list(processed_years),
+                    years=list(map(str, processed_years)),
                     fields=self.patched_fields,
                 )
             )
@@ -440,7 +440,7 @@ class DataManifest:
             new_info.update(
                 init_media_info(
                     full_title=False,
-                    years=list(processed_years),
+                    years=list(map(str, processed_years)),
                     fields=self.patched_fields,
                 )
             )
