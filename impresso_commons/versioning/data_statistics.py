@@ -182,6 +182,10 @@ class NewspaperStatistics(DataStatistics):
                 # add 'titles', 'issues', 'pages' and 'images'
                 count_keys.extend(self.possible_count_keys[start_index:3])
                 count_keys.append(self.possible_count_keys[5])
+            case DataStage.REBUILT:
+                # add 'titles', 'issues', 'ft_tokens'
+                count_keys.extend(self.possible_count_keys[start_index:2])
+                count_keys.append(self.possible_count_keys[4])
             case DataStage.EMBEDDINGS:
                 # add 'embeddings'
                 count_keys.append(self.stage.value)

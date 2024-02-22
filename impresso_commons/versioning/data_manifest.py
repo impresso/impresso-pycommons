@@ -50,26 +50,23 @@ class DataManifest:
         s3_output_bucket: str,  # including partition
         git_repo: Repo,
         temp_dir: str,
-        s3_input_bucket: str | None = None,  # None if canonical
+        # S3 bucket of the previous stage, None if stage='canonical'
+        s3_input_bucket: str | None = None,
         staging: bool | None = None,
         # to directly provide the next version
         new_version: str | None = None,
         # to indicate if patch in later stages
         is_patch: bool | None = False,
-        # to indcate patch in canonical/rebuilt
+        # to indiate patch in canonical/rebuilt
         patched_fields: dict[str, list[str]] | list[str] | None = None,
         # directly provide the s3 path of the manifest to use as base
         previous_mft_path: str | None = None,
     ) -> None:
 
-        # TODO check logger initialization
-        # if logger is None:
-        #    init_logger()
-
         # TODO modif for Solr (no output bucket)
 
         # TODO remove all non-necessary attributes
-        self.stage = validate_stage(data_stage)  # update
+        self.stage = validate_stage(data_stage)  # update once all stages are final
         self.input_bucket_name = s3_input_bucket
 
         # s3_output_bucket is the path to actual data partition
@@ -237,14 +234,13 @@ class DataManifest:
                 self.input_bucket_name.replace("s3://", ""), self._input_stage
             )
 
-            assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
+            if input_v_mft is not None:
+                assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
 
         # fetch the overall statistics from the input data (it's a list!)
-        return (
-            input_v_mft["overall_statistics"]
-            if self.stage != DataStage.CANONICAL
-            else []
-        )
+        if input_v_mft is not None and self.stage != DataStage.CANONICAL:
+            return input_v_mft["overall_statistics"]
+        return []
 
     def _get_out_path_within_repo(
         self,
@@ -395,7 +391,9 @@ class DataManifest:
             self.notes = contents
         else:
             new_notes = [contents, self.notes] if to_start else [self.notes, contents]
-            self.notes = "\n".join(new_notes)
+            print(new_notes)
+            # there is no way of going to a new line, so separate with a hyphen
+            self.notes = " — ".join(new_notes)
 
     def new_media(self, title: str) -> dict[str, Any]:
         # adding a new media means by default addition update type and title update level.
@@ -490,7 +488,7 @@ class DataManifest:
     def aggregate_stats_for_title(self, title: str, media_dict: dict[str, Any]):
         logger.debug("Aggregating title-level stats for %s.", title)
         # instantiate a NewspaperStatistics object for the title
-        title_cumm_stats = NewspaperStatistics("canonical", "title", title)
+        title_cumm_stats = NewspaperStatistics(self.stage, "title", title)
         # instantiate the list of counts for display
         pretty_counts = []
         for _, np_year_stat in media_dict["stats_as_dict"].items():
@@ -583,7 +581,10 @@ class DataManifest:
         self.version = self._get_current_version(addition)
 
         # the canonical has no input stage
-        if self.stage != DataStage.CANONICAL:
+        if (
+            self.stage != DataStage.CANONICAL
+            and self.input_manifest_s3_path is not None
+        ):
             input_mft_git_path = os.path.join(
                 self._get_out_path_within_repo(stage=self._input_stage),
                 self.input_manifest_s3_path.split("/")[-1],
