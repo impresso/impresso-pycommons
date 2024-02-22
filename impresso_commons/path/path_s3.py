@@ -417,8 +417,8 @@ def fetch_files(
     if page_files is not None:
         # make sure all files are .bz2 files and exactly have the naming format they should
         prev_len = len(page_files)
-        page_files = [p for p in page_files if '.jsonl.bz2' in p and len(p.split('-'))==6]
-        msg = f"{msg} page ids from {len(page_files)} .bz2 files (after filtering {prev_len} files), "
+        page_files = [p for p in page_files if '.jsonl.bz2' in p and len(p.split('-'))>5]
+        msg = f"{msg} page ids from {len(page_files)} .bz2 files ({prev_len} files before filtering), "
         page_bag = db.read_text(page_files, storage_options=IMPRESSO_STORAGEOPT).map(
             json.loads
         )
