@@ -78,7 +78,7 @@ def init_logger(level, file: str | None = None):
 
 def validate_against_schema(
     json_to_validate: dict[str, Any],
-    path_to_schema: str = "impresso-schemas/json/versioning/manifest.schema.json",
+    path_to_schema: str = "schemas/json/versioning/manifest.schema.json",
 ) -> None:
     """Validate a dict corresponding to a JSON against a provided JSON schema.
 

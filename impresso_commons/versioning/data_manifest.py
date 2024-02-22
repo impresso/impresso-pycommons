@@ -258,14 +258,13 @@ class DataManifest:
 
     def validate_and_export_manifest(
         self,
-        path_to_schema: str,
         push_to_git: bool = False,
         commit_msg: str | None = None,
     ) -> bool:
         msg = "Validating and exporting manifest to s3"
 
         # validate the manifest against the schema
-        validate_against_schema(self.manifest_data, path_to_schema)
+        validate_against_schema(self.manifest_data)
 
         if push_to_git:
             # clone the data release repository locally if not for debug
