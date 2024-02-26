@@ -305,7 +305,7 @@ class DataManifest:
 
         if self.output_s3_partition is not None:
             # add the path within the bucket (partition) to the manifest file
-            mft_filename = os.path.join(self.output_bucket_name, mft_filename)
+            mft_filename = os.path.join(self.output_s3_partition, mft_filename)
 
         return upload_to_s3(out_file_path, mft_filename, self.output_bucket_name)
 
@@ -376,6 +376,9 @@ class DataManifest:
 
     def add_by_title_year(self, title: str, year: str, counts: dict[str, int]) -> bool:
         return self._modify_processing_stats(title, str(year), counts)
+    
+    def add_count_list_by_title_year(self, title: str, year: str, all_counts: list[dict[str, int]]) -> bool:
+        return all([self._modify_processing_stats(title, str(year), c) for c in all_counts])
 
     def replace_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
         title, year = ci_id.split("-")[0:2]
