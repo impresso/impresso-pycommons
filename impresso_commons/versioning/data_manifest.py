@@ -79,6 +79,7 @@ class DataManifest:
             self.output_bucket_name, self.output_s3_partition = s3_output_bucket, None
 
         self.temp_dir = temp_dir
+        os.makedirs(temp_dir, exist_ok=True)
         self.notes = None
 
         # attributes relating to GitHub
