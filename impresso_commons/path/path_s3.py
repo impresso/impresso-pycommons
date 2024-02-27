@@ -1,5 +1,6 @@
 """Code for parsing impresso's S3 directory structures."""
 
+import os
 import json
 import logging
 import warnings
@@ -10,26 +11,28 @@ from dask.diagnostics import ProgressBar
 import dask.bag as db
 
 from impresso_commons.path import id2IssueDir
-from impresso_commons.utils.s3 import get_s3_client, get_s3_versions
+from impresso_commons.utils.s3 import get_s3_client, get_s3_versions, fixed_s3fs_glob
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
 
 logger = logging.getLogger(__name__)
 _WARNED = False
 # a simple data structure to represent input directories
-IssueDir = namedtuple(
-    "IssueDirectory", [
-        'journal',
-        'date',
-        'edition',
-        'path'
-    ]
-)
+IssueDir = namedtuple("IssueDirectory", ["journal", "date", "edition", "path"])
 
 
 # a data structure to represent content items (articles or pages)
 class s3ContentItem:
-    def __init__(self, journal, date, edition, number, key_name,
-                 doc_type=None, rebuilt_version=None, canonical_version=None):
+    def __init__(
+        self,
+        journal,
+        date,
+        edition,
+        number,
+        key_name,
+        doc_type=None,
+        rebuilt_version=None,
+        canonical_version=None,
+    ):
         self.journal = journal
         self.date = date
         self.edition = edition
@@ -40,13 +43,13 @@ class s3ContentItem:
         self.canonical_version = canonical_version
 
 
-def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
+def _list_bucket_paginator(bucket_name, prefix="", accept_key=lambda k: True):
     """
-    List the content of a bucket using pagination. 
+    List the content of a bucket using pagination.
     No filtering besides indicated prefix and accept_key lambda.
 
     :param bucket_name: string, e.g. 'original-canonical-data'
-    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical 
+    :param prefix: string, e.g. 'GDL/1950' - refers to the pseudo hierarchical
         structure within the bucket
     :param accept_key: lambda function, to accept or reject a specific key
     @return: arrays of keys
@@ -64,7 +67,9 @@ def _list_bucket_paginator(bucket_name, prefix='', accept_key=lambda k: True):
     return keys if keys else []
 
 
-def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: True, config=None):
+def _list_bucket_paginator_filter(
+    bucket_name, prefix="", accept_key=lambda k: True, config=None
+):
     """
     List the content of a bucket using pagination, with a filter.
     :param bucket_name: string, e.g. 'original-canonical-data'
@@ -81,8 +86,7 @@ def _list_bucket_paginator_filter(bucket_name, prefix='', accept_key=lambda k: T
         # if years are specified, take the range
         if config[np]:
             prefixes = [
-                np + "/" + str(item)
-                for item in range(config[np][0], config[np][1])
+                np + "/" + str(item) for item in range(config[np][0], config[np][1])
             ]
         # otherwise prefix is just the newspaper
         else:
@@ -109,16 +113,11 @@ def _key_to_issue(key_info):
     @return: IssueDir
     """
     key = key_info[0]
-    name_no_prefix = key.split('/')[-1]
+    name_no_prefix = key.split("/")[-1]
     canon_name = name_no_prefix.replace("-issue.json", "")
-    journal, year, month, day, edition = canon_name.split('-')
+    journal, year, month, day, edition = canon_name.split("-")
     path = key
-    issue = IssueDir(
-        journal,
-        date(int(year), int(month), int(day)),
-        edition,
-        path
-    )
+    issue = IssueDir(journal, date(int(year), int(month), int(day)), edition, path)
     return issue._asdict()
 
 
@@ -129,9 +128,9 @@ def _key_to_contentitem(key_info):
     @return: ContentItem
     """
     key = key_info[0]  # GDL/1950/01/06/a/GDL-1950-01-06-a-i0056.json
-    name_no_prefix = key.split('/')[-1]
+    name_no_prefix = key.split("/")[-1]
     canon_name = name_no_prefix.replace(".json", "")
-    journal, year, month, day, edition, number = canon_name.split('-')
+    journal, year, month, day, edition, number = canon_name.split("-")
     ci_type = number[:1]
     path = key
     return s3ContentItem(
@@ -141,7 +140,7 @@ def _key_to_contentitem(key_info):
         number[1:],
         path,
         ci_type,
-        rebuilt_version=key_info[1]
+        rebuilt_version=key_info[1],
     )
 
 
@@ -161,11 +160,9 @@ def _process_keys(key_name, bucket_name, item_type):
     return build((key_name, version_id, last_modified))
 
 
-def impresso_iter_bucket(bucket_name,
-                         item_type=None,
-                         prefix=None,
-                         filter_config=None,
-                         partition_size=15):
+def impresso_iter_bucket(
+    bucket_name, item_type=None, prefix=None, filter_config=None, partition_size=15
+):
     """
     Iterate over a bucket, possibly with a filter, and return an array of either IssueDir or ContentItem.
     VALID ONLY for original-canonical data, where there is individual files for issues and content items (articles).
@@ -179,8 +176,10 @@ def impresso_iter_bucket(bucket_name,
     """
     global _WARNED
     if not _WARNED:
-        warning = ("This function is depreciated and cannot be trusted to yield"
-                   " correct outputs. Please use s3_iter_bucket instead.")
+        warning = (
+            "This function is depreciated and cannot be trusted to yield"
+            " correct outputs. Please use s3_iter_bucket instead."
+        )
         logger.warning(warning)
         warnings.warn(warning, DeprecationWarning)
     # either prefix or config, but not both
@@ -189,19 +188,26 @@ def impresso_iter_bucket(bucket_name,
         return None
 
     # check which kind of object to build, issue or content_item
-    suffix = 'issue.json' if item_type == "issue" else '.json'
+    suffix = "issue.json" if item_type == "issue" else ".json"
 
     # collect keys using pagination
     logger.info(f"Start collecting key from s3 (not parallel)")
     if filter_config is None:
-        keys = _list_bucket_paginator(bucket_name, prefix, accept_key=lambda key: key.endswith(suffix))
+        keys = _list_bucket_paginator(
+            bucket_name, prefix, accept_key=lambda key: key.endswith(suffix)
+        )
     else:
-        keys = _list_bucket_paginator_filter(bucket_name, accept_key=lambda key: key.endswith(suffix),
-                                             config=filter_config)
+        keys = _list_bucket_paginator_filter(
+            bucket_name,
+            accept_key=lambda key: key.endswith(suffix),
+            config=filter_config,
+        )
 
     # build IssueDir or ContentItem from the keys, using dask.
     logger.info(f"Start processing key.")
-    ci_bag = db.from_sequence(keys, partition_size)  # default partition_size in dask: about 100
+    ci_bag = db.from_sequence(
+        keys, partition_size
+    )  # default partition_size in dask: about 100
     ci_bag = ci_bag.map(_process_keys, bucket_name=bucket_name, item_type=item_type)
     with ProgressBar():
         result = ci_bag.compute()
@@ -224,24 +230,23 @@ def s3_iter_bucket(bucket_name, prefix, suffix):
     :type prefix: str
     @return: array of keys
     """
-    return _list_bucket_paginator(bucket_name,
-                                  prefix,
-                                  accept_key=lambda key: key.endswith(suffix)
-                                  )
+    return _list_bucket_paginator(
+        bucket_name, prefix, accept_key=lambda key: key.endswith(suffix)
+    )
 
 
 def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
     """
     Iterate over bucket and filter according to config and suffix.
     Config is a dict where k= newspaper acronym and v = array of 2 years, considered as time interval.
-    Example: 
-        config = { 
+    Example:
+        config = {
             "GDL" : [1960, 1970], => will take all years in interval
             "JDG": [], => Empty array means no filter, all years.
             "GDL": [1798, 1999, 10] => take each 10th item within sequence of years
 
         }
-        
+
     :param bucket_name: the name of the bucket
     :type bucket_name: str
     :param config: newspaper/years to consider
@@ -264,7 +269,7 @@ def s3_filter_archives(bucket_name, config, suffix=".jsonl.bz2"):
             if len(config[np]) == 2:
                 keynames = tmp
             elif len(config[np]) == 3:
-                keynames = tmp[::config[np][2]]
+                keynames = tmp[:: config[np][2]]
 
             accept_key = lambda k: k in keynames
 
@@ -289,12 +294,151 @@ def read_s3_issues(newspaper, year, input_bucket):
         issue["s3_version"] = None
         return issue
 
-    issue_path_ons3 = f'{input_bucket}/{newspaper}/issues/{newspaper}-{year}-issues.jsonl.bz2'
-    issues = db.read_text(
-        issue_path_ons3,
-        storage_options=IMPRESSO_STORAGEOPT
-    ).map(lambda x: json.loads(x))\
-        .map(add_version)\
-        .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))\
+    issue_path_ons3 = (
+        f"{input_bucket}/{newspaper}/issues/{newspaper}-{year}-issues.jsonl.bz2"
+    )
+    issues = (
+        db.read_text(issue_path_ons3, storage_options=IMPRESSO_STORAGEOPT)
+        .map(lambda x: json.loads(x))
+        .map(add_version)
+        .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))
         .compute()
+    )
     return issues
+
+
+def list_newspapers(
+    bucket_name: str,
+    s3_client=get_s3_client(),
+    page_size: int = 10000,
+) -> list[str]:
+    """List newspapers contained in an s3 bucket with impresso data.
+
+    Note:
+        25,000 seems to be the maximum `PageSize` value supported by
+        SwitchEngines' S3 implementation (ceph).
+
+    Note:
+        copied from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
+    """
+    print(f"Fetching list of newspapers from {bucket_name}")
+
+    original_bucket_name = bucket_name
+
+    if "s3://" in bucket_name:
+        bucket_name = bucket_name.replace("s3://", "").split("/")[0]
+
+    paginator = s3_client.get_paginator("list_objects")
+
+    newspapers = set()
+    for n, resp in enumerate(
+        paginator.paginate(Bucket=bucket_name, PaginationConfig={"PageSize": page_size})
+    ):
+        # means the bucket is empty
+        if "Contents" not in resp:
+            continue
+
+        for f in resp["Contents"]:
+            newspapers.add(f["Key"].split("/")[0])
+        msg = (
+            f"Paginated listing of keys in {bucket_name}: page {n + 1}, listed "
+            f"{len(resp['Contents'])}"
+        )
+        logger.info(msg)
+    print(f"{bucket_name} contains {len(newspapers)} newspapers")
+
+    return newspapers
+
+
+def list_files(
+    bucket_name: str,
+    type: str = "issues",
+    newspapers_filter: list[str] | None = None,
+) -> tuple[list[str] | None, list[str] | None]:
+    """
+    Note:
+        adapted from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
+    """
+    if type not in ["issues", "pages", "both"]:
+        logger.error("The provided type is not one of ['issues', 'pages', 'both']!")
+        raise NotImplementedError
+
+    # initialize the output lists
+    issue_files, page_files = None, None
+    # list the newspapers in the bucket
+    newspapers = list_newspapers(bucket_name)
+
+    if newspapers_filter is not None:
+        suffix = f"for the provided newspapers {newspapers_filter}"
+    else:
+        suffix = ""
+
+    if type in ["issues", "both"]:
+        issue_files = [
+            file
+            for np in newspapers
+            if newspapers_filter is not None and np in newspapers_filter
+            for file in fixed_s3fs_glob(
+                f"{os.path.join(bucket_name, f'{np}/issues/*')}"
+            )
+        ]
+        print(f"{bucket_name} contains {len(issue_files)} .bz2 issue files {suffix}")
+    if type in ["pages", "both"]:
+        page_files = [
+            file
+            for np in newspapers
+            if newspapers_filter is not None and np in newspapers_filter
+            for file in fixed_s3fs_glob(f"{os.path.join(bucket_name, f'{np}/pages/*')}")
+        ]
+        print(f"{bucket_name} contains {len(page_files)} .bz2 page files {suffix}")
+
+    return issue_files, page_files
+
+
+def fetch_files(
+    bucket_name: str,
+    compute: bool = True,
+    type: str = "issues",
+    newspapers_filter: list[str] | None = None,
+) -> (
+    tuple[db.core.Bag | None, db.core.Bag | None]
+    | tuple[list[str] | None, list[str] | None]
+):
+    """
+    Fetch issue and/or page JSON docs from an s3 bucket with impresso canonical data.
+
+    Note:
+        adapted from https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py
+    """
+    if type not in ["issues", "pages", "both"]:
+        logger.error("The provided type is not one of ['issues', 'pages', 'both']!")
+        raise NotImplementedError
+
+    issue_files, page_files = list_files(bucket_name, type, newspapers_filter)
+    # initialize the outputs
+    issue_bag, page_bag = None, None
+
+    msg = "Fetching "
+    if issue_files is not None:
+        msg = f"{msg} issue ids from {len(issue_files)} .bz2 files, "
+        issue_bag = db.read_text(issue_files, storage_options=IMPRESSO_STORAGEOPT).map(
+            json.loads
+        )
+    if page_files is not None:
+        # make sure all files are .bz2 files and exactly have the naming format they should
+        prev_len = len(page_files)
+        page_files = [
+            p for p in page_files if ".jsonl.bz2" in p and len(p.split("-")) > 5
+        ]
+        msg = f"{msg} page ids from {len(page_files)} .bz2 files ({prev_len} files before filtering), "
+        page_bag = db.read_text(page_files, storage_options=IMPRESSO_STORAGEOPT).map(
+            json.loads
+        )
+
+    logger.info(f"{msg} (compute={compute})")
+
+    if compute:
+        page_bag = page_bag.compute() if page_files is not None else page_bag
+        issue_bag = issue_bag.compute() if issue_files is not None else issue_bag
+
+    return issue_bag, page_bag

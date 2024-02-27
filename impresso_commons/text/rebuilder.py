@@ -26,7 +26,6 @@ import logging
 import os
 import shutil
 import signal
-from sys import exit
 
 import dask.bag as db
 import jsonlines
@@ -35,9 +34,13 @@ from docopt import docopt
 from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
-from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import read_s3_issues
-from impresso_commons.text.helpers import read_issue_pages, rejoin_articles
+from impresso_commons.text.helpers import (
+    read_issue_pages,
+    rejoin_articles,
+    reconstruct_iiif_link,
+    insert_whitespace,
+)
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_s3_resource
 
@@ -55,9 +58,10 @@ TYPE_MAPPINGS = {
     "death_notice": "ob",
     "weather": "w",
 }
+# TODO KB data: add familial announcement?
 
 
-def rebuild_text(page, string=None):
+def rebuild_text(page: list[dict], language: str | None, string: str | None = None):
     """The text rebuilding function.
 
     :param page: a newspaper page conforming to the impresso JSON schema
@@ -101,29 +105,31 @@ def rebuild_text(page, string=None):
                     if "hy" in token:
                         region["l"] = len(token["tx"][:-1]) - 1
                         region["hy1"] = True
-
                     elif "nf" in token:
                         region["l"] = len(token["nf"])
                         region["hy2"] = True
 
-                        if "gn" in token and token["gn"]:
-                            tmp = "{}".format(token["nf"])
-                            string += tmp
-                        else:
-                            tmp = "{} ".format(token["nf"])
-                            string += tmp
+                        token_text = token["nf"]
                     else:
                         if token["tx"]:
                             region["l"] = len(token["tx"])
                         else:
                             region["l"] = 0
 
-                        if "gn" in token and token["gn"]:
-                            tmp = "{}".format(token["tx"])
-                            string += tmp
-                        else:
-                            tmp = "{} ".format(token["tx"])
-                            string += tmp
+                        token_text = token["tx"]
+
+                    # don't add the tokens corresponding to the first part of a hyphenated word
+                    if "hy" not in token:
+                        next_token = (
+                            line["t"][n + 1]["tx"] if n != len(line["t"]) - 1 else None
+                        )
+                        ws = insert_whitespace(
+                            token["tx"],
+                            next=next_token,
+                            previous=line["t"][n - 1]["tx"] if n != 0 else None,
+                            lang=language,
+                        )
+                        string += f"{token_text} " if ws else f"{token_text}"
 
                     # if token is the last in a line
                     if n == len(line["t"]) - 1:
@@ -138,7 +144,9 @@ def rebuild_text(page, string=None):
     return (string, coordinates, offsets)
 
 
-def rebuild_text_passim(page, string=None):
+def rebuild_text_passim(
+    page: list[dict], language: str | None, string: str | None = None
+):
     """The text rebuilding function.
 
     :param page: a newspaper page conforming to the impresso JSON schema
@@ -190,12 +198,14 @@ def rebuild_text_passim(page, string=None):
                     if n == len(line["t"]) - 1:
                         tmp = "{}\n".format(token["tx"])
                         region_string += tmp
-                    elif "gn" in token and token["gn"]:
-                        tmp = "{}".format(token["tx"])
-                        region_string += tmp
                     else:
-                        tmp = "{} ".format(token["tx"])
-                        region_string += tmp
+                        ws = insert_whitespace(
+                            token["tx"],
+                            next=line["t"][n + 1]["tx"],
+                            previous=line["t"][n - 1]["tx"] if n != 0 else None,
+                            lang=language,
+                        )
+                        region_string += f"{token['tx']} " if ws else f"{token['tx']}"
 
                     string += region_string
                     output_region["length"] = len(region_string)
@@ -225,7 +235,7 @@ def rebuild_for_solr(article_metadata):
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
         for p in article_metadata["m"]["pp"]
     }
-    year, month, day = article_id.split("-")[1:4]
+    year, month, day, _, ci_num = article_id.split("-")[1:]
     d = datetime.date(int(year), int(month), int(day))
     raw_type = article_metadata["m"]["tp"]
 
@@ -239,14 +249,23 @@ def rebuild_for_solr(article_metadata):
     parabreaks = []
     regionbreaks = []
 
+    article_lang = article_metadata["m"]["l"] if "l" in article_metadata["m"] else None
+
+    reading_order = (
+        article_metadata["m"]["ro"]
+        if "ro" in article_metadata["m"]
+        else int(ci_num[1:])
+    )
+
     article = {
         "id": article_id,
         "pp": article_metadata["m"]["pp"],
         "d": d.isoformat(),
         "olr": False if mapped_type is None else True,
         "ts": timestamp(),
-        "lg": article_metadata["m"]["l"] if "l" in article_metadata["m"] else None,
+        "lg": article_lang,
         "tp": mapped_type,
+        "ro": reading_order,
         "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"] else None,
         "ppreb": [],
         "lb": [],
@@ -254,19 +273,7 @@ def rebuild_for_solr(article_metadata):
     }
 
     if mapped_type == "img":
-        suffix = "full/0/default.jpg"
-        if (
-            "iiif_link" in article_metadata["m"]
-            and article_metadata["m"]["iiif_link"] is not None
-        ):
-            iiif_link = article_metadata["m"]["iiif_link"]
-            article["iiif_link"] = os.path.join(
-                os.path.dirname(iiif_link),
-                ",".join([str(c) for c in article_metadata["c"]]),
-                suffix,
-            )
-        else:
-            article["iiif_link"] = None
+        article["iiif_link"] = reconstruct_iiif_link(article_metadata)
 
     if "t" in article_metadata["m"]:
         article["t"] = article_metadata["m"]["t"]
@@ -277,9 +284,9 @@ def rebuild_for_solr(article_metadata):
             page = article_metadata["pprr"][n]
 
             if fulltext == "":
-                fulltext, coords, offsets = rebuild_text(page)
+                fulltext, coords, offsets = rebuild_text(page, article_lang)
             else:
-                fulltext, coords, offsets = rebuild_text(page, fulltext)
+                fulltext, coords, offsets = rebuild_text(page, article_lang, fulltext)
 
             linebreaks += offsets["line"]
             parabreaks += offsets["para"]
@@ -314,12 +321,14 @@ def rebuild_for_passim(article_metadata):
         for p in article_metadata["m"]["pp"]
     }
 
+    article_lang = article_metadata["m"]["l"] if "l" in article_metadata["m"] else None
+
     passim_document = {
         "series": np,
         "date": f"{date[0]}-{date[1]}-{date[2]}",
         "id": article_metadata["m"]["id"],
         "cc": article_metadata["m"]["cc"],
-        "lg": article_metadata["m"]["l"] if "l" in article_metadata["m"] else None,
+        "lg": article_lang,
         "pages": [],
     }
 
@@ -332,9 +341,9 @@ def rebuild_for_passim(article_metadata):
         page = article_metadata["pprr"][n]
 
         if fulltext == "":
-            fulltext, regions = rebuild_text_passim(page)
+            fulltext, regions = rebuild_text_passim(page, article_lang)
         else:
-            fulltext, regions = rebuild_text_passim(page, fulltext)
+            fulltext, regions = rebuild_text_passim(page, article_lang, fulltext)
 
         page_doc = {
             "id": page_file_names[page_no].replace(".json", ""),
