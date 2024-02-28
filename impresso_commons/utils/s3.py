@@ -7,14 +7,12 @@ import os
 import logging
 import json
 import warnings
-
-import boto3
 import bz2
+import boto3
 from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 
 from impresso_commons.utils import _get_cores
-
 
 logger = logging.getLogger(__name__)
 
@@ -485,9 +483,9 @@ def alternative_read_text(
     }
 
     with s_open(s3_key, "r", transport_params=transport_params) as infile:
-        if line_by_line:
-            text = infile.readlines()
-        else:
-            text = infile.read()
+        # if line_by_line:
+        text = infile.readlines()
+        # else:
+        #    text = infile.read()
 
     return text

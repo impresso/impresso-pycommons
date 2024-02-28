@@ -26,7 +26,7 @@ import logging
 import os
 import shutil
 import signal
-from sys import exit
+from typing import Any
 
 import dask.bag as db
 import jsonlines
@@ -35,9 +35,13 @@ from docopt import docopt
 from smart_open import smart_open
 
 from impresso_commons.path import parse_canonical_filename
-from impresso_commons.path.path_fs import IssueDir
 from impresso_commons.path.path_s3 import read_s3_issues
-from impresso_commons.text.helpers import (read_issue_pages, rejoin_articles)
+from impresso_commons.text.helpers import (
+    read_issue_pages,
+    rejoin_articles,
+    reconstruct_iiif_link,
+    insert_whitespace,
+)
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_s3_resource
 
@@ -53,33 +57,31 @@ TYPE_MAPPINGS = {
     "image": "img",
     "table": "tb",
     "death_notice": "ob",
-    "weather": "w"
+    "weather": "w",
 }
+# TODO KB data: add familial announcement?
 
 
-def rebuild_text(page, string=None):
-    """The text rebuilding function.
+def rebuild_text(
+    page: list[dict], language: str | None, string: str | None = None
+) -> tuple[str, dict[list], dict[list]]:
+    """Rebuild the text of an article for Solr ingestion.
 
-    :param page: a newspaper page conforming to the impresso JSON schema
-        for pages.
-    :type page: dict
-    :param string: the rebuilt text of the previous page. If `string` is not
-        `None`, then the rebuilt text is appended to it.
-    :type string: str
-    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-        [2] coordinates of token regions (dict of lists).
+    If `string` is not `None`, then the rebuilt text is appended to it.
+
+    Args:
+        page (list[dict]): Newspaper page conforming to the impresso JSON pages schema.
+        language (str | None): Language of the article being rebuilt
+        string (str | None, optional): Rebuilt text of previous page. Defaults to None.
+
+    Returns:
+        tuple[str, dict[list], dict[list]]: [0] Article fulltext, [1] offsets and
+            [2] coordinates of token regions.
     """
 
-    coordinates = {
-        "regions": [],
-        "tokens": []
-    }
+    coordinates = {"regions": [], "tokens": []}
 
-    offsets = {
-        "line": [],
-        "para": [],
-        "region": []
-    }
+    offsets = {"line": [], "para": [], "region": []}
 
     if string is None:
         string = ""
@@ -89,76 +91,78 @@ def rebuild_text(page, string=None):
     for region_n, region in enumerate(page):
 
         if len(string) > 0:
-            offsets['region'].append(len(string))
+            offsets["region"].append(len(string))
 
-        coordinates['regions'].append(region['c'])
+        coordinates["regions"].append(region["c"])
 
         for i, para in enumerate(region["p"]):
 
             if len(string) > 0:
-                offsets['para'].append(len(string))
+                offsets["para"].append(len(string))
 
             for line in para["l"]:
 
-                for n, token in enumerate(line['t']):
+                for n, token in enumerate(line["t"]):
                     region = {}
                     region["c"] = token["c"]
                     region["s"] = len(string)
 
                     if "hy" in token:
-                        region["l"] = len(token["tx"][:-1])-1
-                        region['hy1'] = True
-
+                        region["l"] = len(token["tx"][:-1]) - 1
+                        region["hy1"] = True
                     elif "nf" in token:
                         region["l"] = len(token["nf"])
-                        region['hy2'] = True
+                        region["hy2"] = True
 
-                        if "gn" in token and token["gn"]:
-                            tmp = "{}".format(token["nf"])
-                            string += tmp
-                        else:
-                            tmp = "{} ".format(token["nf"])
-                            string += tmp
+                        token_text = token["nf"]
                     else:
-                        if token['tx']:
+                        if token["tx"]:
                             region["l"] = len(token["tx"])
                         else:
                             region["l"] = 0
 
-                        if "gn" in token and token["gn"]:
-                            tmp = "{}".format(token["tx"])
-                            string += tmp
-                        else:
-                            tmp = "{} ".format(token["tx"])
-                            string += tmp
+                        token_text = token["tx"]
+
+                    # don't add the tokens corresponding to the first part of a hyphenated word
+                    if "hy" not in token:
+                        next_token = (
+                            line["t"][n + 1]["tx"] if n != len(line["t"]) - 1 else None
+                        )
+                        ws = insert_whitespace(
+                            token["tx"],
+                            next_t=next_token,
+                            prev_t=line["t"][n - 1]["tx"] if n != 0 else None,
+                            lang=language,
+                        )
+                        string += f"{token_text} " if ws else f"{token_text}"
 
                     # if token is the last in a line
-                    if n == len(line['t']) - 1:
-                        if 'hy' in token:
-                            offsets['line'].append(region["s"])
+                    if n == len(line["t"]) - 1:
+                        if "hy" in token:
+                            offsets["line"].append(region["s"])
                         else:
-                            token_length = len(token["tx"]) if token['tx']\
-                             else 0
-                            offsets['line'].append(
-                                region["s"] + token_length
-                            )
+                            token_length = len(token["tx"]) if token["tx"] else 0
+                            offsets["line"].append(region["s"] + token_length)
 
-                    coordinates['tokens'].append(region)
+                    coordinates["tokens"].append(region)
 
     return (string, coordinates, offsets)
 
 
-def rebuild_text_passim(page, string=None):
-    """The text rebuilding function.
+def rebuild_text_passim(
+    page: list[dict], language: str | None, string: str | None = None
+) -> tuple[str, list[dict]]:
+    """The text rebuilding function from pages for passim.
 
-    :param page: a newspaper page conforming to the impresso JSON schema
-        for pages.
-    :type page: dict
-    :param string: the rebuilt text of the previous page. If `string` is not
-        `None`, then the rebuilt text is appended to it.
-    :type string: str
-    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-        [2] coordinates of token regions (dict of lists).
+    If `string` is not `None`, then the rebuilt text is appended to it.
+
+    Args:
+        page (list[dict]): Newspaper page conforming to the impresso JSON pages schema.
+        language (str | None): Language of the article being rebuilt
+        string (str | None, optional): Rebuilt text of previous page. Defaults to None.
+
+    Returns:
+        tuple[str, list[dict]]: [0] article fulltext, [1] coordinates of token regions.
     """
 
     regions = []
@@ -175,7 +179,7 @@ def rebuild_text_passim(page, string=None):
 
             for line in para["l"]:
 
-                for n, token in enumerate(line['t']):
+                for n, token in enumerate(line["t"]):
 
                     region_string = ""
 
@@ -183,61 +187,68 @@ def rebuild_text_passim(page, string=None):
                     output_region = {
                         "start": None,
                         "length": None,
-                        'coords': {
-                            "x": token['c'][0],
-                            "y": token['c'][1],
-                            "w": token['c'][2],
-                            "h": token['c'][3]
-                        }
+                        "coords": {
+                            "x": token["c"][0],
+                            "y": token["c"][1],
+                            "w": token["c"][2],
+                            "h": token["c"][3],
+                        },
                     }
 
                     if len(string) == 0:
-                        output_region['start'] = 0
+                        output_region["start"] = 0
                     else:
-                        output_region['start'] = len(string)
+                        output_region["start"] = len(string)
 
                     # if token is the last in a line
-                    if n == len(line['t']) - 1:
+                    if n == len(line["t"]) - 1:
                         tmp = "{}\n".format(token["tx"])
                         region_string += tmp
-                    elif "gn" in token and token["gn"]:
-                        tmp = "{}".format(token["tx"])
-                        region_string += tmp
                     else:
-                        tmp = "{} ".format(token["tx"])
-                        region_string += tmp
+                        ws = insert_whitespace(
+                            token["tx"],
+                            next_t=line["t"][n + 1]["tx"],
+                            prev_t=line["t"][n - 1]["tx"] if n != 0 else None,
+                            lang=language,
+                        )
+                        region_string += f"{token['tx']} " if ws else f"{token['tx']}"
 
                     string += region_string
-                    output_region['length'] = len(region_string)
+                    output_region["length"] = len(region_string)
                     regions.append(output_region)
 
     return (string, regions)
 
 
-def rebuild_for_solr(article_metadata):
-    """Rebuilds the text of an article given its metadata as input.
+def rebuild_for_solr(content_item: dict[str, Any]) -> dict[str, Any]:
+    """Rebuilds the text of an article content-item given its metadata as input.
 
-    .. note::
-
+    Note:
         This rebuild function is thought especially for ingesting the newspaper
         data into our Solr index.
 
-    :param article_metadata: the article's metadata
-    :type article_metadata: dict
-    :return: a dictionary with the following keys: TBD
-    :rtype: dict
+    Args:
+        content_item (dict[str, Any]): The content-item to rebuilt using its metadata.
+
+    Returns:
+        dict[str, Any]: The rebuilt content-item following the Impresso JSON Schema.
     """
     t = Timer()
-    article_id = article_metadata["m"]["id"]
-    logger.info(f'Started rebuilding article {article_id}')
-    issue_id = "-".join(article_id.split('-')[:-1])
+
+    article_id = content_item["m"]["id"]
+    logger.debug("Started rebuilding article %s", article_id)
+
+    issue_id = "-".join(article_id.split("-")[:-1])
+
     page_file_names = {
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in article_metadata["m"]["pp"]
+        for p in content_item["m"]["pp"]
     }
-    year, month, day = article_id.split('-')[1:4]
+
+    year, month, day, _, ci_num = article_id.split("-")[1:]
     d = datetime.date(int(year), int(month), int(day))
-    raw_type = article_metadata["m"]["tp"]
+
+    raw_type = content_item["m"]["tp"]
 
     if raw_type in TYPE_MAPPINGS:
         mapped_type = TYPE_MAPPINGS[raw_type]
@@ -249,110 +260,114 @@ def rebuild_for_solr(article_metadata):
     parabreaks = []
     regionbreaks = []
 
+    article_lang = content_item["m"]["l"] if "l" in content_item["m"] else None
+
+    # if the reading order is not defined, use the number associated to each CI
+    reading_order = (
+        content_item["m"]["ro"] if "ro" in content_item["m"] else int(ci_num[1:])
+    )
+
     article = {
         "id": article_id,
-        "pp": article_metadata["m"]["pp"],
+        "pp": content_item["m"]["pp"],
         "d": d.isoformat(),
         "olr": False if mapped_type is None else True,
         "ts": timestamp(),
-        "lg": article_metadata["m"]["l"] if "l" in article_metadata["m"]
-        else None,
+        "lg": article_lang,
         "tp": mapped_type,
-        "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"]
-        else None,
+        "ro": reading_order,
+        "s3v": content_item["m"]["s3v"] if "s3v" in content_item["m"] else None,
         "ppreb": [],
         "lb": [],
-        "cc": article_metadata["m"]["cc"]
+        "cc": content_item["m"]["cc"],
     }
 
     if mapped_type == "img":
-        suffix = "full/0/default.jpg"
-        if (
-            "iiif_link" in article_metadata["m"] and
-            article_metadata["m"]['iiif_link'] is not None
-        ):
-            iiif_link = article_metadata["m"]["iiif_link"]
-            article['iiif_link'] = os.path.join(
-                os.path.dirname(iiif_link),
-                ",".join([str(c) for c in article_metadata["c"]]),
-                suffix
-            )
-        else:
-            article['iiif_link'] = None
+        article["iiif_link"] = reconstruct_iiif_link(content_item)
 
-    if 't' in article_metadata["m"]:
-        article["t"] = article_metadata["m"]["t"]
+    if "t" in content_item["m"]:
+        article["t"] = content_item["m"]["t"]
 
     if mapped_type != "img":
-        for n, page_no in enumerate(article['pp']):
+        for n, page_no in enumerate(article["pp"]):
 
-            page = article_metadata['pprr'][n]
+            page = content_item["pprr"][n]
 
             if fulltext == "":
-                fulltext, coords, offsets = rebuild_text(page)
+                fulltext, coords, offsets = rebuild_text(page, article_lang)
             else:
-                fulltext, coords, offsets = rebuild_text(page, fulltext)
+                fulltext, coords, offsets = rebuild_text(page, article_lang, fulltext)
 
-            linebreaks += offsets['line']
-            parabreaks += offsets['para']
-            regionbreaks += offsets['region']
+            linebreaks += offsets["line"]
+            parabreaks += offsets["para"]
+            regionbreaks += offsets["region"]
 
             page_doc = {
-                "id": page_file_names[page_no].replace('.json', ''),
+                "id": page_file_names[page_no].replace(".json", ""),
                 "n": page_no,
-                "t": coords['tokens'],
-                "r": coords['regions']
+                "t": coords["tokens"],
+                "r": coords["regions"],
             }
             article["ppreb"].append(page_doc)
         article["lb"] = linebreaks
         article["pb"] = parabreaks
         article["rb"] = regionbreaks
-        logger.info(f'Done rebuilding article {article_id} (Took {t.stop()})')
+        logger.debug("Done rebuilding article %s (Took %s)", article_id, t.stop())
         article["ft"] = fulltext
+
     return article
 
 
-def rebuild_for_passim(article_metadata):
+def rebuild_for_passim(content_item: dict[str, Any]) -> dict[str, Any]:
+    """Rebuilds the text of an article content-item to be used with passim.
+
+    Args:
+        content_item (dict[str, Any]): The content-item to rebuilt using its metadata.
+
+    Returns:
+        dict[str, Any]: The rebuilt content-item built for passim.
+    """
     np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
-        article_metadata['m']['id']
+        content_item["m"]["id"]
     )
 
-    article_id = article_metadata["m"]["id"]
-    logger.info(f'Started rebuilding article {article_id}')
-    issue_id = "-".join(article_id.split('-')[:-1])
+    article_id = content_item["m"]["id"]
+    logger.debug("Started rebuilding article %s", article_id)
+    issue_id = "-".join(article_id.split("-")[:-1])
 
     page_file_names = {
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in article_metadata["m"]["pp"]
+        for p in content_item["m"]["pp"]
     }
+
+    article_lang = content_item["m"]["l"] if "l" in content_item["m"] else None
 
     passim_document = {
         "series": np,
-        "date": f'{date[0]}-{date[1]}-{date[2]}',
-        "id": article_metadata['m']['id'],
-        "cc": article_metadata["m"]["cc"],
-        "lg": article_metadata["m"]['l'] if "l" in article_metadata["m"]
-        else None,
-        "pages": []
+        "date": f"{date[0]}-{date[1]}-{date[2]}",
+        "id": content_item["m"]["id"],
+        "cc": content_item["m"]["cc"],
+        "lg": article_lang,
+        "pages": [],
     }
 
-    if 't' in article_metadata["m"]:
-        passim_document['title'] = article_metadata["m"]["t"]
+    if "t" in content_item["m"]:
+        passim_document["title"] = content_item["m"]["t"]
 
     fulltext = ""
-    for n, page_no in enumerate(article_metadata['m']['pp']):
+    for n, page_no in enumerate(content_item["m"]["pp"]):
 
-        page = article_metadata['pprr'][n]
+        page = content_item["pprr"][n]
 
         if fulltext == "":
-            fulltext, regions = rebuild_text_passim(page)
+            fulltext, regions = rebuild_text_passim(page, article_lang)
         else:
-            fulltext, regions = rebuild_text_passim(page, fulltext)
+            fulltext, regions = rebuild_text_passim(page, article_lang, fulltext)
 
         page_doc = {
-            "id": page_file_names[page_no].replace('.json', ''),
+            "id": page_file_names[page_no].replace(".json", ""),
             "seq": page_no,
-            "regions": regions
+            "regions": regions,
         }
         passim_document["pages"].append(page_doc)
 
@@ -379,23 +394,21 @@ def compress(key, json_files, output_dir):
         (e.g. GDL-1900).
     """
 
-    newspaper, year = key.split('-')
-    filename = f'{newspaper}-{year}.jsonl.bz2'
+    newspaper, year = key.split("-")
+    filename = f"{newspaper}-{year}.jsonl.bz2"
     filepath = os.path.join(output_dir, filename)
-    logger.info(f'Compressing {len(json_files)} JSON files into {filepath}')
-    print(f'Compressing {len(json_files)} JSON files into {filepath}')
+    logger.info(f"Compressing {len(json_files)} JSON files into {filepath}")
+    print(f"Compressing {len(json_files)} JSON files into {filepath}")
 
-    with smart_open(filepath, 'wb') as fout:
+    with smart_open(filepath, "wb") as fout:
         writer = jsonlines.Writer(fout)
 
         for json_file in json_files:
-            with open(json_file, 'r') as inpf:
+            with open(json_file, "r") as inpf:
                 reader = jsonlines.Reader(inpf)
                 articles = list(reader)
                 writer.write_all(articles)
-            logger.info(
-                f'Written {len(articles)} docs from {json_file} to {filepath}'
-            )
+            logger.info(f"Written {len(articles)} docs from {json_file} to {filepath}")
 
         writer.close()
 
@@ -404,7 +417,7 @@ def compress(key, json_files, output_dir):
 
     temp_dir = os.path.dirname(json_files[0])
     os.rmdir(temp_dir)
-    logger.info(f'Removed temporary directory and files in {temp_dir}')
+    logger.info(f"Removed temporary directory and files in {temp_dir}")
 
     return (key, filepath)
 
@@ -428,39 +441,35 @@ def upload(sort_key, filepath, bucket_name=None):
     """
     # create connection with bucket
     # copy contents to s3 key
-    newspaper, year = sort_key.split('-')
-    key_name = "{}/{}".format(
-        newspaper,
-        os.path.basename(filepath)
-    )
+    newspaper, year = sort_key.split("-")
+    key_name = "{}/{}".format(newspaper, os.path.basename(filepath))
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)
         bucket.upload_file(filepath, key_name)
-        logger.info(f'Uploaded {filepath} to {key_name}')
+        logger.info(f"Uploaded {filepath} to {key_name}")
         return True, filepath
     except Exception as e:
         logger.error(e)
-        logger.error(f'The upload of {filepath} failed with error {e}')
+        logger.error(f"The upload of {filepath} failed with error {e}")
         return False, filepath
 
 
 def cleanup(upload_success, filepath):
     """Removes a file if it has been successfully uploaded to S3.
-
     :param upload_success: whether the upload was successful
     :type upload_success: bool
     :param filepath: path to the uploaded file
     :type filepath: str
     """
-    try:
-        if upload_success and os.path.exists(filepath):
+    if upload_success and os.path.exists(filepath):
+        try:
             os.remove(filepath)
-            logger.info(f'Removed temporary file {filepath}')
-        else:
-            logger.info(f'Not removing {filepath} as upload has failed')
-    except FileNotFoundError as e:
-        logger.error(f'Caught error {e} trying to remove {filepath}')
+            logger.info("Removed temporary file %s", filepath)
+        except Exception as e:
+            logger.warning("Error %s occurred when removing %s", e, filepath)
+    else:
+        logger.info("Not removing %s as upload has failed", filepath)
 
 
 def _article_has_problem(article):
@@ -471,7 +480,7 @@ def _article_has_problem(article):
     :return: `True` or `False`
     :rtype: boolean
     """
-    return article['has_problem']
+    return article["has_problem"]
 
 
 def _article_without_problem(article):
@@ -482,18 +491,13 @@ def _article_without_problem(article):
     :return: `True` or `False`
     :rtype: boolean
     """
-    if article['has_problem']:
+    if article["has_problem"]:
         logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
-    return not article['has_problem']
+    return not article["has_problem"]
 
 
 def rebuild_issues(
-        issues,
-        input_bucket,
-        output_dir,
-        dask_client,
-        format='solr',
-        filter_language=None
+    issues, input_bucket, output_dir, dask_client, format="solr", filter_language=None
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -515,66 +519,72 @@ def rebuild_issues(
                 os.remove(os.path.join(path, f))
 
     # determine which rebuild function to apply
-    if format == 'solr':
+    if format == "solr":
         rebuild_function = rebuild_for_solr
-    elif format == 'passim':
+    elif format == "passim":
         rebuild_function = rebuild_for_passim
     else:
-        raise
+        raise NotImplementedError
 
     # create a temporary output directory named after newspaper and year
     # e.g. IMP-1994
     issue, issue_json = issues[0]
-    key = f'{issue.journal}-{issue.date.year}'
+    key = f"{issue.journal}-{issue.date.year}"
     issue_dir = os.path.join(output_dir, key)
     mkdir(issue_dir)
 
-    print("Fleshing out articles by issue...") # warning about large graph comes here
+    print("Fleshing out articles by issue...")  # warning about large graph comes here
     issues_bag = db.from_sequence(issues, partition_size=3)
 
-    faulty_issues = issues_bag.filter(
-        lambda i: len(i[1]['pp']) == 0
-    ).map(lambda i: i[1]).pluck('id').compute()
-    logger.debug(f'Issues with no pages (will be skipped): {faulty_issues}')
-    print(f'Issues with no pages (will be skipped): {faulty_issues}')
+    faulty_issues = (
+        issues_bag.filter(lambda i: len(i[1]["pp"]) == 0)
+        .map(lambda i: i[1])
+        .pluck("id")
+        .compute()
+    )
+    logger.debug(f"Issues with no pages (will be skipped): {faulty_issues}")
+    print(f"Issues with no pages (will be skipped): {faulty_issues}")
     del faulty_issues
     logger.debug(f"Number of partitions: {issues_bag.npartitions}")
     print(f"Number of partitions: {issues_bag.npartitions}")
 
-    articles_bag = issues_bag.filter(lambda i: len(i[1]['pp']) > 0)\
-        .starmap(read_issue_pages, bucket=input_bucket)\
-        .starmap(rejoin_articles) \
-        .flatten().persist()
+    articles_bag = (
+        issues_bag.filter(lambda i: len(i[1]["pp"]) > 0)
+        .starmap(read_issue_pages, bucket=input_bucket)
+        .starmap(rejoin_articles)
+        .flatten()
+        .persist()
+    )
 
-    faulty_articles_n = articles_bag\
-        .filter(_article_has_problem)\
-        .pluck('m')\
-        .pluck('id')\
-        .compute()
-    logger.debug(f'Skipped articles: {faulty_articles_n}')
-    print(f'Skipped articles: {faulty_articles_n}')
+    faulty_articles_n = (
+        articles_bag.filter(_article_has_problem).pluck("m").pluck("id").compute()
+    )
+    logger.debug(f"Skipped articles: {faulty_articles_n}")
+    print(f"Skipped articles: {faulty_articles_n}")
     del faulty_articles_n
 
-    articles_bag = articles_bag.filter(_article_without_problem)\
-        .map(rebuild_function)\
-        .persist()
+    articles_bag = (
+        articles_bag.filter(_article_without_problem).map(rebuild_function).persist()
+    )
 
     def has_language(ci):
-        if 'lg' not in ci:
+        if "lg" not in ci:
             return False
         else:
-            return ci['lg'] in filter_language
+            return ci["lg"] in filter_language
 
     if filter_language:
         filtered_articles = articles_bag.filter(has_language).persist()
         print(filtered_articles.count().compute())
-        result = filtered_articles.map(json.dumps)\
-            .to_textfiles('{}/*.json'.format(issue_dir))
+        result = filtered_articles.map(json.dumps).to_textfiles(
+            "{}/*.json".format(issue_dir)
+        )
     else:
-        result = articles_bag.map(json.dumps)\
-            .to_textfiles('{}/*.json'.format(issue_dir))
+        result = articles_bag.map(json.dumps).to_textfiles(
+            "{}/*.json".format(issue_dir)
+        )
 
-    dask_client.cancel(issues_bag)  
+    dask_client.cancel(issues_bag)
     logger.info("done.")
     print("done.")
 
@@ -597,17 +607,15 @@ def init_logging(level, file):
         I could not get it to work properly, so keeping this duplicate.
     """
     # Initialise the logger
-    root_logger = logging.getLogger('')
+    root_logger = logging.getLogger("")
     root_logger.setLevel(level)
 
-    if(file is not None):
-        handler = logging.FileHandler(filename=file, mode='w')
+    if file is not None:
+        handler = logging.FileHandler(filename=file, mode="w")
     else:
         handler = logging.StreamHandler()
 
-    formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
-    )
+    formatter = logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
     root_logger.info("Logger successfully initialised")
@@ -620,8 +628,8 @@ def main():
     def signal_handler(*args):
         # Handle any cleanup here
         print(
-            'SIGINT or CTRL-C detected. Exiting gracefully'
-            ' and shutting down the dask local cluster'
+            "SIGINT or CTRL-C detected. Exiting gracefully"
+            " and shutting down the dask local cluster"
         )
         client.shutdown()
         exit(0)
@@ -642,7 +650,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     if languages:
-        languages = languages.split(',')
+        languages = languages.split(",")
 
     init_logging(log_level, log_file)
 
@@ -652,7 +660,7 @@ def main():
             shutil.rmtree(outp_dir)
             os.mkdir(outp_dir)
 
-    with open(filter_config_file, 'r') as file:
+    with open(filter_config_file, "r") as file:
         config = json.load(file)
 
     # start the dask local cluster
@@ -669,25 +677,21 @@ def main():
         try:
             for n, batch in enumerate(config):
                 rebuilt_issues = []
-                logger.info(f'Processing batch {n + 1}/{len(config)} [{batch}]')
-                print(f'Processing batch {n + 1}/{len(config)} [{batch}]')
+                logger.info(f"Processing batch {n + 1}/{len(config)} [{batch}]")
+                print(f"Processing batch {n + 1}/{len(config)} [{batch}]")
                 newspaper = list(batch.keys())[0]
                 start_year, end_year = batch[newspaper]
 
                 for year in range(start_year, end_year):
-                    logger.info(f'Processing year {year}')
-                    logger.info('Retrieving issues...')
-                    print(f'Processing year {year}')
-                    print('Retrieving issues...')
+                    logger.info(f"Processing year {year}")
+                    logger.info("Retrieving issues...")
+                    print(f"Processing year {year}")
+                    print("Retrieving issues...")
                     try:
-                        input_issues = read_s3_issues(
-                            newspaper,
-                            year,
-                            bucket_name
-                        )
+                        input_issues = read_s3_issues(newspaper, year, bucket_name)
                     except FileNotFoundError:
-                        logger.info(f'{newspaper}-{year} not found in {bucket_name}')
-                        print(f'{newspaper}-{year} not found in {bucket_name}')
+                        logger.info(f"{newspaper}-{year} not found in {bucket_name}")
+                        print(f"{newspaper}-{year} not found in {bucket_name}")
                         continue
 
                     issue_key, json_files = rebuild_issues(
@@ -696,28 +700,36 @@ def main():
                         output_dir=outp_dir,
                         dask_client=client,
                         format=output_format,
-                        filter_language=languages
+                        filter_language=languages,
                     )
                     rebuilt_issues.append((issue_key, json_files))
                     del input_issues
-                logger.info((
-                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
-                    f"to {output_bucket_name}"
-                ))
-                print((
-                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
-                    f"to {output_bucket_name}"
-                ))
-                b = db.from_sequence(rebuilt_issues) \
-                    .starmap(compress, output_dir=outp_dir) \
-                    .starmap(upload, bucket_name=output_bucket_name) \
+                logger.info(
+                    (
+                        f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                        f"to {output_bucket_name}"
+                    )
+                )
+                print(
+                    (
+                        f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                        f"to {output_bucket_name}"
+                    )
+                )
+                b = (
+                    db.from_sequence(rebuilt_issues)
+                    .starmap(compress, output_dir=outp_dir)
+                    .starmap(upload, bucket_name=output_bucket_name)
                     .starmap(cleanup)
+                )
                 future = b.persist()
                 progress(future)
                 # clear memory of objects once computations are done
                 client.restart()
                 print(f"Restarted client after finishing processing batch {n + 1}")
-                logger.info(f"Restarted client after finishing processing batch {n + 1}")
+                logger.info(
+                    f"Restarted client after finishing processing batch {n + 1}"
+                )
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
@@ -733,5 +745,5 @@ def main():
         print("\nFunction not yet implemented (sorry!).\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
