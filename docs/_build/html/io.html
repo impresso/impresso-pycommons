@@ -71,7 +71,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.path.path_s3">I/O from S3</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.IssueDir"><code class="docutils literal notranslate"><span class="pre">IssueDir</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.fetch_files"><code class="docutils literal notranslate"><span class="pre">fetch_files()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.impresso_iter_bucket"><code class="docutils literal notranslate"><span class="pre">impresso_iter_bucket()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.list_files"><code class="docutils literal notranslate"><span class="pre">list_files()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.list_newspapers"><code class="docutils literal notranslate"><span class="pre">list_newspapers()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.read_s3_issues"><code class="docutils literal notranslate"><span class="pre">read_s3_issues()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.s3ContentItem"><code class="docutils literal notranslate"><span class="pre">s3ContentItem</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.path.path_s3.s3_filter_archives"><code class="docutils literal notranslate"><span class="pre">s3_filter_archives()</span></code></a></li>
@@ -333,6 +336,46 @@ issues = select_issues(config, inp_dir)</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.fetch_files">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">fetch_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'issues'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspapers_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Bag</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Bag</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.path.path_s3.fetch_files" title="Link to this definition"></a></dt>
+<dd><p>Fetch issue and/or page canonical JSON files from an s3 bucket.</p>
+<p>If compute=True, the output will be a list of the contents of all files in the
+bucket for the specified newspapers and type of files.
+If compute=False, the output will remain in a distributed dask.bag.</p>
+<p>Based on file_type, the issue files, page files or both will be returned.
+In the returned tuple, issues are always in the first element and pages in the
+second, hence if file_type is not ‘both’, the tuple entry corresponding to the
+undesired type of files will be None.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>adapted from <a class="reference external" href="https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py">https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the s3 bucket to fetch the files form</p></li>
+<li><p><strong>compute</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to compute result and output as list.
+Defaults to True.</p></li>
+<li><p><strong>file_type</strong> – (str, optional): Type of files to list, possible values are “issues”,
+“pages” and “both”. Defaults to “issues”.</p></li>
+<li><p><strong>newspapers_filter</strong> – (list[str]|None,optional): List of newspapers to consider.
+If None, all will be considered. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – The given <cite>file_type</cite> is not one of [‘issues’, ‘pages’, ‘both’].</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>[0] Issue files’ contents or None and
+[1] Page files’ contents or None based on <cite>file_type</cite></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[db.core.Bag|None, db.core.Bag|None] | tuple[list[str]|None, list[str]|None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.path.path_s3.impresso_iter_bucket">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">impresso_iter_bucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.path.path_s3.impresso_iter_bucket" title="Link to this definition"></a></dt>
 <dd><p>Iterate over a bucket, possibly with a filter, and return an array of either IssueDir or ContentItem.
@@ -344,6 +387,70 @@ VALID ONLY for original-canonical data, where there is individual files for issu
 e.g. { “GDL”: [1950, 1960], “JDG”: [1890, 1900] }. Last year is excluded.
 :param partition_size: partition size of dask to build the object (Issuedir or ContentItem)
 &#64;return: an array of (filtered) IssueDir or ContentItems.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.list_files">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">list_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'issues'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspapers_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.path.path_s3.list_files" title="Link to this definition"></a></dt>
+<dd><p>List the canonical files located in a given S3 bucket.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>adapted from <a class="reference external" href="https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py">https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – S3 bucket name.</p></li>
+<li><p><strong>file_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of files to list, possible values are “issues”,
+“pages” and “both”. Defaults to “issues”.</p></li>
+<li><p><strong>newspapers_filter</strong> (<em>list</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List of newspapers to consider.
+If None, all will be considered. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – The given <cite>file_type</cite> is not one of [‘issues’, ‘pages’, ‘both’].</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>[0] List of issue files or None and</dt><dd><p>[1] List of page files or None based on <cite>file_type</cite></p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple[list[str] | None, list[str] | None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.path.path_s3.list_newspapers">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.path.path_s3.</span></span><span class="sig-name descname"><span class="pre">list_newspapers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_client=&lt;botocore.client.S3</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">page_size:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.path.path_s3.list_newspapers" title="Link to this definition"></a></dt>
+<dd><p>List newspapers contained in an s3 bucket with impresso data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>25,000 seems to be the maximum <cite>PageSize</cite> value supported by
+SwitchEngines’ S3 implementation (ceph).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Copied from <a class="reference external" href="https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py">https://github.com/impresso/impresso-data-sanitycheck/tree/master/sanity_check/contents/s3_data.py</a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the S3 bucket to consider</p></li>
+<li><p><strong>s3_client</strong> (<em>optional</em>) – S3 client to use. Defaults to get_s3_client().</p></li>
+<li><p><strong>page_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Pagination configuration. Defaults to 10000.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of newspaper (aliases) present in the given S3 bucket.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -416,7 +523,7 @@ Config is a dict where k= newspaper acronym and v = array of 2 years, considered
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
+    <p>&#169; Copyright 2024, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

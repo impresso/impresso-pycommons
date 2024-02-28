@@ -421,19 +421,16 @@ def fetch_files(
     compute: bool = True,
     file_type: str = "issues",
     newspapers_filter: list[str] | None = None,
-) -> (
-    tuple[db.core.Bag | None, db.core.Bag | None]
-    | tuple[list[str] | None, list[str] | None]
-):
+) -> tuple[db.core.Bag | list[str] | None, db.core.Bag | list[str] | None]:
     """Fetch issue and/or page canonical JSON files from an s3 bucket.
 
-    If `compute`=True, the output will be a list of the contents of all files in the
+    If compute=True, the output will be a list of the contents of all files in the
     bucket for the specified newspapers and type of files.
-    If `compute`=False, the output will remain in a distributed dask.bag.
+    If compute=False, the output will remain in a distributed dask.bag.
 
-    Based on `file_type`, the issue files, page files or both will be returned.
+    Based on file_type, the issue files, page files or both will be returned.
     In the returned tuple, issues are always in the first element and pages in the
-    second, hence if `file_type` is not 'both', the tuple entry corresponding to the
+    second, hence if file_type is not 'both', the tuple entry corresponding to the
     undesired type of files will be None.
 
     Note:
