@@ -3,7 +3,7 @@ For EPFL members, this script can be scaled by running it using Runai,
 as documented on https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw> --git-repo=<gr> --temp-dir=<tp>]
 
 Options:
 
@@ -14,8 +14,11 @@ Options:
 --filter-config=<fc>  A JSON configuration file specifying which newspaper issues will be rebuilt
 --verbose  Set logging level to DEBUG (by default is INFO)
 --clear  Remove output directory before and after rebuilding
---format=<fo>  stuff
---nworkers=<nw>  number of workers for (local) dask client
+--format=<fo>  Rebuilt format to use (can be "solr" or "passim")
+--languages=<lgs>  Languages to filter the articles to rebuild on.
+--nworkers=<nw>  number of workers for (local) Dask client.
+--git-repo=<gr>   Local path to the "impresso-text-acquisition" git directory (including it).
+--temp-dir=<tp>  Temporary directory in which to clone the impresso-data-release git repository.
 """  # noqa: E501
 
 import traceback
@@ -26,6 +29,7 @@ import logging
 import os
 import shutil
 import signal
+import git
 from typing import Any
 
 import dask.bag as db
@@ -44,6 +48,9 @@ from impresso_commons.text.helpers import (
 )
 from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_s3_resource
+
+from impresso_commons.versioning.data_manifest import DataManifest
+from impresso_commons.versioning.helpers import DataStage, compute_stats_in_rebuilt_bag
 
 logger = logging.getLogger(__name__)
 
@@ -447,11 +454,11 @@ def upload(sort_key, filepath, bucket_name=None):
     try:
         bucket = s3.Bucket(bucket_name)
         bucket.upload_file(filepath, key_name)
-        logger.info(f"Uploaded {filepath} to {key_name}")
+        logger.info("Uploaded %s to %s", filepath, key_name)
         return True, filepath
     except Exception as e:
         logger.error(e)
-        logger.error(f"The upload of {filepath} failed with error {e}")
+        logger.error("The upload of %s failed with error %s", filepath, e)
         return False, filepath
 
 
@@ -492,7 +499,7 @@ def _article_without_problem(article):
     :rtype: boolean
     """
     if article["has_problem"]:
-        logger.warning(f"Article {article['m']['id']} won't be rebuilt.")
+        logger.warning("Article %s won't be rebuilt.", article["m"]["id"])
     return not article["has_problem"]
 
 
@@ -533,7 +540,8 @@ def rebuild_issues(
     issue_dir = os.path.join(output_dir, key)
     mkdir(issue_dir)
 
-    print("Fleshing out articles by issue...")  # warning about large graph comes here
+    # warning about large graph comes here
+    print("Fleshing out articles by issue...")
     issues_bag = db.from_sequence(issues, partition_size=3)
 
     faulty_issues = (
@@ -542,11 +550,13 @@ def rebuild_issues(
         .pluck("id")
         .compute()
     )
-    logger.debug(f"Issues with no pages (will be skipped): {faulty_issues}")
-    print(f"Issues with no pages (will be skipped): {faulty_issues}")
+    msg = f"Issues with no pages (will be skipped): {faulty_issues}"
+    logger.debug(msg)
+    print(msg)
     del faulty_issues
-    logger.debug(f"Number of partitions: {issues_bag.npartitions}")
-    print(f"Number of partitions: {issues_bag.npartitions}")
+    msg = f"Number of partitions: {issues_bag.npartitions}"
+    logger.debug(msg)
+    print(msg)
 
     articles_bag = (
         issues_bag.filter(lambda i: len(i[1]["pp"]) > 0)
@@ -559,8 +569,9 @@ def rebuild_issues(
     faulty_articles_n = (
         articles_bag.filter(_article_has_problem).pluck("m").pluck("id").compute()
     )
-    logger.debug(f"Skipped articles: {faulty_articles_n}")
-    print(f"Skipped articles: {faulty_articles_n}")
+    msg = f"Skipped articles: {faulty_articles_n}"
+    logger.debug(msg)
+    print(msg)
     del faulty_articles_n
 
     articles_bag = (
@@ -570,25 +581,22 @@ def rebuild_issues(
     def has_language(ci):
         if "lg" not in ci:
             return False
-        else:
-            return ci["lg"] in filter_language
+        return ci["lg"] in filter_language
 
     if filter_language:
         filtered_articles = articles_bag.filter(has_language).persist()
         print(filtered_articles.count().compute())
-        result = filtered_articles.map(json.dumps).to_textfiles(
-            "{}/*.json".format(issue_dir)
-        )
+        stats_for_issues = compute_stats_in_rebuilt_bag(filtered_articles, key)
+        result = filtered_articles.map(json.dumps).to_textfiles(f"{issue_dir}/*.json")
     else:
-        result = articles_bag.map(json.dumps).to_textfiles(
-            "{}/*.json".format(issue_dir)
-        )
+        stats_for_issues = compute_stats_in_rebuilt_bag(articles_bag, key)
+        result = articles_bag.map(json.dumps).to_textfiles(f"{issue_dir}/*.json")
 
     dask_client.cancel(issues_bag)
     logger.info("done.")
     print("done.")
 
-    return (key, result)
+    return (key, result, stats_for_issues)
 
 
 def init_logging(level, file):
@@ -646,6 +654,8 @@ def main():
     nworkers = arguments["--nworkers"] if arguments["--nworkers"] else 8
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
     languages = arguments["--languages"]
+    repo_path = arguments["--git-repo"]
+    temp_dir = arguments["--temp-dir"]
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -669,32 +679,46 @@ def main():
     else:
         cluster = None
         client = Client(scheduler)
-    logger.info(f"Dask local cluster: {client}")
-    print(f"Dask local cluster: {client}")
+
+    dask_cluster_msg = f"Dask local cluster: {client}"
+    logger.info(dask_cluster_msg)
+    print(dask_cluster_msg)
+
+    # ititialize manifest
+    manifest = DataManifest(
+        data_stage="rebuilt",
+        s3_output_bucket=output_bucket_name,
+        s3_input_bucket=bucket_name,
+        git_repo=git.Repo(repo_path),
+        temp_dir=temp_dir,
+    )
+    titles = set()
 
     if arguments["rebuild_articles"]:
 
         try:
             for n, batch in enumerate(config):
                 rebuilt_issues = []
-                logger.info(f"Processing batch {n + 1}/{len(config)} [{batch}]")
-                print(f"Processing batch {n + 1}/{len(config)} [{batch}]")
+                proc_b_msg = f"Processing batch {n + 1}/{len(config)} [{batch}]"
+                logger.info(proc_b_msg)
+                print(proc_b_msg)
                 newspaper = list(batch.keys())[0]
                 start_year, end_year = batch[newspaper]
 
                 for year in range(start_year, end_year):
-                    logger.info(f"Processing year {year}")
-                    logger.info("Retrieving issues...")
-                    print(f"Processing year {year}")
-                    print("Retrieving issues...")
+                    proc_year_msg = f"Processing year {year} \nRetrieving issues..."
+                    logger.info(proc_year_msg)
+                    print(proc_year_msg)
+
                     try:
                         input_issues = read_s3_issues(newspaper, year, bucket_name)
                     except FileNotFoundError:
-                        logger.info(f"{newspaper}-{year} not found in {bucket_name}")
-                        print(f"{newspaper}-{year} not found in {bucket_name}")
+                        fnf_msg = f"{newspaper}-{year} not found in {bucket_name}"
+                        logger.info(fnf_msg)
+                        print(fnf_msg)
                         continue
 
-                    issue_key, json_files = rebuild_issues(
+                    issue_key, json_files, year_stats = rebuild_issues(
                         issues=input_issues,
                         input_bucket=bucket_name,
                         output_dir=outp_dir,
@@ -704,18 +728,17 @@ def main():
                     )
                     rebuilt_issues.append((issue_key, json_files))
                     del input_issues
-                logger.info(
-                    (
-                        f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
-                        f"to {output_bucket_name}"
-                    )
+
+                    manifest.add_by_title_year(newspaper, year, year_stats)
+                    titles.add(newspaper)
+
+                msg = (
+                    f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
+                    f"to {output_bucket_name}"
                 )
-                print(
-                    (
-                        f"Uploading {len(rebuilt_issues)} rebuilt bz2files "
-                        f"to {output_bucket_name}"
-                    )
-                )
+                logger.info(msg)
+                print(msg)
+
                 b = (
                     db.from_sequence(rebuilt_issues)
                     .starmap(compress, output_dir=outp_dir)
@@ -726,10 +749,9 @@ def main():
                 progress(future)
                 # clear memory of objects once computations are done
                 client.restart()
-                print(f"Restarted client after finishing processing batch {n + 1}")
-                logger.info(
-                    f"Restarted client after finishing processing batch {n + 1}"
-                )
+                rstrt_msg = f"Restarted client after finishing processing batch {n + 1}"
+                print(rstrt_msg)
+                logger.info(rstrt_msg)
 
         except Exception as e:
             traceback.print_tb(e.__traceback__)
@@ -737,6 +759,13 @@ def main():
             client.shutdown()
         finally:
             client.shutdown()
+
+        manifest_note = f"Rebuilt of newspaper articles for {list(titles)}."
+        manifest.append_to_notes(manifest_note)
+        # finalize and compute the manifest
+        manifest.compute(export_to_git_and_s3=False)
+        # TODO modif
+        manifest.validate_and_export_manifest(push_to_git=False)
 
         logger.info("---------- Done ----------")
         print("---------- Done ----------")

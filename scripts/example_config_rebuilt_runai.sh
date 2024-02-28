@@ -25,3 +25,10 @@ export output_dir="${pvc_path}/impresso-pycommons/impresso_commons/data/rebuilt"
 #filter config
 filter_config_filename='chosen_or_created_config_file.json' # TODO change
 export filter_config="${pvc_path}/impresso-pycommons/impresso_commons/data/config/${filter_config_filename}"
+
+#git repo
+export git_repo="${pvc_path}/impresso-pycommons"
+
+#temp dir
+mkdir $pvc_path/temp_rebuilt
+export temp_dir="${pvc_path}/temp_rebuilt"

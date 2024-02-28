@@ -9,6 +9,8 @@ import copy
 
 from typing import Any, Self
 from enum import StrEnum
+from dask import dataframe as dd
+import dask.bag as db
 
 import git
 
@@ -404,3 +406,72 @@ def counts_for_canonical_issue(issue: dict[str, Any]) -> dict[str, int]:
         "content_items_out": len(issue["i"]),
         "images": len([item for item in issue["i"] if item["m"]["tp"] == "image"]),
     }
+
+
+def counts_for_rebuilt(rebuilt_ci: dict[str, Any]) -> dict[str, int | str]:
+    return {
+        "np_id": rebuilt_ci["id"].split("-")[0],
+        "year": rebuilt_ci["id"].split("-")[1],
+        "issue_id": "-".join(
+            rebuilt_ci["id"].split("-")[:-1]
+        ),  # count the issues represented
+        "n_content_items": 1,
+        "n_tokens": (
+            len(rebuilt_ci["ft"].split()) if "ft" in rebuilt_ci else 0
+        ),  # split on spaces to count tokens
+    }
+
+
+def compute_stats_in_rebuilt_bag(
+    rebuilt_articles: db.core.Bag, key: str
+) -> list[dict[str, int | str]]:
+
+    # define locally the nunique() aggregation function for dask
+    def chunk(s):
+        # The function applied to the individual partition (map)
+        return s.apply(lambda x: list(set(x)))
+
+    def agg(s):
+        # The function which will aggregate the result from all the partitions (reduce)
+        s = s._selected_obj
+        return s.groupby(level=list(range(s.index.nlevels))).sum()
+
+    def finalize(s):
+        # The optional function that will be applied to the result of the agg_tu functions
+        return s.apply(lambda x: len(set(x)))
+
+    # aggregating function implementing np.nunique()
+    tunique = dd.Aggregation("tunique", chunk, agg, finalize)
+
+    rebuilt_count_df = (
+        rebuilt_articles.map(counts_for_rebuilt)
+        .to_dataframe(
+            meta={
+                "np_id": str,
+                "year": str,
+                "issue_id": str,
+                "n_content_items": int,
+                "n_tokens": int,
+            }
+        )
+        .persist()
+    )
+
+    # agggregate them at the scale of the entire corpus
+    # first groupby title, year and issue to also count the individual issues present
+    aggregated_df = (
+        rebuilt_count_df.groupby(by=["np_id", "year"])
+        .agg({"issue_id": tunique, "n_content_items": sum, "n_tokens": sum})
+        .rename(
+            columns={
+                "issue_id": "issues",
+                "n_content_items": "content_items_out",
+                "n_tokens": "ft_tokens",
+            }
+        )
+        .reset_index()
+    )
+
+    # todo: modify so that it's only 1 title/year and does not have the title/year
+    logger.info("Obtaining the yearly rebuilt statistics for %s", key)
+    return aggregated_df.to_bag(format="dict").compute()
