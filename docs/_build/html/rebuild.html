@@ -60,10 +60,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.text.helpers">Helpers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.get_iiif_and_coords"><code class="docutils literal notranslate"><span class="pre">get_iiif_and_coords()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.insert_whitespace"><code class="docutils literal notranslate"><span class="pre">insert_whitespace()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.pages_to_article"><code class="docutils literal notranslate"><span class="pre">pages_to_article()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_issue"><code class="docutils literal notranslate"><span class="pre">read_issue()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_issue_pages"><code class="docutils literal notranslate"><span class="pre">read_issue_pages()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.read_page"><code class="docutils literal notranslate"><span class="pre">read_page()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.reconstruct_iiif_link"><code class="docutils literal notranslate"><span class="pre">reconstruct_iiif_link()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.rejoin_articles"><code class="docutils literal notranslate"><span class="pre">rejoin_articles()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.text.helpers.text_apply_breaks"><code class="docutils literal notranslate"><span class="pre">text_apply_breaks()</span></code></a></li>
 </ul>
@@ -145,15 +148,11 @@ as documented on <a class="reference external" href="https://github.com/impresso
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.rebuilder.cleanup">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upload_success</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.cleanup" title="Link to this definition"></a></dt>
-<dd><p>Removes a file if it has been successfully uploaded to S3.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>upload_success</strong> (<em>bool</em>) – whether the upload was successful</p></li>
-<li><p><strong>filepath</strong> (<em>str</em>) – path to the uploaded file</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Removes a file if it has been successfully uploaded to S3.
+:param upload_success: whether the upload was successful
+:type upload_success: bool
+:param filepath: path to the uploaded file
+:type filepath: str</p>
 </dd></dl>
 
 <dl class="py function">
@@ -214,13 +213,25 @@ I could not get it to work properly, so keeping this duplicate.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_for_passim">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_passim" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_passim" title="Link to this definition"></a></dt>
+<dd><p>Rebuilds the text of an article content-item to be used with passim.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>content_item</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The content-item to rebuilt using its metadata.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The rebuilt content-item built for passim.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_for_solr">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_solr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article_metadata</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_solr" title="Link to this definition"></a></dt>
-<dd><p>Rebuilds the text of an article given its metadata as input.</p>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_for_solr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_for_solr" title="Link to this definition"></a></dt>
+<dd><p>Rebuilds the text of an article content-item given its metadata as input.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This rebuild function is thought especially for ingesting the newspaper
@@ -228,13 +239,13 @@ data into our Solr index.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>article_metadata</strong> (<em>dict</em>) – the article’s metadata</p>
+<dd class="field-odd"><p><strong>content_item</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – The content-item to rebuilt using its metadata.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a dictionary with the following keys: TBD</p>
+<dd class="field-even"><p>The rebuilt content-item following the Impresso JSON Schema.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p>dict[str, Any]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -262,40 +273,48 @@ data into our Solr index.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_text">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text" title="Link to this definition"></a></dt>
-<dd><p>The text rebuilding function.</p>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text" title="Link to this definition"></a></dt>
+<dd><p>Rebuild the text of an article for Solr ingestion.</p>
+<p>If <cite>string</cite> is not <cite>None</cite>, then the rebuilt text is appended to it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>page</strong> (<em>dict</em>) – a newspaper page conforming to the impresso JSON schema
-for pages.</p></li>
-<li><p><strong>string</strong> (<em>str</em>) – the rebuilt text of the previous page. If <cite>string</cite> is not
-<cite>None</cite>, then the rebuilt text is appended to it.</p></li>
+<li><p><strong>page</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – Newspaper page conforming to the impresso JSON pages schema.</p></li>
+<li><p><strong>language</strong> (<em>str</em><em> | </em><em>None</em>) – Language of the article being rebuilt</p></li>
+<li><p><strong>string</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Rebuilt text of previous page. Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-[2] coordinates of token regions (dict of lists).</p>
+<dd class="field-even"><p><dl class="simple">
+<dt>[0] Article fulltext, [1] offsets and</dt><dd><p>[2] coordinates of token regions.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, dict[list], dict[list]]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.rebuilder.rebuild_text_passim">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text_passim" title="Link to this definition"></a></dt>
-<dd><p>The text rebuilding function.</p>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.rebuilder.</span></span><span class="sig-name descname"><span class="pre">rebuild_text_passim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.text.rebuilder.rebuild_text_passim" title="Link to this definition"></a></dt>
+<dd><p>The text rebuilding function from pages for passim.</p>
+<p>If <cite>string</cite> is not <cite>None</cite>, then the rebuilt text is appended to it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>page</strong> (<em>dict</em>) – a newspaper page conforming to the impresso JSON schema
-for pages.</p></li>
-<li><p><strong>string</strong> (<em>str</em>) – the rebuilt text of the previous page. If <cite>string</cite> is not
-<cite>None</cite>, then the rebuilt text is appended to it.</p></li>
+<li><p><strong>page</strong> (<em>list</em><em>[</em><em>dict</em><em>]</em>) – Newspaper page conforming to the impresso JSON pages schema.</p></li>
+<li><p><strong>language</strong> (<em>str</em><em> | </em><em>None</em>) – Language of the article being rebuilt</p></li>
+<li><p><strong>string</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Rebuilt text of previous page. Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-[2] coordinates of token regions (dict of lists).</p>
+<dd class="field-even"><p>[0] article fulltext, [1] coordinates of token regions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str, list[dict]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -327,7 +346,52 @@ for pages.</p></li>
 </section>
 <section id="module-impresso_commons.text.helpers">
 <span id="helpers"></span><h2>Helpers<a class="headerlink" href="#module-impresso_commons.text.helpers" title="Link to this heading"></a></h2>
-<p>TODO</p>
+<p>Helper functions for the text <cite>rebuilder.py</cite> script.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.get_iiif_and_coords">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">get_iiif_and_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.text.helpers.get_iiif_and_coords" title="Link to this definition"></a></dt>
+<dd><p>Fetch the iiif link and image coordinates from CI metadata.</p>
+<p>Adapts to the various cases currently present in the canonical data, see
+<a class="reference external" href="https://github.com/impresso/impresso-text-acquisition/issues/117">https://github.com/impresso/impresso-text-acquisition/issues/117</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ci</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Content item to retrieve the information from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>IIIF link and coordinates as string or</dt><dd><p>None if part of the information is missing from the content item</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[str | None, str | None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.insert_whitespace">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">insert_whitespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lang</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#impresso_commons.text.helpers.insert_whitespace" title="Link to this definition"></a></dt>
+<dd><p>Determine whether a whitespace should be inserted after a token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>token</strong> (<em>str</em>) – Current token.</p></li>
+<li><p><strong>next_t</strong> (<em>str</em>) – Following token.</p></li>
+<li><p><strong>prev_t</strong> (<em>str</em>) – Previous token.</p></li>
+<li><p><strong>lang</strong> (<em>str</em>) – Language of text.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether a whitespace should be inserted after the <cite>token</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.text.helpers.pages_to_article">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">pages_to_article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">article</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.pages_to_article" title="Link to this definition"></a></dt>
@@ -363,6 +427,34 @@ for pages.</p></li>
 <dt class="sig sig-object py" id="impresso_commons.text.helpers.read_page">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">read_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_client</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.text.helpers.read_page" title="Link to this definition"></a></dt>
 <dd><p>Read the data from S3 for a given newspaper pages.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.text.helpers.reconstruct_iiif_link">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.text.helpers.</span></span><span class="sig-name descname"><span class="pre">reconstruct_iiif_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content_item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#impresso_commons.text.helpers.reconstruct_iiif_link" title="Link to this definition"></a></dt>
+<dd><p>Construct the iiif link to the CI’s image based on its metadata.</p>
+<p>A iiif image API link and the image coordinates are to be fetched
+from the content item first.
+Different importers (and endpoints) have different formats, needing
+different processing.
+In addition, some inconsistencies exist in the canonical data.
+This function adapts to these variations, more details in issue:
+<a class="reference external" href="https://github.com/impresso/impresso-text-acquisition/issues/117">https://github.com/impresso/impresso-text-acquisition/issues/117</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>content_item</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Content item in canonical format.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>iiif link to the image area of the content item if present in the</dt><dd><p>CI metadata, else None.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -414,7 +506,7 @@ function. It applies to <cite>fulltext</cite> the characte offsets contained in
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
+    <p>&#169; Copyright 2024, Impresso - Media Monitoring of the Past - EPFL-DHLAB, UZH-ICL, UNILU-C2DH..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
