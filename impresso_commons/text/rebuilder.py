@@ -26,6 +26,7 @@ import logging
 import os
 import shutil
 import signal
+from typing import Any
 
 import dask.bag as db
 import jsonlines
@@ -61,17 +62,21 @@ TYPE_MAPPINGS = {
 # TODO KB data: add familial announcement?
 
 
-def rebuild_text(page: list[dict], language: str | None, string: str | None = None):
-    """The text rebuilding function.
+def rebuild_text(
+    page: list[dict], language: str | None, string: str | None = None
+) -> tuple[str, dict[list], dict[list]]:
+    """Rebuild the text of an article for Solr ingestion.
 
-    :param page: a newspaper page conforming to the impresso JSON schema
-        for pages.
-    :type page: dict
-    :param string: the rebuilt text of the previous page. If `string` is not
-        `None`, then the rebuilt text is appended to it.
-    :type string: str
-    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-        [2] coordinates of token regions (dict of lists).
+    If `string` is not `None`, then the rebuilt text is appended to it.
+
+    Args:
+        page (list[dict]): Newspaper page conforming to the impresso JSON pages schema.
+        language (str | None): Language of the article being rebuilt
+        string (str | None, optional): Rebuilt text of previous page. Defaults to None.
+
+    Returns:
+        tuple[str, dict[list], dict[list]]: [0] Article fulltext, [1] offsets and
+            [2] coordinates of token regions.
     """
 
     coordinates = {"regions": [], "tokens": []}
@@ -125,8 +130,8 @@ def rebuild_text(page: list[dict], language: str | None, string: str | None = No
                         )
                         ws = insert_whitespace(
                             token["tx"],
-                            next=next_token,
-                            previous=line["t"][n - 1]["tx"] if n != 0 else None,
+                            next_t=next_token,
+                            prev_t=line["t"][n - 1]["tx"] if n != 0 else None,
                             lang=language,
                         )
                         string += f"{token_text} " if ws else f"{token_text}"
@@ -146,17 +151,18 @@ def rebuild_text(page: list[dict], language: str | None, string: str | None = No
 
 def rebuild_text_passim(
     page: list[dict], language: str | None, string: str | None = None
-):
-    """The text rebuilding function.
+) -> tuple[str, list[dict]]:
+    """The text rebuilding function from pages for passim.
 
-    :param page: a newspaper page conforming to the impresso JSON schema
-        for pages.
-    :type page: dict
-    :param string: the rebuilt text of the previous page. If `string` is not
-        `None`, then the rebuilt text is appended to it.
-    :type string: str
-    :return: a tuple with: [0] fulltext, [1] offsets (dict of lists) and
-        [2] coordinates of token regions (dict of lists).
+    If `string` is not `None`, then the rebuilt text is appended to it.
+
+    Args:
+        page (list[dict]): Newspaper page conforming to the impresso JSON pages schema.
+        language (str | None): Language of the article being rebuilt
+        string (str | None, optional): Rebuilt text of previous page. Defaults to None.
+
+    Returns:
+        tuple[str, list[dict]]: [0] article fulltext, [1] coordinates of token regions.
     """
 
     regions = []
@@ -201,8 +207,8 @@ def rebuild_text_passim(
                     else:
                         ws = insert_whitespace(
                             token["tx"],
-                            next=line["t"][n + 1]["tx"],
-                            previous=line["t"][n - 1]["tx"] if n != 0 else None,
+                            next_t=line["t"][n + 1]["tx"],
+                            prev_t=line["t"][n - 1]["tx"] if n != 0 else None,
                             lang=language,
                         )
                         region_string += f"{token['tx']} " if ws else f"{token['tx']}"
@@ -214,30 +220,35 @@ def rebuild_text_passim(
     return (string, regions)
 
 
-def rebuild_for_solr(article_metadata):
-    """Rebuilds the text of an article given its metadata as input.
+def rebuild_for_solr(content_item: dict[str, Any]) -> dict[str, Any]:
+    """Rebuilds the text of an article content-item given its metadata as input.
 
-    .. note::
-
+    Note:
         This rebuild function is thought especially for ingesting the newspaper
         data into our Solr index.
 
-    :param article_metadata: the article's metadata
-    :type article_metadata: dict
-    :return: a dictionary with the following keys: TBD
-    :rtype: dict
+    Args:
+        content_item (dict[str, Any]): The content-item to rebuilt using its metadata.
+
+    Returns:
+        dict[str, Any]: The rebuilt content-item following the Impresso JSON Schema.
     """
     t = Timer()
-    article_id = article_metadata["m"]["id"]
-    logger.info(f"Started rebuilding article {article_id}")
+
+    article_id = content_item["m"]["id"]
+    logger.debug("Started rebuilding article %s", article_id)
+
     issue_id = "-".join(article_id.split("-")[:-1])
+
     page_file_names = {
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in article_metadata["m"]["pp"]
+        for p in content_item["m"]["pp"]
     }
+
     year, month, day, _, ci_num = article_id.split("-")[1:]
     d = datetime.date(int(year), int(month), int(day))
-    raw_type = article_metadata["m"]["tp"]
+
+    raw_type = content_item["m"]["tp"]
 
     if raw_type in TYPE_MAPPINGS:
         mapped_type = TYPE_MAPPINGS[raw_type]
@@ -249,39 +260,38 @@ def rebuild_for_solr(article_metadata):
     parabreaks = []
     regionbreaks = []
 
-    article_lang = article_metadata["m"]["l"] if "l" in article_metadata["m"] else None
+    article_lang = content_item["m"]["l"] if "l" in content_item["m"] else None
 
+    # if the reading order is not defined, use the number associated to each CI
     reading_order = (
-        article_metadata["m"]["ro"]
-        if "ro" in article_metadata["m"]
-        else int(ci_num[1:])
+        content_item["m"]["ro"] if "ro" in content_item["m"] else int(ci_num[1:])
     )
 
     article = {
         "id": article_id,
-        "pp": article_metadata["m"]["pp"],
+        "pp": content_item["m"]["pp"],
         "d": d.isoformat(),
         "olr": False if mapped_type is None else True,
         "ts": timestamp(),
         "lg": article_lang,
         "tp": mapped_type,
         "ro": reading_order,
-        "s3v": article_metadata["m"]["s3v"] if "s3v" in article_metadata["m"] else None,
+        "s3v": content_item["m"]["s3v"] if "s3v" in content_item["m"] else None,
         "ppreb": [],
         "lb": [],
-        "cc": article_metadata["m"]["cc"],
+        "cc": content_item["m"]["cc"],
     }
 
     if mapped_type == "img":
-        article["iiif_link"] = reconstruct_iiif_link(article_metadata)
+        article["iiif_link"] = reconstruct_iiif_link(content_item)
 
-    if "t" in article_metadata["m"]:
-        article["t"] = article_metadata["m"]["t"]
+    if "t" in content_item["m"]:
+        article["t"] = content_item["m"]["t"]
 
     if mapped_type != "img":
         for n, page_no in enumerate(article["pp"]):
 
-            page = article_metadata["pprr"][n]
+            page = content_item["pprr"][n]
 
             if fulltext == "":
                 fulltext, coords, offsets = rebuild_text(page, article_lang)
@@ -302,43 +312,52 @@ def rebuild_for_solr(article_metadata):
         article["lb"] = linebreaks
         article["pb"] = parabreaks
         article["rb"] = regionbreaks
-        logger.info(f"Done rebuilding article {article_id} (Took {t.stop()})")
+        logger.debug("Done rebuilding article %s (Took %s)", article_id, t.stop())
         article["ft"] = fulltext
+
     return article
 
 
-def rebuild_for_passim(article_metadata):
+def rebuild_for_passim(content_item: dict[str, Any]) -> dict[str, Any]:
+    """Rebuilds the text of an article content-item to be used with passim.
+
+    Args:
+        content_item (dict[str, Any]): The content-item to rebuilt using its metadata.
+
+    Returns:
+        dict[str, Any]: The rebuilt content-item built for passim.
+    """
     np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
-        article_metadata["m"]["id"]
+        content_item["m"]["id"]
     )
 
-    article_id = article_metadata["m"]["id"]
-    logger.info(f"Started rebuilding article {article_id}")
+    article_id = content_item["m"]["id"]
+    logger.debug("Started rebuilding article %s", article_id)
     issue_id = "-".join(article_id.split("-")[:-1])
 
     page_file_names = {
         p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in article_metadata["m"]["pp"]
+        for p in content_item["m"]["pp"]
     }
 
-    article_lang = article_metadata["m"]["l"] if "l" in article_metadata["m"] else None
+    article_lang = content_item["m"]["l"] if "l" in content_item["m"] else None
 
     passim_document = {
         "series": np,
         "date": f"{date[0]}-{date[1]}-{date[2]}",
-        "id": article_metadata["m"]["id"],
-        "cc": article_metadata["m"]["cc"],
+        "id": content_item["m"]["id"],
+        "cc": content_item["m"]["cc"],
         "lg": article_lang,
         "pages": [],
     }
 
-    if "t" in article_metadata["m"]:
-        passim_document["title"] = article_metadata["m"]["t"]
+    if "t" in content_item["m"]:
+        passim_document["title"] = content_item["m"]["t"]
 
     fulltext = ""
-    for n, page_no in enumerate(article_metadata["m"]["pp"]):
+    for n, page_no in enumerate(content_item["m"]["pp"]):
 
-        page = article_metadata["pprr"][n]
+        page = content_item["pprr"][n]
 
         if fulltext == "":
             fulltext, regions = rebuild_text_passim(page, article_lang)

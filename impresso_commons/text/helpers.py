@@ -23,19 +23,47 @@ IIIF_ENDPOINT_BASE_2_SUFFIX = {
 
 WHITESPACE_RULES = {
     "fr": {
-        "pct_no_ws_before": [".", ",", ")", "]", "}", "°", "..."],
+        "pct_no_ws_before": [".", ",", ")", "]", "}", "°", "...", ".-", "%"],
         "pct_no_ws_after": ["(", "[", "{"],
         "pct_no_ws_before_after": ["'", "-"],
         "pct_number": [".", ","],
     },
     "de": {
-        "pct_no_ws_before": [".", ",", ")", "]", "}", "°", "...", "?", "!", ":"],
+        "pct_no_ws_before": [
+            ".",
+            ",",
+            ")",
+            "]",
+            "}",
+            "°",
+            "...",
+            "?",
+            "!",
+            ":",
+            ";",
+            ".-",
+            "%",
+        ],
         "pct_no_ws_after": ["(", "[", "{"],
         "pct_no_ws_before_after": ["'", "-"],
         "pct_number": [".", ","],
     },
     "other": {
-        "pct_no_ws_before": [".", ",", ")", "]", "}", "°", "..."],
+        "pct_no_ws_before": [
+            ".",
+            ",",
+            ")",
+            "]",
+            "}",
+            "°",
+            "...",
+            "?",
+            "!",
+            ":",
+            ";",
+            ".-",
+            "%",
+        ],
         "pct_no_ws_after": ["(", "[", "{"],
         "pct_no_ws_before_after": ["'", "-"],
         "pct_number": [".", ","],
@@ -281,15 +309,15 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
 
 
 def insert_whitespace(
-    token: str, next: str | None, previous: str | None, lang: str | None
+    token: str, next_t: str | None, prev_t: str | None, lang: str | None
 ) -> bool:
     """Determine whether a whitespace should be inserted after a token.
 
     Args:
         token (str): Current token.
-        following_token (str): Following token.
-        previous_token (str): Previous token.
-        language (str): Language of text.
+        next_t (str): Following token.
+        prev_t (str): Previous token.
+        lang (str): Language of text.
 
     Returns:
         bool: Whether a whitespace should be inserted after the `token`.
@@ -300,24 +328,28 @@ def insert_whitespace(
 
     if (
         token in wsrules["pct_no_ws_before_after"]
-        or next in wsrules["pct_no_ws_before_after"]
+        or next_t in wsrules["pct_no_ws_before_after"]
     ):
         insert_ws = False
 
-    elif next in wsrules["pct_no_ws_before"]:
+    # the first char of the next token is punctuation.
+    elif next_t is not None and next_t[0] in wsrules["pct_no_ws_before"]:
         insert_ws = False
 
-    elif token in wsrules["pct_no_ws_after"]:
+    # the last char of current token is punctuation.
+    elif token in wsrules["pct_no_ws_after"] or token[-1] in wsrules["pct_no_ws_after"]:
         insert_ws = False
 
-    elif token in wsrules["pct_number"] and previous is not None and next is not None:
-        if previous.isdigit() and next.isdigit():
+    elif token in wsrules["pct_number"] and prev_t is not None and next_t is not None:
+        if prev_t.isdigit() and next_t.isdigit():
             return False
         else:
             return True
 
-    logger.debug(
-        f"Insert whitespace: curr={token}, follow={next}, "
-        f"prev={previous} ({insert_ws})"
+    debug_msg = (
+        f"Insert whitespace: curr={token}, follow={next_t}, "
+        f"prev={prev_t} ({insert_ws})"
     )
+    logger.debug(debug_msg)
+
     return insert_ws
