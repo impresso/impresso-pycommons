@@ -63,9 +63,9 @@ cd
 
 # launch screens
 echo "Launching the scheduler, workers and rebuilder script, with $WORKERS workers."
-screen -dmS scheduler dask scheduler --port 8786
-screen -dmS workers dask worker localhost:8786 --nworkers $WORKERS --nthreads 1 --memory-limit 6G
+screen -dmS scheduler dask scheduler --port 8787
+screen -dmS workers dask worker localhost:8787 --nworkers $WORKERS --nthreads 1 --memory-limit 6G
 
-echo "dask dashboard at localhost:8786/status"
+echo "dask dashboard at localhost:8787/status"
 
-screen -dmS rebuilt python $pvc_path/impresso-pycommons/impresso_commons/text/rebuilder.py rebuild_articles --input-bucket=$input_bucket --log-file=$log_file --output-dir=$output_dir --output-bucket=$output_bucket --format=$format --filter-config=$filter_config --git-repo=$git_repo --temp-dir=$temp_dir --prev-manifest=$prev_manifest_path --scheduler=localhost:8786
+screen -dmS rebuilt python $pvc_path/impresso-pycommons/impresso_commons/text/rebuilder.py rebuild_articles --input-bucket=$input_bucket --log-file=$log_file --output-dir=$output_dir --output-bucket=$output_bucket --format=$format --filter-config=$filter_config --git-repo=$git_repo --temp-dir=$temp_dir --prev-manifest=$prev_manifest_path --scheduler=localhost:8787
