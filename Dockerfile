@@ -53,7 +53,8 @@ RUN pip install \
     opencv-python \
     smart_open \
     "s3fs>=2023.3.0" \
-    jupyter
+    jupyter \
+    git-python
 
 EXPOSE 8080
 EXPOSE 8786

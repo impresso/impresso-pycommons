@@ -410,7 +410,7 @@ def counts_for_canonical_issue(issue: dict[str, Any]) -> dict[str, int]:
 
 def counts_for_rebuilt(rebuilt_ci: dict[str, Any]) -> dict[str, int | str]:
     return {
-        #"np_id": rebuilt_ci["id"].split("-")[0],
+        # "np_id": rebuilt_ci["id"].split("-")[0],
         "year": rebuilt_ci["id"].split("-")[1],
         "issue_id": "-".join(
             rebuilt_ci["id"].split("-")[:-1]
@@ -424,7 +424,7 @@ def counts_for_rebuilt(rebuilt_ci: dict[str, Any]) -> dict[str, int | str]:
 
 def compute_stats_in_rebuilt_bag(
     rebuilt_articles: db.core.Bag, key: str
-) -> lsit[dict[str, int | str]]:
+) -> list[dict[str, int | str]]:
     # all the rebuilt articles in the bag are form the same newspaper and year
     # define locally the nunique() aggregation function for dask
     def chunk(s):
@@ -447,7 +447,7 @@ def compute_stats_in_rebuilt_bag(
         rebuilt_articles.map(counts_for_rebuilt)
         .to_dataframe(
             meta={
-                #"np_id": str,
+                # "np_id": str,
                 "year": str,
                 "issue_id": str,
                 "n_content_items": int,
@@ -460,7 +460,7 @@ def compute_stats_in_rebuilt_bag(
     # agggregate them at the scale of the entire corpus
     # first groupby title, year and issue to also count the individual issues present
     aggregated_df = (
-        #rebuilt_count_df.groupby(by=["np_id", "year"])
+        # rebuilt_count_df.groupby(by=["np_id", "year"])
         rebuilt_count_df.groupby(by="year")
         .agg({"issue_id": tunique, "n_content_items": sum, "n_tokens": sum})
         .rename(
@@ -470,7 +470,7 @@ def compute_stats_in_rebuilt_bag(
                 "n_tokens": "ft_tokens",
             }
         )
-        #.reset_index()
+        # .reset_index()
     )
 
     # todo: modify so that it's only 1 title/year and does not have the title/year
