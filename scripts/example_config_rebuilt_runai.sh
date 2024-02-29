@@ -30,5 +30,8 @@ export filter_config="${pvc_path}/impresso-pycommons/impresso_commons/data/confi
 export git_repo="${pvc_path}/impresso-pycommons"
 
 #temp dir
-mkdir $pvc_path/temp_rebuilt
+mkdir -p $pvc_path/temp_rebuilt 
 export temp_dir="${pvc_path}/temp_rebuilt"
+
+# path to the previous manifest
+export prev_manifest_path=""

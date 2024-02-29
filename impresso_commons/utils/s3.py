@@ -482,10 +482,11 @@ def alternative_read_text(
         "client": session.client("s3", endpoint_url=s3_endpoint),
     }
 
-    with s_open(s3_key, "r", transport_params=transport_params) as infile:
-        # if line_by_line:
-        text = infile.readlines()
-        # else:
-        #    text = infile.read()
+    if line_by_line:
+        with s_open(s3_key, "r", transport_params=transport_params) as infile:
+            text = infile.readlines()
+    else:
+        with s_open(s3_key, "r", transport_params=transport_params) as infile:
+            text = infile.read()
 
     return text

@@ -3,7 +3,7 @@ For EPFL members, this script can be scaled by running it using Runai,
 as documented on https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md.
 
 Usage:
-    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw> --git-repo=<gr> --temp-dir=<tp>]
+    rebuilder.py rebuild_articles --input-bucket=<b> --log-file=<f> --output-dir=<od> --filter-config=<fc> [--format=<fo> --scheduler=<sch> --output-bucket=<ob> --verbose --clear --languages=<lgs> --nworkers=<nw> --git-repo=<gr> --temp-dir=<tp> --prev-manifest=<pm>]
 
 Options:
 
@@ -19,6 +19,7 @@ Options:
 --nworkers=<nw>  number of workers for (local) Dask client.
 --git-repo=<gr>   Local path to the "impresso-text-acquisition" git directory (including it).
 --temp-dir=<tp>  Temporary directory in which to clone the impresso-data-release git repository.
+--prev-manifest=<pm> Optional S3 path to the previous manifest to use for the manifest generation
 """  # noqa: E501
 
 import traceback
@@ -656,6 +657,7 @@ def main():
     languages = arguments["--languages"]
     repo_path = arguments["--git-repo"]
     temp_dir = arguments["--temp-dir"]
+    prev_manifest_path = arguments["--prev-manifest"] if arguments["--prev-manifest"] else None
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -691,6 +693,7 @@ def main():
         s3_input_bucket=bucket_name,
         git_repo=git.Repo(repo_path),
         temp_dir=temp_dir,
+        previous_mft_path=prev_manifest_path if prev_manifest_path != '' else None
     )
     titles = set()
 
@@ -729,7 +732,8 @@ def main():
                     rebuilt_issues.append((issue_key, json_files))
                     del input_issues
 
-                    manifest.add_by_title_year(newspaper, year, year_stats)
+                    logger.debug(f"year_stats: {year_stats}]")
+                    manifest.add_by_title_year(newspaper, year, year_stats[0])
                     titles.add(newspaper)
 
                 msg = (
@@ -763,9 +767,8 @@ def main():
         manifest_note = f"Rebuilt of newspaper articles for {list(titles)}."
         manifest.append_to_notes(manifest_note)
         # finalize and compute the manifest
-        manifest.compute(export_to_git_and_s3=False)
-        # TODO modif
-        manifest.validate_and_export_manifest(push_to_git=False)
+        manifest.compute(export_to_git_and_s3=True)
+        #manifest.validate_and_export_manifest(push_to_git=False)
 
         logger.info("---------- Done ----------")
         print("---------- Done ----------")
