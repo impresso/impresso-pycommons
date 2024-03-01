@@ -657,7 +657,9 @@ def main():
     languages = arguments["--languages"]
     repo_path = arguments["--git-repo"]
     temp_dir = arguments["--temp-dir"]
-    prev_manifest_path = arguments["--prev-manifest"] if arguments["--prev-manifest"] else None
+    prev_manifest_path = (
+        arguments["--prev-manifest"] if arguments["--prev-manifest"] else None
+    )
 
     signal.signal(signal.SIGINT, signal_handler)
 
@@ -686,14 +688,14 @@ def main():
     logger.info(dask_cluster_msg)
     print(dask_cluster_msg)
 
-    # ititialize manifest
+    # initialize manifest
     manifest = DataManifest(
         data_stage="rebuilt",
         s3_output_bucket=output_bucket_name,
         s3_input_bucket=bucket_name,
         git_repo=git.Repo(repo_path),
         temp_dir=temp_dir,
-        previous_mft_path=prev_manifest_path if prev_manifest_path != '' else None
+        previous_mft_path=prev_manifest_path if prev_manifest_path != "" else None,
     )
     titles = set()
 
@@ -767,8 +769,8 @@ def main():
         manifest_note = f"Rebuilt of newspaper articles for {list(titles)}."
         manifest.append_to_notes(manifest_note)
         # finalize and compute the manifest
-        manifest.compute(export_to_git_and_s3=True)
-        #manifest.validate_and_export_manifest(push_to_git=False)
+        manifest.compute(export_to_git_and_s3=False)
+        manifest.validate_and_export_manifest(push_to_git=False)
 
         logger.info("---------- Done ----------")
         print("---------- Done ----------")

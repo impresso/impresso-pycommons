@@ -276,8 +276,6 @@ class DataManifest:
             out_repo = None
             logger.info("%s!", msg)
 
-        # TODO add verification against JSON schema
-
         manifest_dump = json.dumps(self.manifest_data, indent=4)
 
         mft_filename = self._manifest_filename
@@ -376,9 +374,13 @@ class DataManifest:
 
     def add_by_title_year(self, title: str, year: str, counts: dict[str, int]) -> bool:
         return self._modify_processing_stats(title, str(year), counts)
-    
-    def add_count_list_by_title_year(self, title: str, year: str, all_counts: list[dict[str, int]]) -> bool:
-        return all([self._modify_processing_stats(title, str(year), c) for c in all_counts])
+
+    def add_count_list_by_title_year(
+        self, title: str, year: str, all_counts: list[dict[str, int]]
+    ) -> bool:
+        return all(
+            [self._modify_processing_stats(title, str(year), c) for c in all_counts]
+        )
 
     def replace_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
         title, year = ci_id.split("-")[0:2]
