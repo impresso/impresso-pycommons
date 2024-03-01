@@ -28,7 +28,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     screen  \
     wget \
     sudo \
-    openssh-client
+    openssh-client \
+    lsof
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get clean && \

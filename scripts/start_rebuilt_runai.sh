@@ -5,7 +5,7 @@
 # "/home/$USER_NAME/dhlab-data/data/$USER_NAME-data/init_rebuilt_runai.sh" for the various options necessary.
 
 # Default number of workers
-DEFAULT_WORKERS=64
+DEFAULT_WORKERS='64'
 
 # Display script usage information
 usage() {
