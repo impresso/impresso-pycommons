@@ -408,9 +408,10 @@ def counts_for_canonical_issue(issue: dict[str, Any]) -> dict[str, int]:
     }
 
 
-def counts_for_rebuilt(rebuilt_ci: dict[str, Any]) -> dict[str, int | str]:
-    return {
-        # "np_id": rebuilt_ci["id"].split("-")[0],
+def counts_for_rebuilt(rebuilt_ci: dict[str, Any], include_np: bool = False) -> dict[str, int | str]:
+
+    counts = {"np_id": rebuilt_ci["id"].split("-")[0]} if include_np else {}
+    counts.update({
         "year": rebuilt_ci["id"].split("-")[1],
         "issue_id": "-".join(
             rebuilt_ci["id"].split("-")[:-1]
@@ -419,7 +420,8 @@ def counts_for_rebuilt(rebuilt_ci: dict[str, Any]) -> dict[str, int | str]:
         "n_tokens": (
             len(rebuilt_ci["ft"].split()) if "ft" in rebuilt_ci else 0
         ),  # split on spaces to count tokens
-    }
+    })
+    return counts
 
 
 def compute_stats_in_rebuilt_bag(
@@ -444,7 +446,7 @@ def compute_stats_in_rebuilt_bag(
     tunique = dd.Aggregation("tunique", chunk, agg, finalize)
 
     rebuilt_count_df = (
-        rebuilt_articles.map(counts_for_rebuilt)
+        rebuilt_articles.starmap(counts_for_rebuilt)
         .to_dataframe(
             meta={
                 # "np_id": str,
