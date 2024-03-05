@@ -122,14 +122,14 @@ def rebuild_text(
                         region["l"] = len(token["nf"])
                         region["hy2"] = True
 
-                        token_text = token["nf"]
+                        token_text = token["nf"] if token["nf"] is not None else ""
                     else:
                         if token["tx"]:
                             region["l"] = len(token["tx"])
                         else:
                             region["l"] = 0
 
-                        token_text = token["tx"]
+                        token_text = token["tx"] if token["tx"] is not None else ""
 
                     # don't add the tokens corresponding to the first part of a hyphenated word
                     if "hy" not in token:
