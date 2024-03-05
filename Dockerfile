@@ -15,7 +15,7 @@ RUN apt-get update \
         ca-certificates \
         pkg-config \
         cmake \
-        software-properties-common 
+        software-properties-common
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     apt-utils \
@@ -28,7 +28,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     screen  \
     wget \
     sudo \
-    openssh-client
+    openssh-client 
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get clean && \

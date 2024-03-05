@@ -298,10 +298,11 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
             # uri was already of image, but not correct.
             uri_base = "/".join(uri_base.split("/")[:-3])
         elif old_suffix != "info.json":
-            logger.warning(
+            warn_msg = (
                 f"Unexpected iiif url suffix: {old_suffix} "
                 f"for CI with id: {content_item['id']}."
             )
+            logger.warning(warn_msg)
 
         # reconstruct the final image link
         return os.path.join(uri_base, coords, img_suffix)
@@ -322,6 +323,10 @@ def insert_whitespace(
     Returns:
         bool: Whether a whitespace should be inserted after the `token`.
     """
+    # if current token text is None, previous token's whitespace rule applies
+    if token is None or len(token) == 0:
+        return False
+
     wsrules = WHITESPACE_RULES[lang if lang in WHITESPACE_RULES else "other"]
 
     insert_ws = True
@@ -333,8 +338,12 @@ def insert_whitespace(
         insert_ws = False
 
     # the first char of the next token is punctuation.
-    elif next_t is not None and next_t[0] in wsrules["pct_no_ws_before"]:
-        insert_ws = False
+    elif next_t is not None and len(next_t) != 0:
+        if (
+            next_t in wsrules["pct_no_ws_before"]
+            or next_t[0] in wsrules["pct_no_ws_before"]
+        ):
+            insert_ws = False
 
     # the last char of current token is punctuation.
     elif token in wsrules["pct_no_ws_after"] or token[-1] in wsrules["pct_no_ws_after"]:
