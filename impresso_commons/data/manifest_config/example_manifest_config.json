@@ -1,0 +1,14 @@
+{
+    "data_stage": "",
+    "output_bucket": "",
+    "input_bucket": "",
+    "git_repository": "",
+    "newspapers": [],
+    "temp_directory": "",
+    "previous_mft_s3_path": "",
+    "is_staging": false,
+    "is_patch": false,
+    "patched_fields": [],
+    "push_to_git": true,
+    "file_extensions": ""
+}
