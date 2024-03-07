@@ -46,7 +46,6 @@ class DataStage(StrEnum):
     ENTITIES = "entities"
     LANGIDENT = "langident"
     LINGUISTIC_PROCESSING = "lingproc"
-    MENTIONS = "mentions"
     OCRQA = "orcqa"
     TEXT_REUSE = "text-reuse"
     TOPICS = "topics"
@@ -399,13 +398,28 @@ def init_media_info(
     }
 
 
-def counts_for_canonical_issue(issue: dict[str, Any]) -> dict[str, int]:
-    return {
-        "issues": 1,
-        "pages": len(set(issue["pp"])),
-        "content_items_out": len(issue["i"]),
-        "images": len([item for item in issue["i"] if item["m"]["tp"] == "image"]),
-    }
+def counts_for_canonical_issue(
+    issue: dict[str, Any], include_np_yr: bool = False
+) -> dict[str, int]:
+
+    counts = (
+        {
+            "np_id": issue["id"].split("-")[0],
+            "year": issue["id"].split("-")[1],
+            "id": issue["id"],
+        }
+        if include_np_yr
+        else {}
+    )
+    counts.update(
+        {
+            "issues": 1,
+            "pages": len(set(issue["pp"])),
+            "content_items_out": len(issue["i"]),
+            "images": len([item for item in issue["i"] if item["m"]["tp"] == "image"]),
+        }
+    )
+    return counts
 
 
 def counts_for_rebuilt(
@@ -416,11 +430,11 @@ def counts_for_rebuilt(
     counts.update(
         {
             "year": rebuilt_ci["id"].split("-")[1],
-            "issue_id": "-".join(
+            "issues": "-".join(
                 rebuilt_ci["id"].split("-")[:-1]
             ),  # count the issues represented
-            "n_content_items": 1,
-            "n_tokens": (
+            "content_items_out": 1,
+            "ft_tokens": (
                 len(rebuilt_ci["ft"].split()) if "ft" in rebuilt_ci else 0
             ),  # split on spaces to count tokens
         }
@@ -428,57 +442,175 @@ def counts_for_rebuilt(
     return counts
 
 
-def compute_stats_in_rebuilt_bag(
-    rebuilt_articles: db.core.Bag, key: str
-) -> list[dict[str, int | str]]:
-    # all the rebuilt articles in the bag are form the same newspaper and year
-    # define locally the nunique() aggregation function for dask
-    def chunk(s):
-        # The function applied to the individual partition (map)
-        return s.apply(lambda x: list(set(x)))
+def compute_stats_in_canonical_bag(
+    s3_canonical_issues: db.core.Bag,
+) -> list[dict[str, Any]]:
+    """Computes number of issues and pages per newspaper from a Dask bag of canonical data.
 
-    def agg(s):
-        # The function which will aggregate the result from all the partitions (reduce)
-        s = s._selected_obj
-        return s.groupby(level=list(range(s.index.nlevels))).sum()
+    Args:
+        s3_canonical_issues (db.core.Bag): Bag with the contents of canonical files to
+            compute statistics on.
 
-    def finalize(s):
-        # The optional function that will be applied to the result of the agg_tu functions
-        return s.apply(lambda x: len(set(x)))
+    Returns:
+        list[dict[str, Any]]: List of counts that match canonical DataStatistics keys.
+    """
 
-    # aggregating function implementing np.nunique()
-    tunique = dd.Aggregation("tunique", chunk, agg, finalize)
-
-    rebuilt_count_df = (
-        rebuilt_articles.map(counts_for_rebuilt)
+    print("Fetched all issues, gathering desired information.")
+    logger.info("Fetched all issues, gathering desired information.")
+    pages_count_df = (
+        s3_canonical_issues.map(
+            lambda i: counts_for_canonical_issue(i, include_np_yr=True)
+        )
         .to_dataframe(
             meta={
-                # "np_id": str,
+                "np_id": str,
                 "year": str,
-                "issue_id": str,
-                "n_content_items": int,
-                "n_tokens": int,
+                "issues": int,
+                "pages": int,
+                "images": int,
+                "content_items_out": int,
             }
         )
+        .set_index("id")
         .persist()
     )
 
-    # agggregate them at the scale of the entire corpus
-    # first groupby title, year and issue to also count the individual issues present
+    # cum the counts for all values collected
     aggregated_df = (
-        # rebuilt_count_df.groupby(by=["np_id", "year"])
-        rebuilt_count_df.groupby(by="year")
-        .agg({"issue_id": tunique, "n_content_items": sum, "n_tokens": sum})
-        .rename(
-            columns={
-                "issue_id": "issues",
-                "n_content_items": "content_items_out",
-                "n_tokens": "ft_tokens",
+        pages_count_df.groupby(by=["np_id", "year"])
+        .agg(
+            {
+                "pages": sum,
+                "issues": sum,
+                "content_items_out": sum,
+                "images": sum,
             }
         )
-        # .reset_index()
+        .reset_index()
     )
 
-    # todo: modify so that it's only 1 title/year and does not have the title/year
-    logger.info("Obtaining the yearly rebuilt statistics for %s", key)
+    print("Finished grouping and aggregating stats by title and year.")
+    logger.info("Finished grouping and aggregating stats by title and year.")
+    # return as a list of dicts
+    return aggregated_df.to_bag(format="dict").compute()
+
+
+# define locally the nunique() aggregation function for dask
+def chunk(s):
+    # The function applied to the individual partition (map)
+    return s.apply(lambda x: list(set(x)))
+
+
+def agg(s):
+    # The function which will aggregate the result from all the partitions (reduce)
+    s = s._selected_obj
+    return s.groupby(level=list(range(s.index.nlevels))).sum()
+
+
+def finalize(s):
+    # The optional function that will be applied to the result of the agg_tu functions
+    return s.apply(lambda x: len(set(x)))
+
+
+# aggregating function implementing np.nunique()
+tunique = dd.Aggregation("tunique", chunk, agg, finalize)
+
+
+def compute_stats_in_rebuilt_bag(
+    rebuilt_articles: db.core.Bag, key: str = "", include_np: bool = False
+) -> list[dict[str, int | str]]:
+    # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
+    # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
+
+    # define the list of columns in the dataframe
+    df_meta = {"np_id": str} if include_np else {}
+    df_meta.update(
+        {
+            "year": str,
+            "issues": str,
+            "content_items_out": int,
+            "ft_tokens": int,
+        }
+    )
+
+    rebuilt_count_df = (
+        rebuilt_articles.map(lambda rf: counts_for_rebuilt(rf, include_np=include_np))
+        .to_dataframe(meta=df_meta)
+        .persist()
+    )
+
+    gp_key = ["np_id", "year"] if include_np else "year"
+    # agggregate them at the scale of the entire corpus
+    # first groupby title, year and issue to also count the individual issues present
+    aggregated_df = rebuilt_count_df.groupby(by=gp_key).agg(
+        {"issues": tunique, "content_items_out": sum, "ft_tokens": sum}
+    )
+
+    # when titles are included, multiple titles and years will be represented
+    if include_np:
+        aggregated_df = aggregated_df.reset_index()
+
+    msg = "Obtaining the yearly rebuilt statistics"
+    if key != "":
+        logger.info("%s for %s", msg, key)
+    else:
+        logger.info(msg)
+    return aggregated_df.to_bag(format="dict").compute()
+
+
+def compute_stats_in_entities_bag(
+    s3_entities: db.core.Bag,
+) -> list[dict[str, Any]]:
+    """TODO
+
+    Args:
+        s3_entities (db.core.Bag): Bag with the contents of entity files.
+
+    Returns:
+        list[dict[str, Any]]: List of counts that match NE DataStatistics keys.
+    """
+    pages_count_df = (
+        s3_entities.map(
+            lambda ci: {
+                "np_id": ci["id"].split("-")[0],
+                "year": ci["id"].split("-")[1],
+                "issues": "-".join(ci["id"].split("-")[:-1]),
+                "content_items_out": 1,
+                "ne_mentions": len(ci["nes"]),
+                "ne_entities": set(
+                    [m["wkd_id"] for m in ci["nes"] if m["wkd_id"] != "NIL"]
+                ),
+            }
+        )
+        .to_dataframe(
+            meta={
+                "np_id": str,
+                "year": str,
+                "issues": int,
+                "content_items_out": int,
+                "ne_mentions": int,
+                "ne_entities": set,
+            }
+        )
+        .explode("ne_entities")
+        .persist()
+    )
+
+    # cum the counts for all values collected
+    aggregated_df = (
+        pages_count_df.groupby(by=["np_id", "year"])
+        .agg(
+            {
+                "issues": tunique,
+                "content_items_out": sum,
+                "ne_mentions": sum,
+                "ne_entities": tunique,
+            }
+        )
+        .reset_index()
+    )
+
+    print("Finished grouping and aggregating stats by title and year.")
+    logger.info("Finished grouping and aggregating stats by title and year.")
+    # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()

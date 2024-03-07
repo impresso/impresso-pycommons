@@ -24,7 +24,13 @@ from impresso_commons.path.path_s3 import fetch_files
 from impresso_commons.versioning.data_statistics import (
     NewspaperStatistics,
 )
-from impresso_commons.versioning.helpers import validate_stage, DataStage
+from impresso_commons.versioning.helpers import (
+    validate_stage,
+    DataStage,
+    compute_stats_in_canonical_bag,
+    compute_stats_in_rebuilt_bag,
+    compute_stats_in_entities_bag,
+)
 from impresso_commons.versioning.data_manifest import DataManifest
 
 
@@ -43,25 +49,19 @@ def get_files_to_consider(config: dict[str, Any]) -> list[str]:
     return s3_files
 
 
-def get_agg_func(stage: DataStage) -> callable:
-    func = None
+def compute_stats_for_stage(
+    files_bag: db.core.Bag, stage: DataStage
+) -> list[dict] | None:
     match stage:
         case DataStage.CANONICAL:
-            # function to aggregate canonical data
-            func = 1
+            return compute_stats_in_canonical_bag(files_bag)
         case DataStage.REBUILT:
-            func = 2  # TODO
+            return compute_stats_in_rebuilt_bag(files_bag)
         case DataStage.ENTITIES:
-            func = 3  # TODO
-        case DataStage.MENTIONS:
-            func = 3
-        # TODO add the new cases
-    return func
-
-
-def compute_stats_from_agg(files_bag, agg_func) -> list[dict]:
-    # TODO
-    return []
+            return compute_stats_in_entities_bag(files_bag)
+    raise NotImplementedError(
+        "The function computing statistics for this DataStage is not yet implemented."
+    )
 
 
 def main():
@@ -73,8 +73,7 @@ def main():
 
     # ensure that the provided Data stage is correct
     stage = validate_stage(config_dict["data_stage"])
-    # fetch the correct aggregating function for the data stage
-    agg_function = get_agg_func(stage)
+
     # fetch the names of the files to consider
     s3_files = get_files_to_consider(config_dict)
     # load the selected files in dask bags
@@ -103,7 +102,8 @@ def main():
         previous_mft_path=prev_mft if prev_mft != "" else None,
     )
 
-    computed_stats = compute_stats_from_agg(processed_files, agg_function)
+    # compute the statistics for the given stage
+    computed_stats = compute_stats_for_stage(processed_files, stage)
     # TODO add more prints
     print("Populating the manifest with the resulting yearly statistics...")
     # populate the manifest with these statistics
