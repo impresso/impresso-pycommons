@@ -159,8 +159,8 @@ class NewspaperStatistics(DataStatistics):
         "ft_tokens",
         "images",
         "content_items_in",
-        "ne_entities",
         "ne_mentions",
+        "ne_entities",
         "embeddings_el",
         "topics",
     ]
@@ -191,7 +191,7 @@ class NewspaperStatistics(DataStatistics):
             case DataStage.ENTITIES:
                 # add 'titles', 'issues', 'ne_entities', 'ne_mentions'
                 count_keys.extend(self.possible_count_keys[start_index:2])
-                count_keys.append(self.possible_count_keys[7:9])
+                count_keys.extend(self.possible_count_keys[7:9])
             case DataStage.LANGIDENT:
                 # add 'languages'
                 count_keys.append(self.possible_count_keys[start_index:2])

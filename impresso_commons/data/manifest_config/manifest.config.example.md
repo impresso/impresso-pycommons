@@ -24,7 +24,8 @@ Below is an example for the case of NE-processing, as well as a description of e
     "is_patch": false,
     "patched_fields": [],
     "push_to_git": false,
-    "file_extensions": ".jsonl.bz2"
+    "file_extensions": ".jsonl.bz2",
+    "log_file": "path/to/log_file.log"
 }
 ```
 
@@ -55,3 +56,4 @@ Below is an example for the case of NE-processing, as well as a description of e
   - Can be set to `false` or `null` during experimentation or debugging to only upload to S3 and not push to git.
 - __*file_extensions*__: (required) The extension of the files to consider within `output_bucket`, *including* the first `.` (`.jsonl.bz2` instead of `jsonl.bz2`).
   - Is necessary for the `fixed_s3fs_glob` function used internally, and allows to ensure only desired files are considered (eg. if `.txt` or `.json` files are present in the bucket).
+- __*log_file*__: (required) Local path to log file.

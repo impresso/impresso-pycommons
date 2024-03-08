@@ -586,10 +586,10 @@ def compute_stats_in_entities_bag(
             meta={
                 "np_id": str,
                 "year": str,
-                "issues": int,
+                "issues": str,
                 "content_items_out": int,
                 "ne_mentions": int,
-                "ne_entities": set,
+                "ne_entities": object,
             }
         )
         .explode("ne_entities")
