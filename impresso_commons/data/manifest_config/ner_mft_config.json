@@ -12,6 +12,5 @@
     "is_patch": false,
     "patched_fields": [],
     "push_to_git": false,
-    "file_extensions": "jsonl.bz2",
-    "log_file": "/local/path/to/log_file.log"
+    "file_extensions": "jsonl.bz2"
 }

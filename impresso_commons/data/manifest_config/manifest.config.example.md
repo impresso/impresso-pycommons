@@ -58,4 +58,3 @@ Below is an example for the case of NE-processing, as well as a description of e
   - Can be left empty (`""` or `null`), in which case a generic note with the processed titles will be used.
 - __*file_extensions*__: (required) The extension of the files to consider within `output_bucket`, *including* the first `.` (`.jsonl.bz2` instead of `jsonl.bz2`).
   - Is necessary for the `fixed_s3fs_glob` function used internally, and allows to ensure only desired files are considered (eg. if `.txt` or `.json` files are present in the bucket).
-- __*log_file*__: (required) Local path to log file.

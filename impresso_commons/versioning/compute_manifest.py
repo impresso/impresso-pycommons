@@ -1,12 +1,13 @@
 """Command-line script to generate a manifest for an S3 bucket or partition after a processing.
 
 Usage:
-    compute_manifest.py --config-file=<cf> [--verbose]
+    compute_manifest.py --config-file=<cf> --log-file=<lf> [--verbose]
 
 Options:
 
 --config-file=<cf>  Path to configuration json file containing all necessary arguments for the computation of the manifest.
---verbose  Set logging level to DEBUG (by default is INFO)
+--log-file=<lf> Path to log file to use.
+--verbose  Set logging level to DEBUG (by default is INFO).
 """
 
 import json
@@ -90,17 +91,16 @@ def compute_stats_for_stage(
     )
 
 
-def main():
-    arguments = docopt(__doc__)
-    config_file_path = arguments["--config-file"]
-    log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
+def create_manifest(config_dict: dict[str, Any]) -> None:
+    """Given its configuration, generate the manifest for a given s3 bucket partition.
 
-    logger.info("Reading the arguments inside %s", config_file_path)
-    with open(config_file_path, "r", encoding="utf-8") as f_in:
-        config_dict = json.load(f_in)
+    Note:
+        The contents of the configuration file (or dict) are given in markdown file
+        `impresso_commons/data/manifest_config/manifest.config.example.md``
 
-    init_logging(log_level, config_dict["log_file"])
-
+    Args:
+        config_dict (dict[str, Any]): Configuration following the guidelines.
+    """
     # ensure that the provided Data stage is correct
     stage = validate_stage(config_dict["data_stage"])
     logger.info("Starting to generate the manifest for DataStage: '%s'", stage)
@@ -165,6 +165,21 @@ def main():
     else:
         manifest.compute(export_to_git_and_s3=False)
         manifest.validate_and_export_manifest(push_to_git=False)
+
+
+def main():
+    arguments = docopt(__doc__)
+    config_file_path = arguments["--config-file"]
+    log_file = arguments["--log-file"]
+    log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
+
+    init_logging(log_level, log_file)
+
+    logger.info("Reading the arguments inside %s", config_file_path)
+    with open(config_file_path, "r", encoding="utf-8") as f_in:
+        config_dict = json.load(f_in)
+
+    create_manifest(config_dict)
 
 
 if __name__ == "__main__":
