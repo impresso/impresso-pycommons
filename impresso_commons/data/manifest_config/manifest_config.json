@@ -1,14 +1,14 @@
 {
-    "data_stage": "",
-    "output_bucket": "",
+    "data_stage": "fill_me",
+    "output_bucket": "fill_me",
     "input_bucket": "",
-    "git_repository": "",
+    "git_repository": "fill_me",
     "newspapers": [],
-    "temp_directory": "",
+    "temp_directory": "fill_me",
     "previous_mft_s3_path": "",
     "is_staging": false,
     "is_patch": false,
     "patched_fields": [],
     "push_to_git": true,
-    "file_extensions": ""
+    "file_extensions": "fill_me"
 }

@@ -1,7 +1,6 @@
 """Command-line script to generate a manifest for an S3 bucket or partition after a processing.
 
 Usage:
-    compute_manifest.py --data_stage=<ds> --output-bucket=<ob> --input-bucket=<ib> --git-repo=<gr> --config-file=<cf> --temp-dir=<td>
     compute_manifest.py --config-file=<cf>
 
 Options:
@@ -34,8 +33,12 @@ from impresso_commons.versioning.helpers import (
 from impresso_commons.versioning.data_manifest import DataManifest
 
 
-def get_files_to_consider(config: dict[str, Any]) -> list[str]:
-    extension_filter = f"*.{config['file_extensions']}"
+def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
+    if config["file_extensions"] == "" or config["file_extensions"] is None:
+        raise ValueError("Config file's `file_extensions` should not be empty or None.")
+
+    ext = config["file_extensions"]
+    extension_filter = f"*{ext}" if ext.startswith(".") else f"*.{ext}"
     # if newspapers is empty, include all newspapers
     if len(config["newspapers"]) == 0:
         # return all filenames in the given bucket partition with the correct extension
