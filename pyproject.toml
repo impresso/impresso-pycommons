@@ -38,7 +38,8 @@ dependencies = [
     "numpy",
     "smart_open",
     "jsonlines",
-    "s3fs"
+    "s3fs",
+    "python-dotenv"
 ]
 
 [project.urls]
