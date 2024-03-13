@@ -406,7 +406,6 @@ def counts_for_canonical_issue(
         {
             "np_id": issue["id"].split("-")[0],
             "year": issue["id"].split("-")[1],
-            "id": issue["id"],
         }
         if include_np_yr
         else {}
@@ -471,7 +470,6 @@ def compute_stats_in_canonical_bag(
                 "content_items_out": int,
             }
         )
-        .set_index("id")
         .persist()
     )
 

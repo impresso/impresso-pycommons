@@ -12,5 +12,6 @@
     "is_patch": false,
     "patched_fields": [],
     "push_to_git": false,
+    "notes": "",
     "file_extensions": "jsonl.bz2"
 }

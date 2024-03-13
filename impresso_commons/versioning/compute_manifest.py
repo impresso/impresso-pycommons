@@ -18,7 +18,6 @@ from typing import Any
 import logging
 
 import dask.bag as db
-
 from impresso_commons.utils.s3 import fixed_s3fs_glob, IMPRESSO_STORAGEOPT
 from impresso_commons.text.rebuilder import init_logging
 from impresso_commons.versioning.helpers import (
@@ -50,7 +49,7 @@ def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
         raise ValueError("Config file's `file_extensions` should not be empty or None.")
 
     ext = config["file_extensions"]
-    extension_filter = f"*{ext}" if ext.startswith(".") else f"*.{ext}"
+    extension_filter = f"*{ext}" if "." in ext else f"*.{ext}"
 
     # if newspapers is empty, include all newspapers
     if len(config["newspapers"]) == 0:
