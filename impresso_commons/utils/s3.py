@@ -12,6 +12,7 @@ import boto3
 import bz2
 from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
+from dotenv import load_dotenv
 
 from impresso_commons.utils import _get_cores
 
@@ -20,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 def get_storage_options():
+    # load environment variables from local .env files
+    load_dotenv()
     return {
         "client_kwargs": {"endpoint_url": "https://os.zhdk.cloud.switch.ch"},
         "key": os.environ["SE_ACCESS_KEY"],
@@ -42,6 +45,9 @@ _WARNED = False
 
 
 def get_s3_client(host_url="https://os.zhdk.cloud.switch.ch/"):
+
+    # load environment variables from local .env files
+    load_dotenv()
     if host_url is None:
         try:
             host_url = os.environ["SE_HOST_URL"]
@@ -77,6 +83,8 @@ def get_s3_resource(host_url="https://os.zhdk.cloud.switch.ch/"):
     :rtype: `boto3.resources.factory.s3.ServiceResource`
     """
 
+    # load environment variables from local .env files
+    load_dotenv()
     if host_url is None:
         try:
             host_url = os.environ["SE_HOST_URL"]
