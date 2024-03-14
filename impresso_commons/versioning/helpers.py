@@ -478,8 +478,8 @@ def compute_stats_in_canonical_bag(
         pages_count_df.groupby(by=["np_id", "year"])
         .agg(
             {
-                "pages": sum,
                 "issues": sum,
+                "pages": sum,
                 "content_items_out": sum,
                 "images": sum,
             }
