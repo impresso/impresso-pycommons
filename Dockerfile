@@ -54,7 +54,8 @@ RUN pip install \
     smart_open \
     "s3fs>=2023.3.0" \
     jupyter \
-    git-python
+    git-python \
+    python-dotenv
 
 EXPOSE 8080
 EXPOSE 8786
