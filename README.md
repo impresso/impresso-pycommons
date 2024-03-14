@@ -16,6 +16,9 @@ With `pip`:
 pip install impresso-commons
 ```
 
+## Notes
+The library supports configuration of s3 credentials via project-specific local .env files. 
+
 ## License
 
 The second project 'impresso - Media Monitoring of the Past II. Beyond Borders: Connecting Historical Newspapers and Radio' is funded by the Swiss National Science Foundation (SNSF) under grant number [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891.
