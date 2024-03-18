@@ -39,6 +39,7 @@ dependencies = [
     "smart_open",
     "jsonlines",
     "s3fs",
+    "git-python",
     "python-dotenv"
 ]
 

@@ -50,6 +50,7 @@ flake8>=6.1.0
 fqdn>=1.5.1
 frozenlist>=1.4.0
 fsspec>=2023.6.0
+git-python>=3.1.0
 google-auth>=2.23.3
 h11>=0.14.0
 httpcore>=0.17.3
