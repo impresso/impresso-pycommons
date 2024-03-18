@@ -56,7 +56,10 @@ namespaces = false
 [tool.setuptools.package-data]
 impresso_commons = [
     "data/xmi/*.xml",
-    "data/config/*.json"
+    "data/config/*.json",
+    "schemas/json/*/*.json",
+    "schemas/docs/*/*.json",
+    "schemas/*",
 ]
 
 [project.scripts]
