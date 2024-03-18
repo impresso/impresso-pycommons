@@ -19,7 +19,7 @@ import logging
 
 import dask.bag as db
 from impresso_commons.utils.s3 import fixed_s3fs_glob, IMPRESSO_STORAGEOPT
-from impresso_commons.text.rebuilder import init_logging
+from impresso_commons.utils.utils import init_logger
 from impresso_commons.versioning.helpers import (
     validate_stage,
     DataStage,
@@ -30,6 +30,25 @@ from impresso_commons.versioning.helpers import (
 from impresso_commons.versioning.data_manifest import DataManifest
 
 logger = logging.getLogger(__name__)
+
+# list of optional configurations
+OPT_CONFIG_KEYS = [
+    "input_bucket",
+    "newspapers",
+    "previous_mft_s3_path",
+    "is_patch",
+    "patched_fields",
+    "push_to_git",
+    "notes",
+]
+# list of requirec configurations
+REQ_CONFIG_KEYS = [
+    "data_stage",
+    "output_bucket",
+    "git_repository",
+    "is_staging",
+    "file_extensions",
+]
 
 
 def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
@@ -52,7 +71,7 @@ def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
     extension_filter = f"*{ext}" if "." in ext else f"*.{ext}"
 
     # if newspapers is empty, include all newspapers
-    if len(config["newspapers"]) == 0:
+    if config["newspapers"] is None or len(config["newspapers"]) == 0:
         # return all filenames in the given bucket partition with the correct extension
         return fixed_s3fs_glob(os.path.join(config["output_bucket"], extension_filter))
 
@@ -90,6 +109,32 @@ def compute_stats_for_stage(
     )
 
 
+def validate_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Ensure all required configurations are defined, add any missing optional ones.
+
+    Args:
+        config (dict[str, Any]): Provided configuration dict to compute the manifest.
+
+    Raises:
+        ValueError: Some required arguments of the configuration are missing.
+
+    Returns:
+        dict[str, Any]: Updated config, with any mssing optional argument set to None.
+    """
+    logger.info(
+        "Validating that the provided configuration has all required arugments."
+    )
+    if not all([k in config for k in REQ_CONFIG_KEYS]):
+        raise ValueError(f"Missing some required configurations: {REQ_CONFIG_KEYS}")
+
+    for k in OPT_CONFIG_KEYS:
+        if k not in config:
+            logger.debug("%s was missing form the configuration, setting it to None", k)
+            config[k] = None
+
+    return config
+
+
 def create_manifest(config_dict: dict[str, Any]) -> None:
     """Given its configuration, generate the manifest for a given s3 bucket partition.
 
@@ -100,8 +145,14 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     Args:
         config_dict (dict[str, Any]): Configuration following the guidelines.
     """
-    # ensure that the provided Data stage is correct
+    # if the logger was not previously inialized, do it
+    if not logger.hasHandlers():
+        init_logger()
+
+    # ensure basic validity of the provided configuration
+    config_dict = validate_config(config_dict)
     stage = validate_stage(config_dict["data_stage"])
+
     logger.info("Starting to generate the manifest for DataStage: '%s'", stage)
 
     logger.info("Fetching the files to consider...")
@@ -172,7 +223,7 @@ def main():
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
 
-    init_logging(log_level, log_file)
+    init_logger(log_level, log_file)
 
     logger.info("Reading the arguments inside %s", config_file_path)
     with open(config_file_path, "r", encoding="utf-8") as f_in:

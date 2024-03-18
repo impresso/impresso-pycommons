@@ -49,15 +49,17 @@ def get_pkg_resource(
     return file_manager.enter_context(importlib_resources.as_file(ref))
 
 
-def init_logger(level, file: str | None = None):
+def init_logger(
+    level: int = logging.INFO, file: str | None = None
+) -> logging.RootLogger:
     """Initialises the root logger.
 
-    :param level: desired level of logging (default: logging.INFO)
-    :type level: int
-    :param file:
-    :type file: str
-    :return: the initialised logger
-    :rtype: `logging.RootLogger`
+    Args:
+        level (int, optional): desired level of logging. Defaults to logging.INFO.
+        file (str | None, optional): _description_. Defaults to None.
+
+    Returns:
+        logging.RootLogger: the initialised logger
     """
     # Initialise the logger
     root_logger = logging.getLogger("")
