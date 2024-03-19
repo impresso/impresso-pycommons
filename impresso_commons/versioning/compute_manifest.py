@@ -72,9 +72,11 @@ def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
 
     # if newspapers is empty, include all newspapers
     if config["newspapers"] is None or len(config["newspapers"]) == 0:
+        logger.info("Fetching the files to consider for all titles...")
         # return all filenames in the given bucket partition with the correct extension
         return fixed_s3fs_glob(os.path.join(config["output_bucket"], extension_filter))
 
+    logger.info("Fetching the files to consider for titles %s...", config["newspapers"])
     s3_files = []
     for np in config["newspapers"]:
         s3_files.extend(
@@ -152,17 +154,20 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     # ensure basic validity of the provided configuration
     config_dict = validate_config(config_dict)
     stage = validate_stage(config_dict["data_stage"])
+    logger.info("Provided config validated.")
 
     logger.info("Starting to generate the manifest for DataStage: '%s'", stage)
 
-    logger.info("Fetching the files to consider...")
     # fetch the names of the files to consider
     s3_files = get_files_to_consider(config_dict)
+
+    logger.info("Collected a total of %s files, reading them...", len(s3_files))
     # load the selected files in dask bags
     processed_files = db.read_text(s3_files, storage_options=IMPRESSO_STORAGEOPT).map(
         json.loads
     )
 
+    logger.info("Files loaded successfully, initialising the manifest.")
     # init the git repo object for the processing's repository.
     repo = git.Repo(config_dict["git_repository"])
 
@@ -186,15 +191,19 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
         previous_mft_path=prev_mft if prev_mft != "" else None,
     )
 
-    logger.info("Starting to compute the statistics on the fetches files...")
+    logger.info("Starting to compute the statistics on the fetched files...")
     computed_stats = compute_stats_for_stage(processed_files, stage)
 
-    logger.info("Populating the manifest with the resulting yearly statistics...")
+    logger.info(
+        "Populating the manifest with the resulting %s yearly statistics founc...",
+        len(computed_stats),
+    )
     for stats in computed_stats:
         title = stats["np_id"]
         year = stats["year"]
         del stats["np_id"]
         del stats["year"]
+        logger.debug("Adding %s to %s-%s", stats, title, year)
         manifest.add_by_title_year(title, year, stats)
 
     logger.info("Finalizing the manifest, and computing the result...")
