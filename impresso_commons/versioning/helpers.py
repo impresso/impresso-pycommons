@@ -575,9 +575,9 @@ def compute_stats_in_entities_bag(
                 "issues": "-".join(ci["id"].split("-")[:-1]),
                 "content_items_out": 1,
                 "ne_mentions": len(ci["nes"]),
-                "ne_entities": set(
-                    [m["wkd_id"] for m in ci["nes"] if m["wkd_id"] != "NIL"]
-                ),
+                "ne_entities": sorted(
+                    list(set([m["wkd_id"] for m in ci["nes"] if m["wkd_id"] != "NIL"]))
+                ),  # sorted list to ensure all are the same
             }
         )
         .to_dataframe(

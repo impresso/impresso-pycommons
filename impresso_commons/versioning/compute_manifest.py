@@ -162,6 +162,7 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     s3_files = get_files_to_consider(config_dict)
 
     logger.info("Collected a total of %s files, reading them...", len(s3_files))
+    logger.debug("The list of files selected is: %s", s3_files)
     # load the selected files in dask bags
     processed_files = db.read_text(s3_files, storage_options=IMPRESSO_STORAGEOPT).map(
         json.loads
@@ -238,6 +239,8 @@ def main():
     with open(config_file_path, "r", encoding="utf-8") as f_in:
         config_dict = json.load(f_in)
 
+    logger.info("Provided configuration: ")
+    logger.info(config_dict)
     create_manifest(config_dict)
 
 
