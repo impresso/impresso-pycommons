@@ -112,6 +112,9 @@ def rebuild_text(
 
                 for n, token in enumerate(line["t"]):
                     region = {}
+                    if "c" not in token:
+                        print(f"'c' was not present in token: {token}, line: {line}")
+                        continue
                     region["c"] = token["c"]
                     region["s"] = len(string)
 

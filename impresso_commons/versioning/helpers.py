@@ -42,6 +42,7 @@ class DataStage(StrEnum):
     CANONICAL = "canonical"
     REBUILT = "rebuilt"
     EVENIZED = "evenized-rebuilt"
+    PASSIM = "passim"
     EMBEDDINGS = "embeddings"
     ENTITIES = "entities"
     LANGIDENT = "langident"
@@ -49,6 +50,9 @@ class DataStage(StrEnum):
     OCRQA = "orcqa"
     TEXT_REUSE = "text-reuse"
     TOPICS = "topics"
+    SOLR_TEXT = "solr-text"
+    SOLR_ENTITIES = "solr-entities"
+    SOLR_EMBS = "solr-emb"
 
     @classmethod
     def has_value(cls: Self, value: str) -> bool:

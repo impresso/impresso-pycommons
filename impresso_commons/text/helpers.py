@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 IIIF_ENDPOINT_BASE_2_SUFFIX = {
     "https://ub-sipi.ub.unibas.ch/impresso": "max/0/default.jpg",  # suffix for SWA data
-    "https://scriptorium.bcu-lausanne.ch/api": "450,/0/default.jpg",  # suffix for BCUL data
+    "https://scriptorium.bcu-lausanne.ch/api": "300,/0/default.jpg",  # suffix for BCUL data, sometimes 300 can be replaced by larger values
 }
 
 WHITESPACE_RULES = {
@@ -289,7 +289,7 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
 
         # SWA and BCUL data have a different image suffix than other endpoints
         for iiif_base, iiif_suffix in IIIF_ENDPOINT_BASE_2_SUFFIX.items():
-            img_suffix = iiif_suffix if uri_base in iiif_base else img_suffix
+            img_suffix = iiif_suffix if iiif_base in uri_base else img_suffix
 
         if old_suffix == "default.jpg":
             # iiif was already constructed according to needs.

@@ -30,15 +30,16 @@ class DataStatistics(ABC):
         granularity (str): The granularity of the statistics with respect to the data.
         element (str, optional): The specific element associated with the statistics.
             Defaults to "" (empty string).
-        counts (dict[str, int] | None, optional): Initial counts for statistics.
-            Defaults to None.
+        counts (dict[str, int | dict[str, int]] | None, optional): Initial counts for
+            statistics. Defaults to None.
 
     Attributes:
         stage (DataStage): The stage of data the stats are computed on.
         granularity (str): The granularity of the statistics with respect to the data.
         element (str): The specific element associated with the statistics.
         count_keys (list[str]): The count keys for these statistics.
-        counts (dict[str, int]): The count statistics computed on the specific data.
+        counts (dict[str, int | dict[str, int]]): The count statistics computed on the
+            specific data, can include frequency dicts.
     """
 
     def __init__(
@@ -46,7 +47,7 @@ class DataStatistics(ABC):
         data_stage: DataStage | str,
         granularity: str,
         element: str | None = None,
-        counts: dict[str, int] | None = None,
+        counts: dict[str, int | dict[str | int]] | None = None,
     ) -> None:
 
         self.stage = validate_stage(data_stage)
@@ -65,22 +66,25 @@ class DataStatistics(ABC):
         """Define the count keys for these specific statistics."""
 
     @abstractmethod
-    def _validate_count_keys(self, new_counts: dict[str, int]) -> bool:
+    def _validate_count_keys(self, new_counts: dict[str, int | dict[str, int]]) -> bool:
         """Validate the keys of new counts provided against defined count keys."""
 
-    def init_counts(self) -> dict[str, int]:
+    def init_counts(self) -> dict[str, int | dict[str, int]]:
         """Initialize a dict with all the keys associated to this object.
 
         Returns:
-            dict[str, int]: A dict with all defined keys, and values initialized to 0.
+            dict[str, int | dict[str, int]]: A dict with all defined keys, and values
+                initialized to 0 (or to empty frequency dicts).
         """
-        return {k: 0 for k in self.count_keys}
+        return {k: 0 if "fd" not in k else {} for k in self.count_keys}
 
-    def add_counts(self, new_counts: dict[str, int], replace: bool = False) -> bool:
+    def add_counts(
+        self, new_counts: dict[str, int | dict[str, int]], replace: bool = False
+    ) -> bool:
         """Add new counts to the existing counts if the new keys are validated.
 
         Args:
-            new_counts (dict[str, int]): New counts to be added.
+            new_counts (dict[str, int | dict[str, int]]): New counts to be added.
 
         Returns:
             bool: True if the counts were valid and could be added, False otherwise.
@@ -95,7 +99,16 @@ class DataStatistics(ABC):
                 self.counts = new_counts
             else:
                 for k, v in new_counts.items():
-                    self.counts[k] += v
+                    if k.endswith("_fd"):
+                        # some fields can be frequency dicts
+                        for v_k, v_f in v.items():
+                            self.counts[k][v_k] = (
+                                v_f
+                                if v_k not in self.counts[k]
+                                else self.counts[k][v_k] + v_f
+                            )
+                    else:
+                        self.counts[k] += v
             return True
 
         return False
@@ -126,7 +139,11 @@ class DataStatistics(ABC):
                 logger.warning("Missing the element when pretty-printing!")
 
         if include_counts:
-            stats_dict["stats"] = {k: v for k, v in self.counts.items() if v > 0}
+            stats_dict["stats"] = {
+                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v if v_f > 0}
+                for k, v in self.counts.items()
+                if v > 0
+            }
 
         return stats_dict
 
@@ -163,6 +180,8 @@ class NewspaperStatistics(DataStatistics):
         "ne_entities",
         "embeddings_el",
         "topics",
+        "lang_fd",  # '_fd' suffix signifies a frenquency dict
+        "text_reuse_clusters",
     ]
 
     def _define_count_keys(self) -> list[str]:
@@ -176,41 +195,53 @@ class NewspaperStatistics(DataStatistics):
         start_index = int(self.granularity != "corpus")
         # all counts should have 'content_items_out'
         count_keys = [self.possible_count_keys[3]]
+        # add 'issues' and 'titles' (only if corpus granularity)
+        count_keys.extend(self.possible_count_keys[start_index:2])
         match self.stage:
             case DataStage.CANONICAL:
-                # add 'titles', 'issues', 'pages' and 'images'
-                count_keys.extend(self.possible_count_keys[start_index:3])
+                # add 'pages' and 'images'
+                count_keys.extend(self.possible_count_keys[2])
                 count_keys.append(self.possible_count_keys[5])
+                # keys: 'content_items_out', 'titles', 'issues', 'pages', 'images'
             case DataStage.REBUILT:
-                # add 'titles', 'issues', 'ft_tokens'
-                count_keys.extend(self.possible_count_keys[start_index:2])
+                # add 'ft_tokens'
                 count_keys.append(self.possible_count_keys[4])
+                # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
             case DataStage.EMBEDDINGS:
                 # add 'embeddings'
                 count_keys.append(self.stage.value)
             case DataStage.ENTITIES:
-                # add 'titles', 'issues', 'ne_entities', 'ne_mentions'
-                count_keys.extend(self.possible_count_keys[start_index:2])
+                # add 'ne_entities', 'ne_mentions'
                 count_keys.extend(self.possible_count_keys[7:9])
+                # keys: 'content_items_out', 'titles', 'issues', 'ne_entities', 'ne_mentions'
+            case DataStage.PASSIM:
+                # add 'ft_tokens'
+                count_keys.append(self.possible_count_keys[4])
+                # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
             case DataStage.LANGIDENT:
-                # add 'languages'
+                # add 'titles', 'issues', 'images', 'lang_fd'
                 count_keys.append(self.possible_count_keys[start_index:2])
+                count_keys.append(self.possible_count_keys[5])
+                count_keys.append(self.possible_count_keys[11])
             case DataStage.TEXT_REUSE:
                 # add 'text_reuse_clusters'
-                count_keys.append(self.possible_count_keys[-1])
+                count_keys.append(self.possible_count_keys[12])
             case DataStage.TOPICS:
                 # add 'topics'
-                count_keys.append(self.stage.topics)
+                count_keys.append(self.possible_count_keys[10])
+            # case DataStage.SOLR_TEXT:
+
+            # keys: 'content_items_out', 'titles', 'issues'
         return count_keys
 
-    def _validate_count_keys(self, new_counts: dict[str, int]) -> bool:
+    def _validate_count_keys(self, new_counts: dict[str, int | dict[str, int]]) -> bool:
         """Validate the keys of new counts provided against defined count keys.
 
         Valid new counts shouldn't have keys absent from the defined `attr:count_keys`
         or non-integer values.
 
         Args:
-            new_counts (dict[str, int]): New counts to validate
+            new_counts (dict[str, int | dict[str, int]]): New counts to validate
 
         Returns:
             bool: True if `new_counts` are valid, False otherwise.
@@ -223,7 +254,10 @@ class NewspaperStatistics(DataStatistics):
             logger.error(warn_msg)
             return False
 
-        if not all(v >= 0 for v in new_counts.values()):
+        if not all(
+            v >= 0 if "fd" not in k else all(fv > 0 for fv in v.values())
+            for k, v in new_counts.items()
+        ):
             logger.error(
                 "Provided count values are not all integers and will not be used."
             )
@@ -245,6 +279,10 @@ class NewspaperStatistics(DataStatistics):
         stats_dict = super().pretty_print()
         # add the newspaper stats
         if include_counts:
-            stats_dict["nps_stats"] = {k: v for k, v in self.counts.items() if v > 0}
+            stats_dict["nps_stats"] = {
+                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v if v_f > 0}
+                for k, v in self.counts.items()
+                if v > 0
+            }
 
         return stats_dict
