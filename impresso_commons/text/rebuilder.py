@@ -22,6 +22,7 @@ Options:
 --prev-manifest=<pm> Optional S3 path to the previous manifest to use for the manifest generation
 """  # noqa: E501
 
+import sys
 import traceback
 import datetime
 import json
@@ -30,8 +31,8 @@ import logging
 import os
 import shutil
 import signal
-import git
 from typing import Any
+import git
 
 import dask.bag as db
 import jsonlines
@@ -51,7 +52,7 @@ from impresso_commons.utils import Timer, timestamp
 from impresso_commons.utils.s3 import get_s3_resource
 
 from impresso_commons.versioning.data_manifest import DataManifest
-from impresso_commons.versioning.helpers import DataStage, compute_stats_in_rebuilt_bag
+from impresso_commons.versioning.helpers import compute_stats_in_rebuilt_bag
 
 logger = logging.getLogger(__name__)
 
@@ -96,14 +97,14 @@ def rebuild_text(
 
     # in order to be able to keep line break information
     # we iterate over a list of lists (lines of tokens)
-    for region_n, region in enumerate(page):
+    for region in page:
 
         if len(string) > 0:
             offsets["region"].append(len(string))
 
         coordinates["regions"].append(region["c"])
 
-        for i, para in enumerate(region["p"]):
+        for para in region["p"]:
 
             if len(string) > 0:
                 offsets["para"].append(len(string))
@@ -184,9 +185,9 @@ def rebuild_text_passim(
     # in order to be able to keep line break information
     # we iterate over a list of lists (lines of tokens)
 
-    for region_n, region in enumerate(page):
+    for region in page:
 
-        for i, para in enumerate(region["p"]):
+        for para in region["p"]:
 
             for line in para["l"]:
 
@@ -213,7 +214,7 @@ def rebuild_text_passim(
 
                     # if token is the last in a line
                     if n == len(line["t"]) - 1:
-                        tmp = "{}\n".format(token["tx"])
+                        tmp = f"{token['tx']}\n"
                         region_string += tmp
                     else:
                         ws = insert_whitespace(
@@ -252,8 +253,7 @@ def rebuild_for_solr(content_item: dict[str, Any]) -> dict[str, Any]:
     issue_id = "-".join(article_id.split("-")[:-1])
 
     page_file_names = {
-        p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in content_item["m"]["pp"]
+        p: f"{issue_id}-p{str(p).zfill(4)}.json" for p in content_item["m"]["pp"]
     }
 
     year, month, day, _, ci_num = article_id.split("-")[1:]
@@ -338,17 +338,14 @@ def rebuild_for_passim(content_item: dict[str, Any]) -> dict[str, Any]:
     Returns:
         dict[str, Any]: The rebuilt content-item built for passim.
     """
-    np, date, edition, ci_type, ci_number, ext = parse_canonical_filename(
-        content_item["m"]["id"]
-    )
+    np, date, _, _, _, _ = parse_canonical_filename(content_item["m"]["id"])
 
     article_id = content_item["m"]["id"]
     logger.debug("Started rebuilding article %s", article_id)
     issue_id = "-".join(article_id.split("-")[:-1])
 
     page_file_names = {
-        p: "{}-p{}.json".format(issue_id, str(p).zfill(4))
-        for p in content_item["m"]["pp"]
+        p: f"{issue_id}-p{str(p).zfill(4)}.json" for p in content_item["m"]["pp"]
     }
 
     article_lang = content_item["m"]["l"] if "l" in content_item["m"] else None
@@ -408,18 +405,20 @@ def compress(key, json_files, output_dir):
     newspaper, year = key.split("-")
     filename = f"{newspaper}-{year}.jsonl.bz2"
     filepath = os.path.join(output_dir, filename)
-    logger.info(f"Compressing {len(json_files)} JSON files into {filepath}")
+    logger.info("Compressing %s JSON files into %s", len(json_files), filepath)
     print(f"Compressing {len(json_files)} JSON files into {filepath}")
 
     with smart_open(filepath, "wb") as fout:
         writer = jsonlines.Writer(fout)
 
         for json_file in json_files:
-            with open(json_file, "r") as inpf:
+            with open(json_file, "r", encoding="utf-8") as inpf:
                 reader = jsonlines.Reader(inpf)
                 articles = list(reader)
                 writer.write_all(articles)
-            logger.info(f"Written {len(articles)} docs from {json_file} to {filepath}")
+            logger.info(
+                "Written %s docs from %s to %s", len(articles), json_file, filepath
+            )
 
         writer.close()
 
@@ -428,7 +427,7 @@ def compress(key, json_files, output_dir):
 
     temp_dir = os.path.dirname(json_files[0])
     os.rmdir(temp_dir)
-    logger.info(f"Removed temporary directory and files in {temp_dir}")
+    logger.info("Removed temporary directory and files in %s", temp_dir)
 
     return (key, filepath)
 
@@ -452,8 +451,8 @@ def upload(sort_key, filepath, bucket_name=None):
     """
     # create connection with bucket
     # copy contents to s3 key
-    newspaper, year = sort_key.split("-")
-    key_name = "{}/{}".format(newspaper, os.path.basename(filepath))
+    newspaper, _ = sort_key.split("-")
+    key_name = f"{newspaper}/{os.path.basename(filepath)}"
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)
@@ -508,7 +507,7 @@ def _article_without_problem(article):
 
 
 def rebuild_issues(
-    issues, input_bucket, output_dir, dask_client, format="solr", filter_language=None
+    issues, input_bucket, output_dir, dask_client, _format="solr", filter_language=None
 ):
     """Rebuild a set of newspaper issues into a given format.
 
@@ -530,16 +529,16 @@ def rebuild_issues(
                 os.remove(os.path.join(path, f))
 
     # determine which rebuild function to apply
-    if format == "solr":
+    if _format == "solr":
         rebuild_function = rebuild_for_solr
-    elif format == "passim":
+    elif _format == "passim":
         rebuild_function = rebuild_for_passim
     else:
         raise NotImplementedError
 
     # create a temporary output directory named after newspaper and year
     # e.g. IMP-1994
-    issue, issue_json = issues[0]
+    issue, _ = issues[0]
     key = f"{issue.journal}-{issue.date.year}"
     issue_dir = os.path.join(output_dir, key)
     mkdir(issue_dir)
@@ -635,16 +634,16 @@ def init_logging(level, file):
     return root_logger
 
 
-def main():
+def main() -> None:
 
-    def signal_handler(*args):
+    def signal_handler():
         # Handle any cleanup here
         print(
             "SIGINT or CTRL-C detected. Exiting gracefully"
             " and shutting down the dask local cluster"
         )
         client.shutdown()
-        exit(0)
+        sys.exit(0)
 
     arguments = docopt(__doc__)
     clear_output = arguments["--clear"]
@@ -677,23 +676,25 @@ def main():
             shutil.rmtree(outp_dir)
             os.mkdir(outp_dir)
 
-    with open(filter_config_file, "r") as file:
+    with open(filter_config_file, "r", encoding="utf-8") as file:
         config = json.load(file)
 
     # start the dask local cluster
     if scheduler is None:
         client = Client(n_workers=nworkers, threads_per_worker=1)
     else:
-        cluster = None
         client = Client(scheduler)
 
     dask_cluster_msg = f"Dask local cluster: {client}"
     logger.info(dask_cluster_msg)
     print(dask_cluster_msg)
 
+    # the created manifest is not the same based on the output format
+    data_stage = "rebuilt" if output_format == "solr" else "passim"
+
     # initialize manifest
     manifest = DataManifest(
-        data_stage="rebuilt",
+        data_stage=data_stage,
         s3_output_bucket=output_bucket_name,
         s3_input_bucket=bucket_name,
         git_repo=git.Repo(repo_path),
@@ -731,13 +732,13 @@ def main():
                         input_bucket=bucket_name,
                         output_dir=outp_dir,
                         dask_client=client,
-                        format=output_format,
+                        _format=output_format,
                         filter_language=languages,
                     )
                     rebuilt_issues.append((issue_key, json_files))
                     del input_issues
 
-                    logger.debug(f"year_stats: {year_stats}]")
+                    logger.debug("year_stats: %s", year_stats)
                     manifest.add_by_title_year(newspaper, year, year_stats[0])
                     titles.add(newspaper)
 

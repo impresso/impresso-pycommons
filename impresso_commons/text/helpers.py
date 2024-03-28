@@ -5,8 +5,6 @@ import logging
 import os
 from typing import Any
 
-from dask import bag as db
-
 from impresso_commons.utils.s3 import (
     IMPRESSO_STORAGEOPT,
     alternative_read_text,
@@ -17,8 +15,10 @@ from impresso_commons.utils.s3 import (
 logger = logging.getLogger(__name__)
 
 IIIF_ENDPOINT_BASE_2_SUFFIX = {
-    "https://ub-sipi.ub.unibas.ch/impresso": "max/0/default.jpg",  # suffix for SWA data
-    "https://scriptorium.bcu-lausanne.ch/api": "300,/0/default.jpg",  # suffix for BCUL data, sometimes 300 can be replaced by larger values
+    # suffix for SWA data
+    "https://ub-sipi.ub.unibas.ch/impresso": "max/0/default.jpg",
+    # suffix for BCUL data, sometimes 300 can be replaced by larger values
+    "https://scriptorium.bcu-lausanne.ch/api": "300,/0/default.jpg",
 }
 
 WHITESPACE_RULES = {
@@ -91,7 +91,7 @@ def read_issue(issue, bucket_name, s3_client=None):
     file_content = content_object.get()["Body"].read().decode("utf-8")
     issue_json = json.loads(file_content)
     issue_json["s3_version"] = get_s3_versions(bucket_name, issue.path)[0][0]
-    logger.info("Read JSON of {}".format(issue))
+    logger.info("Read JSON of %s", issue)
     return (issue, issue_json)
 
 
@@ -103,10 +103,10 @@ def read_page(page_key, bucket_name, s3_client):
         file_content = content_object.get()["Body"].read().decode("utf-8")
         page_json = json.loads(file_content)
         page_json["s3v"] = get_s3_versions(bucket_name, page_key)[0][0]
-        logger.info("Read page {} from bucket {}".format(page_key, bucket_name))
+        logger.info("Read page %s from bucket %s", page_key, bucket_name)
         return page_json
     except Exception as e:
-        logger.error(f"There was a problem reading {page_key}: {e}")
+        logger.error("There was a problem reading %s: %s", page_key, e)
         return None
 
 
@@ -125,12 +125,6 @@ def read_issue_pages(issue, issue_json, bucket=None):
         for page in alternative_read_text(filename, IMPRESSO_STORAGEOPT)
     ]
 
-    """
-    pages = db.read_text(
-        filename,
-        storage_options=IMPRESSO_STORAGEOPT
-    ).map(lambda x: json.loads(x)).compute()
-    """
     print(filename)
     issue_json["pp"] = pages
     del pages
@@ -165,8 +159,11 @@ def rejoin_articles(issue, issue_json):
                 article["has_problem"] = True
                 articles.append(article)
                 logger.error(
-                    f"Page {page_no_string} not found for item {art_id}"
-                    f"Issue {issue_json['id']} has pages {page_ids}"
+                    "Page %s not found for item %s. Issue %s has pages %s",
+                    page_no_string,
+                    art_id,
+                    issue_json["id"],
+                    page_ids,
                 )
                 continue
 
@@ -195,7 +192,7 @@ def pages_to_article(article, pages):
     """Return all text regions belonging to a given article."""
     try:
         art_id = article["m"]["id"]
-        print("Extracting text regions for article {}".format(art_id))
+        print("Extracting text regions for article %s", art_id)
         regions_by_page = []
         for page in pages:
             regions_by_page.append(
@@ -206,7 +203,7 @@ def pages_to_article(article, pages):
         article["has_problem"] = False
         article["pprr"] = regions_by_page
         return article
-    except Exception as e:
+    except Exception:
         article["has_problem"] = True
         return article
 
