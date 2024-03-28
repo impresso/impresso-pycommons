@@ -453,6 +453,10 @@ def upload(sort_key, filepath, bucket_name=None):
     # copy contents to s3 key
     newspaper, _ = sort_key.split("-")
     key_name = f"{newspaper}/{os.path.basename(filepath)}"
+    if "/" in bucket_name:
+        # if the provided bucket also contains a partition, add it to the key name
+        bucket_name, partition = bucket_name.split("/")
+        key_name = f"{partition}/{key_name}"
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)

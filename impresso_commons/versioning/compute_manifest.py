@@ -106,6 +106,8 @@ def compute_stats_for_stage(
             return compute_stats_in_rebuilt_bag(files_bag)
         case DataStage.ENTITIES:
             return compute_stats_in_entities_bag(files_bag)
+        case DataStage.PASSIM:
+            return compute_stats_in_rebuilt_bag(files_bag)
     raise NotImplementedError(
         "The function computing statistics for this DataStage is not yet implemented."
     )
