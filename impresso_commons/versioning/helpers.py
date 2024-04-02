@@ -539,9 +539,10 @@ def compute_stats_in_rebuilt_bag(
             "year": str,
             "issues": str,
             "content_items_out": int,
-            "ft_tokens": int,
         }
     )
+    if not passim:
+        df_meta.update({"ft_tokens": int,})
 
     rebuilt_count_df = (
         rebuilt_articles.map(lambda rf: counts_for_rebuilt(rf, include_np=include_np, passim=passim))
