@@ -430,8 +430,8 @@ def counts_for_canonical_issue(
 
 
 def counts_for_rebuilt(
-    rebuilt_ci: dict[str, Any], include_np: bool = False
-) -> dict[str, Union[int, str]]:
+    rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
+) -> dict[str, int | str]:
 
     counts = {"np_id": rebuilt_ci["id"].split("-")[0]} if include_np else {}
     counts.update(
@@ -441,11 +441,17 @@ def counts_for_rebuilt(
                 rebuilt_ci["id"].split("-")[:-1]
             ),  # count the issues represented
             "content_items_out": 1,
-            "ft_tokens": (
-                len(rebuilt_ci["ft"].split()) if "ft" in rebuilt_ci else 0
-            ),  # split on spaces to count tokens
         }
     )
+    if not passim:
+        counts.update(
+            {
+                "ft_tokens": (
+                    len(rebuilt_ci["ft"].split()) if "ft" in rebuilt_ci else 0
+                ),  # split on spaces to count tokens
+            }
+        )
+
     return counts
 
 
@@ -523,10 +529,15 @@ tunique = dd.Aggregation("tunique", chunk, agg, finalize)
 
 
 def compute_stats_in_rebuilt_bag(
-    rebuilt_articles: db.core.Bag, key: str = "", include_np: bool = False
-) -> list[dict[str, Union[int, str]]]:
+    rebuilt_articles: db.core.Bag,
+    key: str = "",
+    include_np: bool = False,
+    passim: bool = False,
+) -> list[dict[str, int | str]]:
     # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
     # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
+    print("Fetched all files, gathering desired information.")
+    logger.info("Fetched all files, gathering desired information.")
 
     # define the list of columns in the dataframe
     df_meta = {"np_id": str} if include_np else {}
@@ -535,12 +546,19 @@ def compute_stats_in_rebuilt_bag(
             "year": str,
             "issues": str,
             "content_items_out": int,
-            "ft_tokens": int,
         }
     )
+    if not passim:
+        df_meta.update(
+            {
+                "ft_tokens": int,
+            }
+        )
 
     rebuilt_count_df = (
-        rebuilt_articles.map(lambda rf: counts_for_rebuilt(rf, include_np=include_np))
+        rebuilt_articles.map(
+            lambda rf: counts_for_rebuilt(rf, include_np=include_np, passim=passim)
+        )
         .to_dataframe(meta=df_meta)
         .persist()
     )
@@ -561,6 +579,7 @@ def compute_stats_in_rebuilt_bag(
         logger.info("%s for %s", msg, key)
     else:
         logger.info(msg)
+
     return aggregated_df.to_bag(format="dict").compute()
 
 

@@ -103,11 +103,11 @@ def compute_stats_for_stage(
         case DataStage.CANONICAL:
             return compute_stats_in_canonical_bag(files_bag)
         case DataStage.REBUILT:
-            return compute_stats_in_rebuilt_bag(files_bag)
+            return compute_stats_in_rebuilt_bag(files_bag, include_np=True)
         case DataStage.ENTITIES:
             return compute_stats_in_entities_bag(files_bag)
         case DataStage.PASSIM:
-            return compute_stats_in_rebuilt_bag(files_bag)
+            return compute_stats_in_rebuilt_bag(files_bag, include_np=True, passim=True)
     raise NotImplementedError(
         "The function computing statistics for this DataStage is not yet implemented."
     )
@@ -198,9 +198,11 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     computed_stats = compute_stats_for_stage(processed_files, stage)
 
     logger.info(
-        "Populating the manifest with the resulting %s yearly statistics founc...",
+        "Populating the manifest with the resulting %s yearly statistics found...",
         len(computed_stats),
     )
+    logger.debug("computed_stats: %s", computed_stats)
+
     for stats in computed_stats:
         title = stats["np_id"]
         year = stats["year"]

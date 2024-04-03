@@ -12,6 +12,7 @@ import boto3
 from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 from dotenv import load_dotenv
+from typing import Union
 
 from impresso_commons.utils import _get_cores
 
@@ -472,7 +473,7 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
 
 def alternative_read_text(
     s3_key: str, s3_credentials: dict, line_by_line: bool = True
-) -> list[str] | str:
+) -> Union[list[str], str]:
     """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
     Note:
