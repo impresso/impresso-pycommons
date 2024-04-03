@@ -6,7 +6,7 @@ import os
 import logging
 import pathlib
 from contextlib import ExitStack
-from typing import Any
+from typing import Any, Union
 import jsonschema
 import importlib_resources
 
@@ -50,7 +50,7 @@ def get_pkg_resource(
 
 
 def init_logger(
-    level: int = logging.INFO, file: str | None = None
+    level: int = logging.INFO, file: Union[str, None] = None
 ) -> logging.RootLogger:
     """Initialises the root logger.
 
@@ -100,5 +100,8 @@ def validate_against_schema(
     try:
         jsonschema.validate(json_to_validate, json_schema)
     except Exception as e:
-        logger.error("The provided JSON could not be validated against its schema.")
+        logger.error(
+            "The provided JSON could not be validated against its schema: %s.",
+            json_to_validate,
+        )
         raise e

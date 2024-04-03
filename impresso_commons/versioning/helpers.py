@@ -7,7 +7,7 @@ import os
 import re
 import copy
 
-from typing import Any, Self
+from typing import Any, Self, Union
 from enum import StrEnum
 from dask import dataframe as dd
 import dask.bag as db
@@ -74,7 +74,7 @@ class DataStage(StrEnum):
 
 def validate_stage(
     data_stage: str, return_value_str: bool = False
-) -> DataStage | str | None:
+) -> Union[DataStage, str, None]:
     """Validate the provided data stage if it's in the DataStage Enum (key or value).
 
     Args:
@@ -114,7 +114,9 @@ def validate_granularity(value: str, for_stats: bool = True):
 ###### VERSION FUNCTIONS ######
 
 
-def validate_version(v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$") -> str | None:
+def validate_version(
+    v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
+) -> Union[str, None]:
     # accept versions with hyphens in case of mistake
     v = v.replace("-", ".")
 
@@ -132,7 +134,7 @@ def version_as_list(version: str) -> list[int]:
     return version[start:].split(sep)
 
 
-def extract_version(name_or_path: str, as_int: bool = False) -> str | list[str]:
+def extract_version(name_or_path: str, as_int: bool = False) -> Union[str, list[str]]:
     # in the case it's a path
     basename = os.path.basename(name_or_path)
     version = basename.replace(".json", "").split("_")[-1]
@@ -162,8 +164,8 @@ def increment_version(prev_version: str, increment: str) -> str:
 
 
 def find_s3_data_manifest_path(
-    bucket_name: str, data_stage: str, partition: str | None = None
-) -> str | None:
+    bucket_name: str, data_stage: str, partition: Union[str, None] = None
+) -> Union[str, None]:
 
     # fetch the data stage as the naming value
     if type(data_stage) == DataStage:
@@ -201,8 +203,10 @@ def find_s3_data_manifest_path(
 
 
 def read_manifest_from_s3(
-    bucket_name: str, data_stage: DataStage | str, partition: str | None = None
-) -> tuple[str, dict[str, Any]] | tuple[None, None]:
+    bucket_name: str,
+    data_stage: Union[DataStage, str],
+    partition: Union[str, None] = None,
+) -> Union[tuple[str, dict[str, Any]], tuple[None, None]]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
     if manifest_s3_path is None:
@@ -216,7 +220,7 @@ def read_manifest_from_s3(
     return manifest_s3_path, json.loads(raw_text)
 
 
-def read_manifest_from_s3_path(manifest_s3_path: str) -> dict[str, Any] | None:
+def read_manifest_from_s3_path(manifest_s3_path: str) -> Union[dict[str, Any], None]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
     try:
         raw_text = alternative_read_text(
@@ -302,7 +306,7 @@ def write_and_push_to_git(
     git_repo: git.Repo,
     path_in_repo: str,
     filename: str,
-    commit_msg: str | None = None,
+    commit_msg: Union[str, None] = None,
 ) -> tuple[bool, str]:
     # given the serialized dump or a json file, write it in local git repo
     # folder and push it to the given subpath on git
@@ -316,7 +320,7 @@ def write_and_push_to_git(
 
 
 def git_commit_push(
-    full_git_filepath: str, git_repo: git.Repo, commit_msg: str | None = None
+    full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
 ) -> bool:
     # add, commit and push the file at the given path.
     filename = os.path.basename(full_git_filepath)
@@ -391,8 +395,8 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
 def init_media_info(
     add: bool = True,
     full_title: bool = True,
-    years: list[str] | None = None,
-    fields: list[str] | None = None,
+    years: Union[list[str], None] = None,
+    fields: Union[list[str], None] = None,
 ) -> dict[str, Any]:
     return {
         "update_type": "addition" if add else "modification",
@@ -427,7 +431,7 @@ def counts_for_canonical_issue(
 
 def counts_for_rebuilt(
     rebuilt_ci: dict[str, Any], include_np: bool = False
-) -> dict[str, int | str]:
+) -> dict[str, Union[int, str]]:
 
     counts = {"np_id": rebuilt_ci["id"].split("-")[0]} if include_np else {}
     counts.update(
@@ -520,7 +524,7 @@ tunique = dd.Aggregation("tunique", chunk, agg, finalize)
 
 def compute_stats_in_rebuilt_bag(
     rebuilt_articles: db.core.Bag, key: str = "", include_np: bool = False
-) -> list[dict[str, int | str]]:
+) -> list[dict[str, Union[int, str]]]:
     # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
     # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
 

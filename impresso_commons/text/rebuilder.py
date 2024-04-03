@@ -31,7 +31,7 @@ import logging
 import os
 import shutil
 import signal
-from typing import Any
+from typing import Any, Union
 import git
 
 import dask.bag as db
@@ -72,7 +72,7 @@ TYPE_MAPPINGS = {
 
 
 def rebuild_text(
-    page: list[dict], language: str | None, string: str | None = None
+    page: list[dict], language: Union[str, None], string: Union[str, None] = None
 ) -> tuple[str, dict[list], dict[list]]:
     """Rebuild the text of an article for Solr ingestion.
 
@@ -162,7 +162,7 @@ def rebuild_text(
 
 
 def rebuild_text_passim(
-    page: list[dict], language: str | None, string: str | None = None
+    page: list[dict], language: Union[str, None], string: Union[str, None] = None
 ) -> tuple[str, list[dict]]:
     """The text rebuilding function from pages for passim.
 
@@ -194,6 +194,12 @@ def rebuild_text_passim(
                 for n, token in enumerate(line["t"]):
 
                     region_string = ""
+
+                    if "c" not in token:
+                        # if the coordniates are missing, they should be skipped
+                        logger.debug("Missing 'c' in token %s", token)
+                        print(f"Missing 'c' in token {token}")
+                        continue
 
                     # each page region is a token
                     output_region = {

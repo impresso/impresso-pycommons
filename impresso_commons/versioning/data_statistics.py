@@ -7,7 +7,7 @@ progressively count the number of elements modified or added by the processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Union
 
 # from impresso_commons.versioning.data_manifest import DataStage
 from impresso_commons.versioning.helpers import (
@@ -44,10 +44,10 @@ class DataStatistics(ABC):
 
     def __init__(
         self,
-        data_stage: DataStage | str,
+        data_stage: Union[DataStage, str],
         granularity: str,
-        element: str | None = None,
-        counts: dict[str, int | dict[str | int]] | None = None,
+        element: Union[str, None] = None,
+        counts: Union[dict[str, Union[int, dict[str, int]]], None] = None,
     ) -> None:
 
         self.stage = validate_stage(data_stage)
@@ -66,10 +66,12 @@ class DataStatistics(ABC):
         """Define the count keys for these specific statistics."""
 
     @abstractmethod
-    def _validate_count_keys(self, new_counts: dict[str, int | dict[str, int]]) -> bool:
+    def _validate_count_keys(
+        self, new_counts: dict[str, Union[int, dict[str, int]]]
+    ) -> bool:
         """Validate the keys of new counts provided against defined count keys."""
 
-    def init_counts(self) -> dict[str, int | dict[str, int]]:
+    def init_counts(self) -> dict[str, Union[int, dict[str, int]]]:
         """Initialize a dict with all the keys associated to this object.
 
         Returns:
@@ -79,7 +81,7 @@ class DataStatistics(ABC):
         return {k: 0 if "fd" not in k else {} for k in self.count_keys}
 
     def add_counts(
-        self, new_counts: dict[str, int | dict[str, int]], replace: bool = False
+        self, new_counts: dict[str, Union[int, dict[str, int]]], replace: bool = False
     ) -> bool:
         """Add new counts to the existing counts if the new keys are validated.
 
@@ -200,7 +202,7 @@ class NewspaperStatistics(DataStatistics):
         match self.stage:
             case DataStage.CANONICAL:
                 # add 'pages' and 'images'
-                count_keys.extend(self.possible_count_keys[2])
+                count_keys.append(self.possible_count_keys[2])
                 count_keys.append(self.possible_count_keys[5])
                 # keys: 'content_items_out', 'titles', 'issues', 'pages', 'images'
             case DataStage.REBUILT:
@@ -220,7 +222,6 @@ class NewspaperStatistics(DataStatistics):
                 # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
             case DataStage.LANGIDENT:
                 # add 'titles', 'issues', 'images', 'lang_fd'
-                count_keys.append(self.possible_count_keys[start_index:2])
                 count_keys.append(self.possible_count_keys[5])
                 count_keys.append(self.possible_count_keys[11])
             case DataStage.TEXT_REUSE:
@@ -234,7 +235,9 @@ class NewspaperStatistics(DataStatistics):
             # keys: 'content_items_out', 'titles', 'issues'
         return count_keys
 
-    def _validate_count_keys(self, new_counts: dict[str, int | dict[str, int]]) -> bool:
+    def _validate_count_keys(
+        self, new_counts: dict[str, Union[int, dict[str, int]]]
+    ) -> bool:
         """Validate the keys of new counts provided against defined count keys.
 
         Valid new counts shouldn't have keys absent from the defined `attr:count_keys`
