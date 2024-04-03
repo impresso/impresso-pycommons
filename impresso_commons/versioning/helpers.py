@@ -7,8 +7,9 @@ import os
 import re
 import copy
 
-from typing import Any, Self, Union
-from enum import StrEnum
+from typing import Any, Union
+from typing_extensions import Self
+from strenum import StrEnum
 from dask import dataframe as dd
 import dask.bag as db
 
@@ -431,7 +432,7 @@ def counts_for_canonical_issue(
 
 def counts_for_rebuilt(
     rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
-) -> dict[str, int | str]:
+) -> dict[str, Union[int, str]]:
 
     counts = {"np_id": rebuilt_ci["id"].split("-")[0]} if include_np else {}
     counts.update(
@@ -533,7 +534,7 @@ def compute_stats_in_rebuilt_bag(
     key: str = "",
     include_np: bool = False,
     passim: bool = False,
-) -> list[dict[str, int | str]]:
+) -> list[dict[str, Union[int, str]]]:
     # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
     # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
     print("Fetched all files, gathering desired information.")
