@@ -9,7 +9,7 @@ import os
 import json
 import copy
 
-from typing import Any
+from typing import Any, Union
 from time import strftime
 from git import Repo
 
@@ -46,21 +46,21 @@ class DataManifest:
 
     def __init__(
         self,
-        data_stage: DataStage | str,
+        data_stage: Union[DataStage, str],
         s3_output_bucket: str,  # including partition
         git_repo: Repo,
         temp_dir: str,
         # S3 bucket of the previous stage, None if stage='canonical'
-        s3_input_bucket: str | None = None,
-        staging: bool | None = None,
+        s3_input_bucket: Union[str, None] = None,
+        staging: Union[bool, None] = None,
         # to directly provide the next version
-        new_version: str | None = None,
+        new_version: Union[str, None] = None,
         # to indicate if patch in later stages
-        is_patch: bool | None = False,
+        is_patch: Union[bool, None] = False,
         # to indiate patch in canonical/rebuilt
-        patched_fields: dict[str, list[str]] | list[str] | None = None,
+        patched_fields: Union[dict[str, list[str]], list[str], None] = None,
         # directly provide the s3 path of the manifest to use as base
-        previous_mft_path: str | None = None,
+        previous_mft_path: Union[str, None] = None,
     ) -> None:
 
         # TODO modif for Solr (no output bucket)
@@ -158,7 +158,7 @@ class DataManifest:
 
         return full_s3_path
 
-    def _get_output_branch(self, for_staging: bool | None) -> str:
+    def _get_output_branch(self, for_staging: Union[bool, None]) -> str:
         # TODO recheck logic
         staging_out_bucket = "staging" in self.output_bucket_name
         final_out_bucket = "final" in self.output_bucket_name
@@ -171,7 +171,7 @@ class DataManifest:
         # --> `for_staging` overrides the result.
         return "staging" if staging_out_bucket or for_staging else "master"
 
-    def _get_prev_version_manifest(self) -> dict[str, Any] | None:
+    def _get_prev_version_manifest(self) -> Union[dict[str, Any], None]:
         # previous version manifest is in the output bucket, except when:
         # _prev_mft_s3_path is defined upon instantiation, then use it directly
         logger.debug("Reading the previous version of the manifest from S3.")
@@ -246,7 +246,7 @@ class DataManifest:
     def _get_out_path_within_repo(
         self,
         folder_prefix: str = "data-processing-versioning",
-        stage: DataStage | None = None,
+        stage: Union[DataStage, None] = None,
     ) -> str:
         # TODO add data-indexation for SOLR
         stage = stage if stage is not None else self.stage
@@ -260,7 +260,7 @@ class DataManifest:
     def validate_and_export_manifest(
         self,
         push_to_git: bool = False,
-        commit_msg: str | None = None,
+        commit_msg: Union[str, None] = None,
     ) -> bool:
         msg = "Validating and exporting manifest to s3"
 
@@ -420,7 +420,7 @@ class DataManifest:
 
     def update_info_for_title(
         self, processed_years: set[str], prev_version_years: set[str]
-    ) -> dict[str, str | list]:
+    ) -> dict[str, Union[str, list]]:
         new_info = {"last_modification_date": self._generation_date}
 
         if processed_years == prev_version_years:
@@ -544,7 +544,7 @@ class DataManifest:
         return overall_stats
 
     def compute(
-        self, export_to_git_and_s3: bool = True, commit_msg: str | None = None
+        self, export_to_git_and_s3: bool = True, commit_msg: Union[str, None] = None
     ) -> None:
         # function that will perform all the logic to construct the manifest
         # (similarly to NewsPaperPages)

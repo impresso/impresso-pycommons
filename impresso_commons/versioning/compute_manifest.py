@@ -14,7 +14,7 @@ import json
 import os
 import git
 from docopt import docopt
-from typing import Any
+from typing import Any, Union
 import logging
 
 import dask.bag as db
@@ -51,7 +51,7 @@ REQ_CONFIG_KEYS = [
 ]
 
 
-def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
+def get_files_to_consider(config: dict[str, Any]) -> Union[list[str], None]:
     """Get the list of S3 files to consider based on the provided configuration.
 
     Args:
@@ -88,7 +88,7 @@ def get_files_to_consider(config: dict[str, Any]) -> list[str] | None:
 
 def compute_stats_for_stage(
     files_bag: db.core.Bag, stage: DataStage
-) -> list[dict] | None:
+) -> Union[list[dict], None]:
     """Compute statistics for a specific data stage.
 
     Args:

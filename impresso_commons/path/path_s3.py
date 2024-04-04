@@ -6,6 +6,7 @@ import logging
 import warnings
 from datetime import date
 from collections import namedtuple
+from typing import Union
 
 from dask.diagnostics import ProgressBar
 import dask.bag as db
@@ -359,8 +360,8 @@ def list_newspapers(
 def list_files(
     bucket_name: str,
     file_type: str = "issues",
-    newspapers_filter: list[str] | None = None,
-) -> tuple[list[str] | None, list[str] | None]:
+    newspapers_filter: Union[list[str], None] = None,
+) -> tuple[Union[list[str], None, list[str], None]]:
     """List the canonical files located in a given S3 bucket.
 
     Note:
@@ -418,8 +419,8 @@ def fetch_files(
     bucket_name: str,
     compute: bool = True,
     file_type: str = "issues",
-    newspapers_filter: list[str] | None = None,
-) -> tuple[db.core.Bag | list[str] | None, db.core.Bag | list[str] | None]:
+    newspapers_filter: Union [list[str], None] = None,
+) -> tuple[Union[db.core.Bag, list[str], None], Union[db.core.Bag, list[str], None]]:
     """Fetch issue and/or page canonical JSON files from an s3 bucket.
 
     If compute=True, the output will be a list of the contents of all files in the
