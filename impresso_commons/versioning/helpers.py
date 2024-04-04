@@ -178,6 +178,7 @@ def find_s3_data_manifest_path(
         "canonical",
         "rebuilt",
         "evenized-rebuilt",
+        "passim"
     ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
@@ -448,6 +449,7 @@ def counts_for_rebuilt(
             }
         )
 
+    print(f"id: {rebuilt_ci['id']}")
     return counts
 
 
@@ -553,9 +555,14 @@ def compute_stats_in_rebuilt_bag(
     gp_key = ["np_id", "year"] if include_np else "year"
     # agggregate them at the scale of the entire corpus
     # first groupby title, year and issue to also count the individual issues present
-    aggregated_df = rebuilt_count_df.groupby(by=gp_key).agg(
-        {"issues": tunique, "content_items_out": sum, "ft_tokens": sum}
-    )
+    if not passim:
+        aggregated_df = rebuilt_count_df.groupby(by=gp_key).agg(
+            {"issues": tunique, "content_items_out": sum, "ft_tokens": sum}
+        )
+    else:
+        aggregated_df = rebuilt_count_df.groupby(by=gp_key).agg(
+            {"issues": tunique, "content_items_out": sum}
+        )
 
     # when titles are included, multiple titles and years will be represented
     if include_np:
