@@ -142,9 +142,9 @@ class DataStatistics(ABC):
 
         if include_counts:
             stats_dict["stats"] = {
-                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v if v_f > 0}
+                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
                 for k, v in self.counts.items()
-                if v > 0
+                if "_fd" in k or v > 0
             }
 
         return stats_dict
@@ -282,10 +282,12 @@ class NewspaperStatistics(DataStatistics):
         stats_dict = super().pretty_print()
         # add the newspaper stats
         if include_counts:
+            for k, v in self.counts.items():
+                print(k, v)
             stats_dict["nps_stats"] = {
-                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v if v_f > 0}
+                k: v if "_fd" not in k else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
                 for k, v in self.counts.items()
-                if v > 0
+                if "_fd" in k or v > 0
             }
 
         return stats_dict

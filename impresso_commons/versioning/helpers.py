@@ -1,6 +1,8 @@
 """Helper functions to read, generate and write data versioning manifests.
 """
 
+from ast import literal_eval
+from collections import Counter
 import json
 import logging
 import os
@@ -448,13 +450,12 @@ def counts_for_rebuilt(
     rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
 ) -> dict[str, Union[int, str]]:
 
-    counts = {"np_id": rebuilt_ci["id"].split("-")[0]} if include_np else {}
+    split_id = rebuilt_ci["id"].split("-")
+    counts = {"np_id": split_id[0]} if include_np else {}
     counts.update(
         {
-            "year": rebuilt_ci["id"].split("-")[1],
-            "issues": "-".join(
-                rebuilt_ci["id"].split("-")[:-1]
-            ),  # count the issues represented
+            "year": split_id[1],
+            "issues": "-".join(split_id[:-1]),  # count the issues represented
             "content_items_out": 1,
         }
     )
@@ -660,3 +661,52 @@ def compute_stats_in_entities_bag(
     logger.info("Finished grouping and aggregating stats by title and year.")
     # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()
+
+
+def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, Any]]:
+
+    def freq(x, col='lang_fd'):
+        x[col] = dict(Counter(literal_eval(x[col])))
+        return x
+
+    pages_count_df = (
+        s3_langident.map(
+            lambda ci: {
+                "np_id": ci["id"].split("-")[0],
+                "year": ci["id"].split("-")[1],
+                "issues": "-".join(ci["id"].split("-")[:-1]),
+                "content_items_out": 1,
+                "images": 1 if ci["tp"] == "img" else 0,
+                "lang_fd": "None" if ci["lg"] is None else ci["lg"],
+            }
+        )
+        .to_dataframe(
+            meta={
+                "np_id": str,
+                "year": str,
+                "issues": str,
+                "content_items_out": int,
+                "images": int,
+                "lang_fd": object,
+            }
+        )
+        .persist()
+    )
+
+    # cum the counts for all values collected
+    aggregated_df = (
+        pages_count_df.groupby(by=["np_id", "year"])
+        .agg(
+            {
+                "issues": tunique,
+                "content_items_out": sum,
+                "images": sum,
+                "lang_fd": list,
+            }
+        )
+        .reset_index()
+    )
+    # Dask dataframes did not support using literal_eval
+    agg_bag = aggregated_df.to_bag(format="dict").map(freq)
+
+    return agg_bag.compute()

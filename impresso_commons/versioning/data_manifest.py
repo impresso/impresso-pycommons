@@ -572,10 +572,12 @@ class DataManifest:
         prev_version_mft = self._get_prev_version_manifest()
 
         if prev_version_mft is not None:
+            logger.info("Found previous version manifest, loading its contents.")
             # ensure a non-modified version remains
             old_mft = copy.deepcopy(prev_version_mft)
             old_media_list = media_list_from_mft_json(old_mft)
         else:
+            logger.info("No previous version found, reinitializaing the media list.")
             # if no previous version media list, generate media list from scratch
             old_media_list = {}
 
