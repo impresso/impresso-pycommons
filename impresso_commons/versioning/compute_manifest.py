@@ -205,11 +205,14 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
 
     for stats in computed_stats:
         title = stats["np_id"]
-        year = stats["year"]
-        del stats["np_id"]
-        del stats["year"]
-        logger.debug("Adding %s to %s-%s", stats, title, year)
-        manifest.add_by_title_year(title, year, stats)
+        if title not in ['0002088', '0002244']:
+            year = stats["year"]
+            del stats["np_id"]
+            del stats["year"]
+            logger.debug("Adding %s to %s-%s", stats, title, year)
+            manifest.add_by_title_year(title, year, stats)
+        else:
+            logger.info("Skipping %s as it's BL and only a sample.", title)
 
     logger.info("Finalizing the manifest, and computing the result...")
     # Add the note to the manifest

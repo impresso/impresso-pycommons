@@ -9,7 +9,11 @@ import copy
 
 from typing import Any, Union
 from typing_extensions import Self
-from strenum import StrEnum
+try:
+    from enum import StrEnum
+except:
+    # compatibility with python 3.9
+    from strenum import StrEnum
 from dask import dataframe as dd
 import dask.bag as db
 
@@ -275,10 +279,19 @@ def clone_git_repo(
 
     repo_path = os.path.join(path, repo_name.split("/")[1])
 
-    # if the repository was already cloned, return it.
+    # if the repository was already cloned, pull and return it.
     if os.path.exists(repo_path) and is_git_repo(repo_path):
-        logger.info("Git repository %s had already been cloned.", repo_name)
-        return git.Repo(repo_path)
+        logger.info("Git repository %s had already been cloned, pulling from branch %s.", repo_name, branch)
+        print("Git repository %s had already been cloned, pulling from branch %s.", repo_name, branch)
+        repo = git.Repo(repo_path)
+        # check if the current branch is the correct one & pull latest version
+        if branch not in repo.active_branch.name:
+            logger.info("Switching branch from %s to %s", repo.active_branch.name, branch)
+            print("Switching branch from %s to %s", repo.active_branch.name, branch)
+            repo.git.checkout(branch)
+        repo.remotes.origin.pull()
+
+        return repo
 
     # try to clone using ssh, if it fails, retry with https.
     try:

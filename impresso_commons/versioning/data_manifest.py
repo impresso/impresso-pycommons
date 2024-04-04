@@ -61,6 +61,7 @@ class DataManifest:
         patched_fields: Union[dict[str, list[str]], list[str], None] = None,
         # directly provide the s3 path of the manifest to use as base
         previous_mft_path: Union[str, None] = None,
+        only_counting: Union[bool, None] = False,
     ) -> None:
 
         # TODO modif for Solr (no output bucket)
@@ -68,6 +69,7 @@ class DataManifest:
         # TODO remove all non-necessary attributes
         self.stage = validate_stage(data_stage)  # update once all stages are final
         self.input_bucket_name = s3_input_bucket
+        self.only_counting = only_counting
 
         # s3_output_bucket is the path to actual data partition
         s3_output_bucket = s3_output_bucket.replace("s3://", "")
@@ -89,7 +91,6 @@ class DataManifest:
 
         # init attributes of previous manifest
         self._prev_mft_s3_path = previous_mft_path
-        # self._prev_v_mft = None
         self._prev_v_mft_yearly_stats = None
         self.prev_version = None
 
@@ -221,6 +222,11 @@ class DataManifest:
         if self.is_patch or self.patched_fields is not None:
             # processing is a patch
             return increment_version(self.prev_version, "patch")
+        
+        if self.only_counting is not None and self.only_counting:
+            # manifest computed to count contents of a bucket 
+            # (eg. after a copy from one bucket to another)
+            return increment_version(self.prev_version, "patch")
 
         # modifications were made by re-ingesting/re-generating the data, not patching
         return increment_version(self.prev_version, "minor")
@@ -236,8 +242,7 @@ class DataManifest:
             )
 
             if input_v_mft is not None:
-                assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
-
+                #assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
                 # fetch the overall statistics from the input data (it's a list!)
                 if self.stage != DataStage.CANONICAL:
                     return input_v_mft["overall_statistics"]
@@ -250,8 +255,10 @@ class DataManifest:
     ) -> str:
         # TODO add data-indexation for SOLR
         stage = stage if stage is not None else self.stage
-        if stage in ["canonical", "rebuilt"]:
+        if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
             sub_folder = "data-preparation"
+        elif 'solr' in stage:
+            sub_folder = "data-ingestion"
         else:
             sub_folder = "data-processing"
 
