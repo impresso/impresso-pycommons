@@ -70,6 +70,7 @@ class DataManifest:
         self.stage = validate_stage(data_stage)  # update once all stages are final
         self.input_bucket_name = s3_input_bucket
         self.only_counting = only_counting
+        self.modified_info = False
 
         # s3_output_bucket is the path to actual data partition
         s3_output_bucket = s3_output_bucket.replace("s3://", "")
@@ -222,9 +223,9 @@ class DataManifest:
         if self.is_patch or self.patched_fields is not None:
             # processing is a patch
             return increment_version(self.prev_version, "patch")
-        
-        if self.only_counting is not None and self.only_counting:
-            # manifest computed to count contents of a bucket 
+
+        if self.only_counting is not None and self.only_counting and self.modified_info:
+            # manifest computed to count contents of a bucket
             # (eg. after a copy from one bucket to another)
             return increment_version(self.prev_version, "patch")
 
@@ -242,7 +243,7 @@ class DataManifest:
             )
 
             if input_v_mft is not None:
-                #assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
+                # assert self.input_manifest_s3_path == input_v_mft["mft_s3_path"]
                 # fetch the overall statistics from the input data (it's a list!)
                 if self.stage != DataStage.CANONICAL:
                     return input_v_mft["overall_statistics"]
@@ -257,7 +258,7 @@ class DataManifest:
         stage = stage if stage is not None else self.stage
         if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
             sub_folder = "data-preparation"
-        elif 'solr' in stage:
+        elif "solr" in stage:
             sub_folder = "data-ingestion"
         else:
             sub_folder = "data-processing"
@@ -461,6 +462,36 @@ class DataManifest:
 
         return new_info
 
+    def update_media_stats(
+        self, title: str, yearly_stats: dict[str, dict], old_media_list: dict[str, dict]
+    ) -> Union[dict, bool]:
+
+        modif_media_info = False
+
+        for year, stats in yearly_stats.items():
+            if (
+                year not in old_media_list[title]["stats_as_dict"]
+                and old_media_list[title]["updated_years"] != []
+            ):
+                assert year in old_media_list[title]["updated_years"]
+
+            # if self.only_counting is True, only update media info if stats changed
+            if (
+                not self.only_counting
+                or old_media_list[title]["stats_as_dict"][year] != stats.pretty_print()
+            ):
+                print(
+                    'old_media_list[title]["stats_as_dict"][year] != stats: ',
+                    old_media_list[title]["stats_as_dict"][year],
+                    stats,
+                )
+                modif_media_info = True
+
+            print("Setting stats for ", title, year)
+            old_media_list[title]["stats_as_dict"][year] = stats
+
+        return old_media_list, modif_media_info
+
     def generate_media_dict(self, old_media_list: dict[str, dict]) -> tuple[dict, bool]:
         #   if new keys exist --> addition flag --> major increment
         #   update previous version media list with current processing media list:
@@ -468,32 +499,34 @@ class DataManifest:
         #       - compute update level & targets if not patch
         addition = False
         for title, yearly_stats in self._processing_stats.items():
+
             # if title not yet present in media list, initialize new media dict
             if title not in old_media_list:
                 # new title added to the list: addition, full title
                 old_media_list[title] = self.new_media(title)
+                addition = True
             else:
                 # if title was already present, update the information with current processing
                 media_update_info = self.update_info_for_title(
                     set(yearly_stats.keys()),
                     set(old_media_list[title]["stats_as_dict"].keys()),
                 )
+
+                if not addition and media_update_info["update_type"] == "addition":
+                    # only one addition is enough
+                    addition = True
+
+            # update the statistics and the media info
+            old_media_list, modif_media_info = self.update_media_stats(
+                title, yearly_stats, old_media_list
+            )
+
+            if modif_media_info or addition:
+                print(media_update_info)
                 old_media_list[title].update(media_update_info)
-                logger.debug("Updated media information for %s", title)
-
-            if not addition and old_media_list[title]["update_type"] == "addition":
-                # only one addition is enough
-                addition = True
-
-            for year, stats in yearly_stats.items():
-                if (
-                    year not in old_media_list[title]["stats_as_dict"]
-                    and old_media_list[title]["updated_years"] != []
-                ):
-                    assert year in old_media_list[title]["updated_years"]
-                print(title, year)
-                # todo, change to update??
-                old_media_list[title]["stats_as_dict"][year] = stats
+                print("Updated media information for %s", title)
+                # keep track that media info was updated for version increase
+                self.modified_info = True
 
         return old_media_list, addition
 
@@ -576,10 +609,18 @@ class DataManifest:
             # ensure a non-modified version remains
             old_mft = copy.deepcopy(prev_version_mft)
             old_media_list = media_list_from_mft_json(old_mft)
+
         else:
             logger.info("No previous version found, reinitializaing the media list.")
             # if no previous version media list, generate media list from scratch
             old_media_list = {}
+
+            if self.only_counting:
+                logger.info(
+                    "When no previous version exists, the option to only "
+                    "count (only_counting=True) is not available."
+                )
+                self.only_counting = False
 
         logger.info("Updating the media statistics with the new information...")
         # compare current stats to previous version stats

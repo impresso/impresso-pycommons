@@ -11,6 +11,7 @@ import copy
 
 from typing import Any, Union
 from typing_extensions import Self
+
 try:
     from enum import StrEnum
 except:
@@ -187,7 +188,7 @@ def find_s3_data_manifest_path(
         "canonical",
         "rebuilt",
         "evenized-rebuilt",
-        "passim"
+        "passim",
     ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
@@ -283,12 +284,22 @@ def clone_git_repo(
 
     # if the repository was already cloned, pull and return it.
     if os.path.exists(repo_path) and is_git_repo(repo_path):
-        logger.info("Git repository %s had already been cloned, pulling from branch %s.", repo_name, branch)
-        print("Git repository %s had already been cloned, pulling from branch %s.", repo_name, branch)
+        logger.info(
+            "Git repository %s had already been cloned, pulling from branch %s.",
+            repo_name,
+            branch,
+        )
+        print(
+            "Git repository %s had already been cloned, pulling from branch %s.",
+            repo_name,
+            branch,
+        )
         repo = git.Repo(repo_path)
         # check if the current branch is the correct one & pull latest version
         if branch not in repo.active_branch.name:
-            logger.info("Switching branch from %s to %s", repo.active_branch.name, branch)
+            logger.info(
+                "Switching branch from %s to %s", repo.active_branch.name, branch
+            )
             print("Switching branch from %s to %s", repo.active_branch.name, branch)
             repo.git.checkout(branch)
         repo.remotes.origin.pull()
@@ -397,14 +408,19 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
     manifest = copy.deepcopy(json_mft)
     new_media_list = {}
     for media in manifest["media_list"]:
-        yearly_media_stats = {
-            year_stats["element"].split("-")[1]: year_stats
-            for year_stats in media["media_statistics"]
-            if year_stats["granularity"] == "year"
-        }
+        if media["media_title"] not in ["0002088", "0002244"]:
+            yearly_media_stats = {
+                year_stats["element"].split("-")[1]: year_stats
+                for year_stats in media["media_statistics"]
+                if year_stats["granularity"] == "year"
+            }
 
-        new_media_list[media["media_title"]] = media
-        new_media_list[media["media_title"]]["stats_as_dict"] = yearly_media_stats
+            new_media_list[media["media_title"]] = media
+            new_media_list[media["media_title"]]["stats_as_dict"] = yearly_media_stats
+        else:
+            logger.info(
+                "Skipping %s as it's BL and only a sample.", media["media_title"]
+            )
 
     return new_media_list
 
@@ -665,7 +681,7 @@ def compute_stats_in_entities_bag(
 
 def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, Any]]:
 
-    def freq(x, col='lang_fd'):
+    def freq(x, col="lang_fd"):
         x[col] = dict(Counter(literal_eval(x[col])))
         return x
 
