@@ -11,6 +11,7 @@ import copy
 
 from typing import Any, Union
 from typing_extensions import Self
+from time import strftime
 
 try:
     from enum import StrEnum
@@ -19,6 +20,7 @@ except:
     from strenum import StrEnum
 from dask import dataframe as dd
 import dask.bag as db
+from dask.distributed import progress
 
 import git
 
@@ -484,7 +486,7 @@ def counts_for_rebuilt(
             }
         )
 
-    print(f"id: {rebuilt_ci['id']}")
+    print(f"{strftime('%Y-%m-%d %H:%M:%S')}  –  id: {rebuilt_ci['id']}")
     return counts
 
 
@@ -532,8 +534,9 @@ def compute_stats_in_canonical_bag(
             }
         )
         .reset_index()
-    )
+    ).persist()
 
+    progress(aggregated_df)
     print("Finished grouping and aggregating stats by title and year.")
     logger.info("Finished grouping and aggregating stats by title and year.")
     # return as a list of dicts
@@ -610,13 +613,14 @@ def compute_stats_in_rebuilt_bag(
 
     # when titles are included, multiple titles and years will be represented
     if include_np:
-        aggregated_df = aggregated_df.reset_index()
+        aggregated_df = aggregated_df.reset_index().persist()
 
     msg = "Obtaining the yearly rebuilt statistics"
     if key != "":
         logger.info("%s for %s", msg, key)
     else:
         logger.info(msg)
+    progress(aggregated_df)
 
     return aggregated_df.to_bag(format="dict").compute()
 
@@ -671,10 +675,12 @@ def compute_stats_in_entities_bag(
             }
         )
         .reset_index()
-    )
+    ).persist()
 
     print("Finished grouping and aggregating stats by title and year.")
     logger.info("Finished grouping and aggregating stats by title and year.")
+
+    progress(aggregated_df)
     # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()
 
@@ -721,8 +727,11 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
             }
         )
         .reset_index()
-    )
+    ).persist()
+    
     # Dask dataframes did not support using literal_eval
     agg_bag = aggregated_df.to_bag(format="dict").map(freq)
+
+    progress(agg_bag)
 
     return agg_bag.compute()

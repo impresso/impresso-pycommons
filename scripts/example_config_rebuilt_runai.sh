@@ -9,6 +9,8 @@ export SE_SECRET_KEY='' # add your secret key here
 export output_bucket='' # TODO fill in
 export input_bucket='' # TODO fill in
 
+export $USER_NAME = 'piconti'
+
 export pvc_path="/home/$USER_NAME/dhlab-data/data/$USER_NAME-data"
 
 # log file
@@ -17,7 +19,7 @@ touch $pvc_path/impresso-pycommons/impresso_commons/data/logs/$logfile_name
 export log_file="${pvc_path}/impresso-pycommons/impresso_commons/data/logs/${logfile_name}"
 
 #format
-export format='' # 'solr' or 'passim'
+export format='passim' # 'solr' or 'passim'
 
 #output_dir
 export output_dir="${pvc_path}/impresso-pycommons/impresso_commons/data/rebuilt"

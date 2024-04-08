@@ -1,23 +1,27 @@
 """Command-line script to generate a manifest for an S3 bucket or partition after a processing.
 
 Usage:
-    compute_manifest.py --config-file=<cf> --log-file=<lf> [--verbose]
+    compute_manifest.py --config-file=<cf> --log-file=<lf> [--scheduler=<sch> --nworkers=<nw> --verbose]
 
 Options:
 
 --config-file=<cf>  Path to configuration json file containing all necessary arguments for the computation of the manifest.
 --log-file=<lf> Path to log file to use.
+--scheduler=<sch>  Tell dask to use an existing scheduler (otherwise it'll create one)
+--nworkers=<nw>  number of workers for (local) Dask client.
 --verbose  Set logging level to DEBUG (by default is INFO).
 """
 
 import json
 import os
+import traceback
 import git
 from docopt import docopt
 from typing import Any, Union
 import logging
 
 import dask.bag as db
+from dask.distributed import Client
 from impresso_commons.utils.s3 import fixed_s3fs_glob, IMPRESSO_STORAGEOPT
 from impresso_commons.utils.utils import init_logger
 from impresso_commons.versioning.helpers import (
@@ -180,6 +184,9 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     if p_fields is not None and len(p_fields) == 0:
         p_fields = None
     prev_mft = config_dict["previous_mft_s3_path"]
+    only_counting = None
+    if "only_counting" in config_dict:
+        only_counting = config_dict['only_counting']
 
     # init the manifest given the configuration
     manifest = DataManifest(
@@ -192,6 +199,7 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
         is_patch=config_dict["is_patch"],
         patched_fields=p_fields,
         previous_mft_path=prev_mft if prev_mft != "" else None,
+        only_counting=only_counting
     )
 
     logger.info("Starting to compute the statistics on the fetched files...")
@@ -239,16 +247,34 @@ def main():
     config_file_path = arguments["--config-file"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
+    nworkers = arguments["--nworkers"] if arguments["--nworkers"] else 8
+    scheduler = arguments["--scheduler"]
 
     init_logger(log_level, log_file)
+
+    # start the dask local cluster
+    if scheduler is None:
+        client = Client(n_workers=nworkers, threads_per_worker=1)
+    else:
+        client = Client(scheduler)
+
+    dask_cluster_msg = f"Dask local cluster: {client}"
+    logger.info(dask_cluster_msg)
+    print(dask_cluster_msg)
 
     logger.info("Reading the arguments inside %s", config_file_path)
     with open(config_file_path, "r", encoding="utf-8") as f_in:
         config_dict = json.load(f_in)
 
-    logger.info("Provided configuration: ")
-    logger.info(config_dict)
-    create_manifest(config_dict)
+    try:
+        logger.info("Provided configuration: ")
+        logger.info(config_dict)
+        create_manifest(config_dict)
+
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
+        client.shutdown()
 
 
 if __name__ == "__main__":

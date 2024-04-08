@@ -282,8 +282,6 @@ class NewspaperStatistics(DataStatistics):
         stats_dict = super().pretty_print()
         # add the newspaper stats
         if include_counts:
-            for k, v in self.counts.items():
-                print(k, v)
             stats_dict["nps_stats"] = {
                 k: v if "_fd" not in k else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
                 for k, v in self.counts.items()
