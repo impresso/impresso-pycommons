@@ -142,7 +142,11 @@ class DataStatistics(ABC):
 
         if include_counts:
             stats_dict["stats"] = {
-                k: v if "fd" not in k else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
+                k: (
+                    v
+                    if "fd" not in k
+                    else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
+                )
                 for k, v in self.counts.items()
                 if "_fd" in k or v > 0
             }
@@ -199,7 +203,40 @@ class NewspaperStatistics(DataStatistics):
         count_keys = [self.possible_count_keys[3]]
         # add 'issues' and 'titles' (only if corpus granularity)
         count_keys.extend(self.possible_count_keys[start_index:2])
-        match self.stage:
+        # temporarily use if/else to fit with python 3.9
+
+        if self.stage == DataStage.CANONICAL:
+            # add 'pages' and 'images'
+            count_keys.append(self.possible_count_keys[2])
+            count_keys.append(self.possible_count_keys[5])
+            # keys: 'content_items_out', 'titles', 'issues', 'pages', 'images'
+        elif self.stage == DataStage.REBUILT:
+            # add 'ft_tokens'
+            count_keys.append(self.possible_count_keys[4])
+            # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
+        elif self.stage == DataStage.EMBEDDINGS:
+            # add 'embeddings'
+            count_keys.append(self.stage.value)
+        elif self.stage == DataStage.ENTITIES:
+            # add 'ne_entities', 'ne_mentions'
+            count_keys.extend(self.possible_count_keys[7:9])
+            # keys: 'content_items_out', 'titles', 'issues', 'ne_entities', 'ne_mentions'
+        elif self.stage == DataStage.PASSIM:
+            # add 'ft_tokens'
+            count_keys.append(self.possible_count_keys[4])
+            # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
+        elif self.stage == DataStage.LANGIDENT:
+            # add 'titles', 'issues', 'images', 'lang_fd'
+            count_keys.append(self.possible_count_keys[5])
+            count_keys.append(self.possible_count_keys[11])
+        elif self.stage == DataStage.TEXT_REUSE:
+            # add 'text_reuse_clusters'
+            count_keys.append(self.possible_count_keys[12])
+        elif self.stage == DataStage.TOPICS:
+            # add 'topics'
+            count_keys.append(self.possible_count_keys[10])
+
+        """match self.stage:
             case DataStage.CANONICAL:
                 # add 'pages' and 'images'
                 count_keys.append(self.possible_count_keys[2])
@@ -229,10 +266,10 @@ class NewspaperStatistics(DataStatistics):
                 count_keys.append(self.possible_count_keys[12])
             case DataStage.TOPICS:
                 # add 'topics'
-                count_keys.append(self.possible_count_keys[10])
-            # case DataStage.SOLR_TEXT:
+                count_keys.append(self.possible_count_keys[10])"""
 
-            # keys: 'content_items_out', 'titles', 'issues'
+        # For case DataStage.SOLR_TEXT, all keys are already added.
+        #   keys: 'content_items_out', 'titles', 'issues'
         return count_keys
 
     def _validate_count_keys(
@@ -283,7 +320,11 @@ class NewspaperStatistics(DataStatistics):
         # add the newspaper stats
         if include_counts:
             stats_dict["nps_stats"] = {
-                k: v if "_fd" not in k else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
+                k: (
+                    v
+                    if "_fd" not in k
+                    else {v_k: v_f for v_k, v_f in v.items() if v_f > 0}
+                )
                 for k, v in self.counts.items()
                 if "_fd" in k or v > 0
             }
