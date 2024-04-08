@@ -505,7 +505,7 @@ def compute_stats_in_canonical_bag(
 
     print("Fetched all issues, gathering desired information.")
     logger.info("Fetched all issues, gathering desired information.")
-    pages_count_df = (
+    count_df = (
         s3_canonical_issues.map(
             lambda i: counts_for_canonical_issue(i, include_np_yr=True)
         )
@@ -524,7 +524,7 @@ def compute_stats_in_canonical_bag(
 
     # cum the counts for all values collected
     aggregated_df = (
-        pages_count_df.groupby(by=["np_id", "year"])
+        count_df.groupby(by=["np_id", "year"])
         .agg(
             {
                 "issues": sum,
@@ -636,7 +636,7 @@ def compute_stats_in_entities_bag(
     Returns:
         list[dict[str, Any]]: List of counts that match NE DataStatistics keys.
     """
-    pages_count_df = (
+    count_df = (
         s3_entities.map(
             lambda ci: {
                 "np_id": ci["id"].split("-")[0],
@@ -665,7 +665,7 @@ def compute_stats_in_entities_bag(
 
     # cum the counts for all values collected
     aggregated_df = (
-        pages_count_df.groupby(by=["np_id", "year"])
+        count_df.groupby(by=["np_id", "year"])
         .agg(
             {
                 "issues": tunique,
@@ -691,7 +691,7 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
         x[col] = dict(Counter(literal_eval(x[col])))
         return x
 
-    pages_count_df = (
+    count_df = (
         s3_langident.map(
             lambda ci: {
                 "np_id": ci["id"].split("-")[0],
@@ -717,7 +717,7 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
 
     # cum the counts for all values collected
     aggregated_df = (
-        pages_count_df.groupby(by=["np_id", "year"])
+        count_df.groupby(by=["np_id", "year"])
         .agg(
             {
                 "issues": tunique,
@@ -728,10 +728,53 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
         )
         .reset_index()
     ).persist()
-    
+
     # Dask dataframes did not support using literal_eval
     agg_bag = aggregated_df.to_bag(format="dict").map(freq)
 
     progress(agg_bag)
 
     return agg_bag.compute()
+
+
+def compute_stats_in_solr_text_bag(s3_solr_text: db.core.Bag) -> list[dict[str, Any]]:
+
+    count_df = (
+        s3_solr_text.map(
+            lambda ci: {
+                "np_id": ci["meta_journal_s"],
+                "year": ci["meta_year_i"],
+                "issues": ci["meta_issue_id_s"],
+                "content_items_out": 1,
+            }
+        )
+        .to_dataframe(
+            meta={
+                "np_id": str,
+                "year": str,
+                "issues": str,
+                "content_items_out": int,
+            }
+        )
+        .persist()
+    )
+
+    # cum the counts for all values collected
+    aggregated_df = (
+        count_df.groupby(by=["np_id", "year"])
+        .agg(
+            {
+                "issues": tunique,
+                "content_items_out": sum,
+            }
+        )
+        .reset_index()
+    ).persist()
+
+    print("Finished grouping and aggregating stats by title and year.")
+    logger.info("Finished grouping and aggregating stats by title and year.")
+
+    progress(aggregated_df)
+
+    # return as a list of dicts
+    return aggregated_df.to_bag(format="dict").compute()
