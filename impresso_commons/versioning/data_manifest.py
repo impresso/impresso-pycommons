@@ -216,12 +216,25 @@ class DataManifest:
             # First manifest for this data stage.
             return "v0.0.1"
 
+        logger.debug(
+            "Addition: %s, self.is_patch: %s, self.only_counting: %s, self.modified_info: %s",
+            addition,
+            self.is_patch,
+            self.only_counting,
+            self.modified_info,
+        )
+        print(
+            f"Addition: {addition}, self.is_patch: {self.is_patch}, self.only_counting: {self.only_counting}, self.modified_info: {self.modified_info}"
+        )
+
         if addition:
             # any new title-year pair was added during processing
+            logger.info("Addition is True, major version increase.")
             return increment_version(self.prev_version, "major")
 
         if self.is_patch or self.patched_fields is not None:
             # processing is a patch
+            logger.info("Computation is patch, patch version increase.")
             return increment_version(self.prev_version, "patch")
 
         if (
@@ -231,9 +244,13 @@ class DataManifest:
         ):
             # manifest computed to count contents of a bucket
             # (eg. after a copy from one bucket to another)
+            logger.info("Only counting, and no modified info, patch version increase.")
             return increment_version(self.prev_version, "patch")
 
         # modifications were made by re-ingesting/re-generating the data, not patching
+        logger.info(
+            "No additional keys or patch, but modified info, minor version increase."
+        )
         return increment_version(self.prev_version, "minor")
 
     def _get_input_data_overall_stats(self) -> list[dict[str, Any]]:
@@ -472,14 +489,15 @@ class DataManifest:
         modif_media_info = False
 
         for year, stats in yearly_stats.items():
-            if (
-                year not in old_media_list[title]["stats_as_dict"]
-                and old_media_list[title]["updated_years"] != []
-            ):
-                assert year in old_media_list[title]["updated_years"]
-
+            if year not in old_media_list[title]["stats_as_dict"]:
+                if old_media_list[title]["updated_years"] != []:
+                    assert year in old_media_list[title]["updated_years"]
+                else:
+                    logger.debug("Adding new year %s to %s", year, title)
+                    print(f"Adding new year {year} to {title}")
+                modif_media_info = True
             # if self.only_counting is True, only update media info if stats changed
-            if (
+            elif (
                 not self.only_counting
                 or old_media_list[title]["stats_as_dict"][year] != stats.pretty_print()
             ):

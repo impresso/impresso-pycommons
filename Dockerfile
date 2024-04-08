@@ -28,7 +28,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     screen  \
     wget \
     sudo \
-    openssh-client 
+    openssh-client \
+    jq
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt-get clean && \
@@ -77,5 +78,6 @@ RUN pip install -e .
 
 # Make sure the script launching the rebuilt is executable
 RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/start_rebuilt_runai.sh
+RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/compute_manifest_runai.sh
 
 CMD ["sleep", "infinity"]
