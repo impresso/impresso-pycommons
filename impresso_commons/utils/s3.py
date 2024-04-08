@@ -13,6 +13,7 @@ from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 from dotenv import load_dotenv
 from typing import Union
+import botocore
 
 from impresso_commons.utils import _get_cores
 
@@ -499,3 +500,27 @@ def alternative_read_text(
             text = infile.read()
 
     return text
+
+
+def get_s3_object_size(bucket_name, key):
+    """
+    Get the size of an object (key) in an S3 bucket.
+
+    Args:
+        bucket_name (str): The name of the S3 bucket.
+        key (str): The key (object) whose size you want to retrieve.
+
+    Returns:
+        int: The size of the object in bytes, or None if the object doesn't exist.
+    """
+    s3_client = get_s3_client()
+
+    try:
+        # Get the object metadata to retrieve its size
+        response = s3_client.head_object(Bucket=bucket_name, Key=key)
+        size = response['ContentLength']
+        return int(size)
+    except botocore.exceptions.ClientError as err:
+        logger.error(f"Error: {err} for {key} in {bucket_name}")
+        return None
+
