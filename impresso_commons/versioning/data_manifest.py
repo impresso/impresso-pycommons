@@ -224,7 +224,11 @@ class DataManifest:
             # processing is a patch
             return increment_version(self.prev_version, "patch")
 
-        if self.only_counting is not None and self.only_counting and self.modified_info:
+        if (
+            self.only_counting is not None
+            and self.only_counting
+            and not self.modified_info
+        ):
             # manifest computed to count contents of a bucket
             # (eg. after a copy from one bucket to another)
             return increment_version(self.prev_version, "patch")
@@ -254,7 +258,6 @@ class DataManifest:
         folder_prefix: str = "data-processing-versioning",
         stage: Union[DataStage, None] = None,
     ) -> str:
-        # TODO add data-indexation for SOLR
         stage = stage if stage is not None else self.stage
         if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
             sub_folder = "data-preparation"
