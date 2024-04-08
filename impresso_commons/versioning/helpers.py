@@ -11,7 +11,10 @@ import copy
 
 from typing import Any, Union
 from typing_extensions import Self
-from time import strftime
+from time import strftime, strptime
+from tqdm import tqdm
+
+from impresso_commons.utils.utils import bytes_to
 
 try:
     from enum import StrEnum
@@ -29,6 +32,7 @@ from impresso_commons.utils.s3 import (
     alternative_read_text,
     get_storage_options,
     get_boto3_bucket,
+    get_s3_object_size
 )
 
 logger = logging.getLogger(__name__)
@@ -778,3 +782,206 @@ def compute_stats_in_solr_text_bag(s3_solr_text: db.core.Bag) -> list[dict[str, 
 
     # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()
+
+
+################ MANIFEST DIFFS #################
+
+def manifest_summary(mnf_json: dict[str, Any], extended_summary: bool = False) -> None:
+    """
+    Generate a summary of the manifest data.
+
+    Args:
+        mnf_json (dict): A dictionary containing manifest data.
+        extended_summary (bool, optional): Whether to include extended summary
+        with year statistics. Defaults to False.
+
+    Returns:
+        None
+
+    Prints: Summary of the manifest including the number of media items, additions,
+    and modifications.
+
+    Example:
+        >>> manifest_summary(manifest_json)
+        Summary of manifest /path/to/manifest.json:
+        Number of media items: 10 (8 from set)
+        Number of addition at title level: 5
+        Number of addition at year level: 3
+        Number of modification at title level: 2
+        Number of modification at year level: 1
+    """
+    nb_media_items = len(mnf_json["media_list"])
+    nb_addition_title_level = 0
+    nb_addition_year_level = 0
+    nb_modification_title_level = 0
+    nb_modification_year_level = 0
+
+    media_item_set = set()
+    title_nbyear = {}
+
+    for media_item in mnf_json['media_list']:
+        media_item_set.add(media_item['media_title'])
+        if media_item['update_type'] == "addition":
+            if media_item['update_level'] == 'title':
+                nb_addition_title_level += 1
+            elif media_item['update_level'] == 'year':
+                nb_addition_year_level += 1
+        elif media_item['update_type'] == "modification":
+            if media_item['update_level'] == 'title':
+                nb_modification_title_level += 1
+            elif media_item['update_level'] == 'year':
+                nb_modification_year_level += 1
+        if extended_summary:
+            title_nbyear[media_item['media_title']] = len([year_stats
+                                                           for year_stats in media_item[
+                                                               'media_statistics']
+                                                           if year_stats[
+                                                               'granularity'] == "year"])
+
+    # print summary
+    print(
+        f"\n*** Summary of manifest: [{mnf_json['mft_s3_path']}] (regardless of any "
+        f"modification date):")
+    print(f"- Number of media items: {nb_media_items} ({len(media_item_set)} from set)")
+    print(f"- Number of addition at title level: {nb_addition_title_level}")
+    print(f"- Number of addition at year level: {nb_addition_year_level}")
+    print(f"- Number of modification at title level: {nb_modification_title_level}")
+    print(f"- Number of modification at year level: {nb_modification_year_level}")
+    print(f"- List of media titles:\n{get_media_titles(mnf_json['media_list'])}\n")
+
+    if extended_summary:
+        print(
+            f"\nExtended summary - Number of years per title "
+            f"(regardless of modification/addition or not):"
+            f"{nb_modification_year_level}")
+        for key, val in title_nbyear.items():
+            print(f"- {key:<18}: {val:>5}y")
+            print(f"\n")
+
+
+def filter_new_or_modified_media(rebuilt_mft_path: str, previous_mft_path_str: str) -> \
+        dict[str, Any]:
+    """
+    Compares two manifests to determine new or modified media items.
+
+    Typical use-case is during an atomic update, when only media items added or modified
+    compared to the previous process need to be ingested or processed.
+
+    Args:
+        rebuilt_mft_path (str): Path of the rebuilt manifest (new).
+        previous_mft_path_str (str): Path of the previous process manifest.
+
+    Returns:
+        list[dict[str, Any]]: A manifest identical to 'rebuilt_mft_path' but only with
+        media items that are new or modified in the media list.
+
+    Example: >>> new_or_modified = get_new_or_modified_media("new_manifest.json",
+    "previous_manifest.json") >>> print(new_or_modified) [{'media_title':
+    'new_media_item_1', 'last_modif_date': '2024-04-04T12:00:00Z', etc.},
+    {'media_title': 'modified_media_item_2', 'last_modif_date':
+    '2024-04-03T12:00:00Z', etc.}]
+    """
+    rebuilt_mft_json = read_manifest_from_s3_path(rebuilt_mft_path)
+    previous_mft_json = read_manifest_from_s3_path(previous_mft_path_str)
+    filtered_manifest = copy.deepcopy(rebuilt_mft_json)
+
+    # Extract last modification date of each media item of the previous process
+    previous_media_items = {media['media_title']:
+                                strptime(media['last_modification_date'],
+                                         '%Y-%m-%d %H:%M:%S')
+                            for media in previous_mft_json["media_list"]
+                            }
+
+    # Print rebuilt manifest summary
+    manifest_summary(rebuilt_mft_json, extended_summary=False)
+
+    # Filter: keep only media items newly added or modified after last process
+    filtered_media_list = []
+    for rebuilt_media_item in rebuilt_mft_json["media_list"]:
+        if rebuilt_media_item['media_title'] not in previous_media_items:
+            filtered_media_list.append(rebuilt_media_item)
+        elif strptime(rebuilt_media_item['last_modification_date'],
+                      '%Y-%m-%d %H:%M:%S') > \
+                previous_media_items[rebuilt_media_item['media_title']]:
+            filtered_media_list.append(rebuilt_media_item)
+
+    print(
+        f"\n*** Getting new or modified items:"
+        f"\nInput (rebuilt) manifest has {len(get_media_titles(rebuilt_mft_json))} media items.")
+    print(f"Resulting filtered manifest has {len(filtered_media_list)} media items.")
+    print(f"Media items that will be newly processed:\n"
+          f"{get_media_titles(filtered_media_list)}\n")
+
+    filtered_manifest['media_list'] = filtered_media_list
+
+    return filtered_manifest
+
+
+def get_media_titles(input_data: Union[dict[str, Any], list[dict[str, Any]]]) \
+        -> list[str]:
+    """
+    Extracts media titles from the input data which can be either a manifest
+    or a media list.
+
+    Args:
+        input_data (Union[dict[str, Any], list[dict[str, Any]]]): A manifest dictionary
+            or the media list of a manifest.
+
+    Returns:
+        list[str]: A list of media titles extracted from the input data.
+        Ex:  ['Title 1', 'Title 2']
+    Raises:
+        TypeError: If the input data is not in the expected format.
+        KeyError: If the 'media_title' key is not found in the input data.
+    """
+    if type(input_data) is list:
+        titles = [media_item['media_title'] for media_item in input_data]
+    else:
+        titles = [media_item['media_title'] for media_item in input_data['media_list']]
+    return titles
+
+
+def get_media_item_years(mnf_json: dict[str, Any]) -> dict[str, dict[str, float]]:
+    """
+    Retrieves the s3 key and size in MB of each year of media items from a manifest.
+
+    Args:
+        mnf_json (dict): A manifest dictionary.
+
+    Returns:
+       media_items_years (dict): A dictionary where media titles are keys,
+            and each value is a dictionary with s3 key as key and its size as value.
+    """
+
+    bucket_name = mnf_json['mft_s3_path'].rsplit("/", 1)[0]
+    media_items_years = {}
+
+    logger.info(f"*** Retrieving size info for each key")
+    for media_item in tqdm(mnf_json["media_list"][:25]):
+        title = media_item['media_title']
+        years = {}
+
+        for media_year in media_item["media_statistics"][:25]:
+            if media_year["granularity"] != "year":
+                continue
+
+            year_key = title + "/" + media_year["element"] + ".jsonl.bz2"
+            s3_key = bucket_name + "/" + year_key
+            year_size_b = get_s3_object_size(bucket_name.split("//")[1], year_key)
+            year_size_m = round(bytes_to(year_size_b, 'm'),
+                                2) if year_size_b is not None else None
+            # print(f"Size in b: {year_size_b}, in mb: {year_size_m}")
+
+            years[s3_key] = year_size_m
+
+        media_items_years[title] = years
+
+    logger.info(f"*** About the collection if s3 keys for each year:")
+    for t, y in media_items_years.items():
+        no_s3_keys = [s3k for s3k, size in y.items() if size is None]
+        valid_s3_keys = [s3k for s3k, size in y.items() if size is not None]
+        logger.info(f"\t[{t}] has {len(valid_s3_keys)} existing s3 keys "
+                    f"and {len(no_s3_keys)} missing keys.")
+
+    return media_items_years
+
