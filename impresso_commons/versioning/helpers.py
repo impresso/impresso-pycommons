@@ -67,9 +67,9 @@ class DataStage(StrEnum):
     OCRQA = "orcqa"
     TEXT_REUSE = "text-reuse"
     TOPICS = "topics"
-    SOLR_TEXT = "solr-text"
-    SOLR_ENTITIES = "solr-entities"
-    SOLR_EMBS = "solr-emb"
+    SOLR_TEXT = "solr-ingestion-text"
+    SOLR_ENTITIES = "solr-ingestion-entities"
+    SOLR_EMBS = "solr-ingestion-emb"
 
     @classmethod
     def has_value(cls: Self, value: str) -> bool:
@@ -198,6 +198,7 @@ def find_s3_data_manifest_path(
         "rebuilt",
         "evenized-rebuilt",
         "passim",
+        "solr-ingestion-text"  # TODO - Comment Maud: rather using the constant above?
     ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
@@ -972,11 +973,11 @@ def get_media_item_years(mnf_json: dict[str, Any]) -> dict[str, dict[str, float]
     media_items_years = {}
 
     logger.info(f"*** Retrieving size info for each key")
-    for media_item in tqdm(mnf_json["media_list"][:25]):
+    for media_item in tqdm(mnf_json["media_list"]):
         title = media_item["media_title"]
         years = {}
 
-        for media_year in media_item["media_statistics"][:25]:
+        for media_year in media_item["media_statistics"]:
             if media_year["granularity"] != "year":
                 continue
 
