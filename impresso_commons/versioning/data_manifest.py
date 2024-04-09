@@ -526,6 +526,11 @@ class DataManifest:
                 # new title added to the list: addition, full title
                 old_media_list[title] = self.new_media(title)
                 addition = True
+
+                # set the statistics
+                old_media_list, _ = self.update_media_stats(
+                    title, yearly_stats, old_media_list
+                )
             else:
                 # if title was already present, update the information with current processing
                 media_update_info = self.update_info_for_title(
@@ -537,17 +542,17 @@ class DataManifest:
                     # only one addition is enough
                     addition = True
 
-            # update the statistics and the media info
-            old_media_list, modif_media_info = self.update_media_stats(
-                title, yearly_stats, old_media_list
-            )
+                # update the statistics and identify if the media info needs change
+                old_media_list, modif_media_info = self.update_media_stats(
+                    title, yearly_stats, old_media_list
+                )
 
-            if modif_media_info or addition:
-                print(media_update_info)
-                old_media_list[title].update(media_update_info)
-                print("Updated media information for %s", title)
-                # keep track that media info was updated for version increase
-                self.modified_info = True
+                if modif_media_info:
+                    old_media_list[title].update(media_update_info)
+                    print("Updated media information for %s", title)
+                    logger.info("Updated media information for %s", title)
+                    # keep track that media info was updated for version increase
+                    self.modified_info = True
 
         return old_media_list, addition
 
