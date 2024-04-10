@@ -24,9 +24,9 @@ Below is an example for the case of NE-processing, as well as a description of e
     "is_patch": false,
     "patched_fields": [],
     "push_to_git": false,
-    "file_extensions": ".jsonl.bz2",
+    "only_counting": false,
     "notes": "",
-    "log_file": "path/to/log_file.log"
+    "file_extensions": ".jsonl.bz2",
 }
 ```
 
@@ -55,6 +55,11 @@ Below is an example for the case of NE-processing, as well as a description of e
   - Can be left empty if `is_patch=false`.
 - __*push_to_git*__: (optional) Whether to push the generated manifest to the `impresso/impresso-data-release` gitrepository as it's uploaded to S3.
   - Can be set to `false` or `null` during experimentation or debugging to only upload to S3 and not push to git.
+- __*only_counting*__: (optional) Whether the manifest is computed only to count & version the contents of an S3 bucket (`true`, after a copy from one bucket to the next for instance) or if it directly follows a processing (`false`). 
+  - When `only_counting=true`, the update information for media titles for which the statistics did not change since the last manifest will not be updated (`last_modification_date`, `update_type`, `update_level`, `updated years`, `updated_fields`, `code_git_commit`).
+  - Conversely, when `only_counting=false`, they will all be updated as if the data had been modified or recomputed since the last manifest computation.
+  - This parameter allows to maintain update information through manifest iterations, even if the entire contents of a bucket are taken into consideration.
+  - Can be set to `false` or `null` by default.
 - __*notes*__ : (optional) Note for the manifest, about the processing.
   - Can be left empty (`""` or `null`), in which case a generic note with the processed titles will be used.
 - __*file_extensions*__: (required) The extension of the files to consider within `output_bucket`, *including* the first `.` (`.jsonl.bz2` instead of `jsonl.bz2`).

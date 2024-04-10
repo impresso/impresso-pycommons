@@ -59,6 +59,7 @@ RUN pip install \
     python-dotenv
 
 EXPOSE 8080
+EXPOSE 8785
 EXPOSE 8786
 EXPOSE 8787
 

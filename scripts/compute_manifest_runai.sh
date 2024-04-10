@@ -59,13 +59,13 @@ echo "Sanity check: env. variable log_file: $log_file"
 cd
 
 # locally in a screen, the following should be run:
-# kubectl port-forward {job-name}-0-0 8785:8787
+# kubectl port-forward {job-name}-0-0 8786:8787
 
 # launch screens
 echo "Launching the scheduler, workers and rebuilder script, with $WORKERS workers."
-screen -dmS scheduler dask scheduler --port 8785
-screen -dmS workers dask worker localhost:8785 --nworkers $WORKERS --nthreads 1 --memory-limit 6G
+screen -dmS scheduler dask scheduler --port 8786
+screen -dmS workers dask worker localhost:8786 --nworkers $WORKERS --nthreads 1 --memory-limit 6G
 
-echo "dask dashboard at localhost:8785/status"
+echo "dask dashboard at localhost:8786/status"
 
-screen -dmS compute_mft python $pvc_path/impresso-pycommons/impresso_commons/versioning/compute_manifest.py --config-file=$mft_config --log-file=$log_file --scheduler=localhost:8785
+screen -dmS compute_mft python $pvc_path/impresso-pycommons/impresso_commons/versioning/compute_manifest.py --config-file=$mft_config --log-file=$log_file --scheduler=localhost:8786

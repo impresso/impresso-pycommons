@@ -9,7 +9,8 @@
     "is_staging": false,
     "is_patch": false,
     "patched_fields": [],
-    "push_to_git": true,
+    "push_to_git": false,
+    "only_counting": false,
     "notes": "",
     "file_extensions": "fill_me"
 }
