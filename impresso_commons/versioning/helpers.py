@@ -1,16 +1,16 @@
 """Helper functions to read, generate and write data versioning manifests.
 """
 
-from ast import literal_eval
-from collections import Counter
+import copy
 import json
 import logging
 import os
 import re
-import copy
-
-from typing import Any, Union
+from ast import literal_eval
+from collections import Counter
 from time import strftime, strptime
+from typing import Any, Union
+
 from tqdm import tqdm
 
 from impresso_commons.utils.utils import bytes_to
@@ -90,7 +90,7 @@ class DataStage(StrEnum):
 
 
 def validate_stage(
-    data_stage: str, return_value_str: bool = False
+        data_stage: str, return_value_str: bool = False
 ) -> Union[DataStage, str, None]:
     """Validate the provided data stage if it's in the DataStage Enum (key or value).
 
@@ -132,7 +132,7 @@ def validate_granularity(value: str, for_stats: bool = True):
 
 
 def validate_version(
-    v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
+        v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
 ) -> Union[str, None]:
     # accept versions with hyphens in case of mistake
     v = v.replace("-", ".")
@@ -160,14 +160,13 @@ def extract_version(name_or_path: str, as_int: bool = False) -> Union[str, list[
 
 
 def increment_version(prev_version: str, increment: str) -> str:
-
     try:
         incr_val = VERSION_INCREMENTS.index(increment)
         list_v = version_as_list(prev_version)
         # increase the value of the correct "sub-version" and reset the ones right of it
         list_v[incr_val] = str(int(list_v[incr_val]) + 1)
         if incr_val < 2:
-            list_v[incr_val + 1 :] = ["0"] * (2 - incr_val)
+            list_v[incr_val + 1:] = ["0"] * (2 - incr_val)
         return "v" + ".".join(list_v)
     except ValueError as e:
         logger.error(
@@ -181,9 +180,8 @@ def increment_version(prev_version: str, increment: str) -> str:
 
 
 def find_s3_data_manifest_path(
-    bucket_name: str, data_stage: str, partition: Union[str, None] = None
+        bucket_name: str, data_stage: str, partition: Union[str, None] = None
 ) -> Union[str, None]:
-
     # fetch the data stage as the naming value
     if type(data_stage) == DataStage:
         stage_value = data_stage.value
@@ -222,9 +220,9 @@ def find_s3_data_manifest_path(
 
 
 def read_manifest_from_s3(
-    bucket_name: str,
-    data_stage: Union[DataStage, str],
-    partition: Union[str, None] = None,
+        bucket_name: str,
+        data_stage: Union[DataStage, str],
+        partition: Union[str, None] = None,
 ) -> Union[tuple[str, dict[str, Any]], tuple[None, None]]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
@@ -284,7 +282,8 @@ def is_git_repo(path: str) -> bool:
 
 
 def clone_git_repo(
-    path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
+        path: str, repo_name: str = "impresso/impresso-data-release",
+        branch: str = "master"
 ) -> git.Repo:
     # WARNING: path should be absolute path!!!
     repo_ssh_url = f"git@github.com:{repo_name}.git"
@@ -340,11 +339,11 @@ def clone_git_repo(
 
 
 def write_and_push_to_git(
-    file_contents: str,
-    git_repo: git.Repo,
-    path_in_repo: str,
-    filename: str,
-    commit_msg: Union[str, None] = None,
+        file_contents: str,
+        git_repo: git.Repo,
+        path_in_repo: str,
+        filename: str,
+        commit_msg: Union[str, None] = None,
 ) -> tuple[bool, str]:
     # given the serialized dump or a json file, write it in local git repo
     # folder and push it to the given subpath on git
@@ -358,7 +357,7 @@ def write_and_push_to_git(
 
 
 def git_commit_push(
-    full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
+        full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
 ) -> bool:
     # add, commit and push the file at the given path.
     filename = os.path.basename(full_git_filepath)
@@ -436,10 +435,10 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
 
 
 def init_media_info(
-    add: bool = True,
-    full_title: bool = True,
-    years: Union[list[str], None] = None,
-    fields: Union[list[str], None] = None,
+        add: bool = True,
+        full_title: bool = True,
+        years: Union[list[str], None] = None,
+        fields: Union[list[str], None] = None,
 ) -> dict[str, Any]:
     return {
         "update_type": "addition" if add else "modification",
@@ -450,9 +449,8 @@ def init_media_info(
 
 
 def counts_for_canonical_issue(
-    issue: dict[str, Any], include_np_yr: bool = False
+        issue: dict[str, Any], include_np_yr: bool = False
 ) -> dict[str, int]:
-
     counts = (
         {
             "np_id": issue["id"].split("-")[0],
@@ -473,9 +471,8 @@ def counts_for_canonical_issue(
 
 
 def counts_for_rebuilt(
-    rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
+        rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
 ) -> dict[str, Union[int, str]]:
-
     split_id = rebuilt_ci["id"].split("-")
     counts = {"np_id": split_id[0]} if include_np else {}
     counts.update(
@@ -499,7 +496,7 @@ def counts_for_rebuilt(
 
 
 def compute_stats_in_canonical_bag(
-    s3_canonical_issues: db.core.Bag,
+        s3_canonical_issues: db.core.Bag,
 ) -> list[dict[str, Any]]:
     """Computes number of issues and pages per newspaper from a Dask bag of canonical data.
 
@@ -573,10 +570,10 @@ tunique = dd.Aggregation("tunique", chunk, agg, finalize)
 
 
 def compute_stats_in_rebuilt_bag(
-    rebuilt_articles: db.core.Bag,
-    key: str = "",
-    include_np: bool = False,
-    passim: bool = False,
+        rebuilt_articles: db.core.Bag,
+        key: str = "",
+        include_np: bool = False,
+        passim: bool = False,
 ) -> list[dict[str, Union[int, str]]]:
     # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
     # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
@@ -634,7 +631,7 @@ def compute_stats_in_rebuilt_bag(
 
 
 def compute_stats_in_entities_bag(
-    s3_entities: db.core.Bag,
+        s3_entities: db.core.Bag,
 ) -> list[dict[str, Any]]:
     """TODO
 
@@ -694,7 +691,6 @@ def compute_stats_in_entities_bag(
 
 
 def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, Any]]:
-
     def freq(x, col="lang_fd"):
         x[col] = dict(Counter(literal_eval(x[col])))
         return x
@@ -746,7 +742,6 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
 
 
 def compute_stats_in_solr_text_bag(s3_solr_text: db.core.Bag) -> list[dict[str, Any]]:
-
     count_df = (
         s3_solr_text.map(
             lambda ci: {
@@ -869,7 +864,7 @@ def manifest_summary(mnf_json: dict[str, Any], extended_summary: bool = False) -
 
 
 def filter_new_or_modified_media(
-    rebuilt_mft_path: str, previous_mft_path_str: str
+        rebuilt_mft_path: str, previous_mft_path_str: str
 ) -> dict[str, Any]:
     """
     Compares two manifests to determine new or modified media items.
@@ -912,17 +907,19 @@ def filter_new_or_modified_media(
         if rebuilt_media_item["media_title"] not in previous_media_items:
             filtered_media_list.append(rebuilt_media_item)
         elif (
-            strptime(rebuilt_media_item["last_modification_date"], "%Y-%m-%d %H:%M:%S")
-            > previous_media_items[rebuilt_media_item["media_title"]]
+                strptime(rebuilt_media_item["last_modification_date"],
+                         "%Y-%m-%d %H:%M:%S")
+                > previous_media_items[rebuilt_media_item["media_title"]]
         ):
             filtered_media_list.append(rebuilt_media_item)
 
-    print(
+    logger.info(
         f"\n*** Getting new or modified items:"
         f"\nInput (rebuilt) manifest has {len(get_media_titles(rebuilt_mft_json))} media items."
     )
-    print(f"Resulting filtered manifest has {len(filtered_media_list)} media items.")
-    print(
+    logger.info(
+        f"Resulting filtered manifest has {len(filtered_media_list)} media items.")
+    logger.info(
         f"Media items that will be newly processed:\n"
         f"{get_media_titles(filtered_media_list)}\n"
     )
@@ -933,7 +930,7 @@ def filter_new_or_modified_media(
 
 
 def get_media_titles(
-    input_data: Union[dict[str, Any], list[dict[str, Any]]]
+        input_data: Union[dict[str, Any], list[dict[str, Any]]]
 ) -> list[str]:
     """
     Extracts media titles from the input data which can be either a manifest
@@ -1005,3 +1002,21 @@ def get_media_item_years(mnf_json: dict[str, Any]) -> dict[str, dict[str, float]
         )
 
     return media_items_years
+
+
+def remove_media_in_manifest(mnf_json: dict[str, Any], white_list: list[str]) -> None:
+    """
+    Removes media items from the given manifest JSON object based on a whitelist.
+    Typical use case is ingestion or processing only part of the media for whatever reason.
+
+    Parameters:
+        mnf_json (dict[str, Any]): The manifest JSON object containing a 'media_list'.
+        white_list (list[str]): A list of media titles to be retained in the manifest.
+
+    Returns:
+        None: Modifies the input manifest JSON object in-place by removing media items
+        not in the whitelist.
+    """
+    new_media_list = [media_item for media_item in mnf_json['media_list'] if
+                      media_item['media_title'] in white_list]
+    mnf_json['media_list'] = new_media_list
