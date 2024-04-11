@@ -9,20 +9,13 @@ import re
 from ast import literal_eval
 from collections import Counter
 from time import strftime, strptime
-from typing import Any, Union
+from typing import Any, Union, Self
 
+# python 3.10+
+from enum import StrEnum
 from tqdm import tqdm
 
 from impresso_commons.utils.utils import bytes_to
-
-try:
-    # python 3.10+
-    from enum import StrEnum
-    from typing import Self
-except:
-    # compatibility with python 3.9
-    from strenum import StrEnum
-    from typing_extensions import Self
 
 from dask import dataframe as dd
 import dask.bag as db
@@ -183,7 +176,7 @@ def find_s3_data_manifest_path(
     bucket_name: str, data_stage: str, partition: Union[str, None] = None
 ) -> Union[str, None]:
     # fetch the data stage as the naming value
-    if type(data_stage) == DataStage:
+    if isinstance(data_stage, DataStage):
         stage_value = data_stage.value
     else:
         stage_value = validate_stage(data_stage, return_value_str=True)
@@ -192,11 +185,11 @@ def find_s3_data_manifest_path(
     path_filter = f"{stage_value}_v*.json"
 
     if partition is None and stage_value in [
-        "canonical",
-        "rebuilt",
-        "evenized-rebuilt",
-        "passim",
-        "solr-ingestion-text",  # TODO - Comment Maud: rather using the constant above?
+        DataStage.CANONICAL.value,  # "canonical"
+        DataStage.REBUILT.value,  # "rebuilt"
+        DataStage.EVENIZED.value,  # "evenized-rebuilt"
+        DataStage.PASSIM.value,  # "passim"
+        DataStage.SOLR_TEXT.value,  # "solr-ingestion-text"
     ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
