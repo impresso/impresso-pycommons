@@ -45,27 +45,25 @@ IMPRESSO_STORAGEOPT = get_storage_options()
 class DataManifest:
 
     def __init__(
-            self,
-            data_stage: Union[DataStage, str],
-            s3_output_bucket: str,  # including partition
-            # TODO / comment: for git:repo perhaps the user passes a str and Repo() is done here (?)
-            git_repo: Repo,
-            temp_dir: str,
-            # S3 bucket of the previous stage, None if stage='canonical'
-            s3_input_bucket: Union[str, None] = None,
-            staging: Union[bool, None] = None,
-            # to directly provide the next version
-            new_version: Union[str, None] = None,
-            # to indicate if patch in later stages
-            is_patch: Union[bool, None] = False,
-            # to indiate patch in canonical/rebuilt
-            patched_fields: Union[dict[str, list[str]], list[str], None] = None,
-            # directly provide the s3 path of the manifest to use as base
-            previous_mft_path: Union[str, None] = None,
-            only_counting: Union[bool, None] = False,
+        self,
+        data_stage: Union[DataStage, str],
+        s3_output_bucket: str,  # including partition
+        # str path to the local repo corresponding to the code used for processing
+        git_repo: str | Repo,
+        temp_dir: str,
+        # S3 bucket of the previous stage, None if stage='canonical'
+        s3_input_bucket: Union[str, None] = None,
+        staging: Union[bool, None] = None,
+        # to directly provide the next version
+        new_version: Union[str, None] = None,
+        # to indicate if patch in later stages
+        is_patch: Union[bool, None] = False,
+        # to indiate patch in canonical/rebuilt
+        patched_fields: Union[dict[str, list[str]], list[str], None] = None,
+        # directly provide the s3 path of the manifest to use as base
+        previous_mft_path: Union[str, None] = None,
+        only_counting: Union[bool, None] = False,
     ) -> None:
-
-        # TODO modif for Solr (no output bucket)
 
         # TODO remove all non-necessary attributes
         self.stage = validate_stage(data_stage)  # update once all stages are final
@@ -151,12 +149,12 @@ class DataManifest:
 
         # sanity check
         if (
-                self._prev_mft_s3_path is not None
-                and self.output_bucket_name in self._prev_mft_s3_path
+            self._prev_mft_s3_path is not None
+            and self.output_bucket_name in self._prev_mft_s3_path
         ):
             assert (
-                    self._prev_mft_s3_path.split(f"/{self.stage.value}_v")[0]
-                    == full_s3_path.split(f"/{self.stage.value}_v")[0]
+                self._prev_mft_s3_path.split(f"/{self.stage.value}_v")[0]
+                == full_s3_path.split(f"/{self.stage.value}_v")[0]
             ), "Mismatch between s3 path of previous & current version of manifest."
 
         return full_s3_path
@@ -239,9 +237,9 @@ class DataManifest:
             return increment_version(self.prev_version, "patch")
 
         if (
-                self.only_counting is not None
-                and self.only_counting
-                and not self.modified_info
+            self.only_counting is not None
+            and self.only_counting
+            and not self.modified_info
         ):
             # manifest computed to count contents of a bucket
             # (eg. after a copy from one bucket to another)
@@ -272,9 +270,9 @@ class DataManifest:
         return []
 
     def _get_out_path_within_repo(
-            self,
-            folder_prefix: str = "data-processing-versioning",
-            stage: Union[DataStage, None] = None,
+        self,
+        folder_prefix: str = "data-processing-versioning",
+        stage: Union[DataStage, None] = None,
     ) -> str:
         stage = stage if stage is not None else self.stage
         if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
@@ -287,9 +285,9 @@ class DataManifest:
         return os.path.join(folder_prefix, sub_folder)
 
     def validate_and_export_manifest(
-            self,
-            push_to_git: bool = False,
-            commit_msg: Union[str, None] = None,
+        self,
+        push_to_git: bool = False,
+        commit_msg: Union[str, None] = None,
     ) -> bool:
         msg = "Validating and exporting manifest to s3"
 
@@ -350,7 +348,7 @@ class DataManifest:
         self.append_to_notes(failed_note, to_start=False)
 
     def _init_yearly_stats(
-            self, title: str, year: str, counts: dict[str, int]
+        self, title: str, year: str, counts: dict[str, int]
     ) -> tuple[NewspaperStatistics, bool]:
         logger.debug("Initializing counts for %s-%s", title, year)
         elem = f"{title}-{year}"
@@ -370,7 +368,7 @@ class DataManifest:
         return False
 
     def _modify_processing_stats(
-            self, title: str, year: str, counts: dict[str, int], adding: bool = True
+        self, title: str, year: str, counts: dict[str, int], adding: bool = True
     ) -> bool:
         # check if title/year pair is already in processing stats
         if self.has_title_year_key(title, year):
@@ -405,7 +403,7 @@ class DataManifest:
         return self._modify_processing_stats(title, str(year), counts)
 
     def add_count_list_by_title_year(
-            self, title: str, year: str, all_counts: list[dict[str, int]]
+        self, title: str, year: str, all_counts: list[dict[str, int]]
     ) -> bool:
         return all(
             [self._modify_processing_stats(title, str(year), c) for c in all_counts]
@@ -416,7 +414,7 @@ class DataManifest:
         return self._modify_processing_stats(title, year, counts, adding=False)
 
     def replace_by_title_year(
-            self, title: str, year: str, counts: dict[str, int]
+        self, title: str, year: str, counts: dict[str, int]
     ) -> bool:
         return self._modify_processing_stats(title, str(year), counts, adding=False)
 
@@ -448,7 +446,7 @@ class DataManifest:
         return media
 
     def update_info_for_title(
-            self, processed_years: set[str], prev_version_years: set[str]
+        self, processed_years: set[str], prev_version_years: set[str]
     ) -> dict[str, Union[str, list]]:
         new_info = {"last_modification_date": self._generation_date}
 
@@ -484,8 +482,7 @@ class DataManifest:
         return new_info
 
     def update_media_stats(
-            self, title: str, yearly_stats: dict[str, dict],
-            old_media_list: dict[str, dict]
+        self, title: str, yearly_stats: dict[str, dict], old_media_list: dict[str, dict]
     ) -> Union[dict, bool]:
 
         modif_media_info = False
@@ -500,9 +497,8 @@ class DataManifest:
                 modif_media_info = True
             # if self.only_counting is True, only update media info if stats changed
             elif (
-                    not self.only_counting
-                    or old_media_list[title]["stats_as_dict"][
-                        year] != stats.pretty_print()
+                not self.only_counting
+                or old_media_list[title]["stats_as_dict"][year] != stats.pretty_print()
             ):
                 print(
                     'old_media_list[title]["stats_as_dict"][year] != stats: ',
@@ -582,7 +578,7 @@ class DataManifest:
         return media_dict, title_cumm_stats
 
     def title_level_stats(
-            self, media_list: dict[str, dict]
+        self, media_list: dict[str, dict]
     ) -> tuple[list[DataStatistics], dict[str, dict]]:
         full_title_stats = []
         for title, media_as_dict in media_list.items():
@@ -613,7 +609,7 @@ class DataManifest:
         return overall_stats
 
     def compute(
-            self, export_to_git_and_s3: bool = True, commit_msg: Union[str, None] = None
+        self, export_to_git_and_s3: bool = True, commit_msg: Union[str, None] = None
     ) -> None:
         # function that will perform all the logic to construct the manifest
         # (similarly to NewsPaperPages)
@@ -666,8 +662,8 @@ class DataManifest:
 
         # the canonical has no input stage
         if (
-                self.stage != DataStage.CANONICAL
-                and self.input_manifest_s3_path is not None
+            self.stage != DataStage.CANONICAL
+            and self.input_manifest_s3_path is not None
         ):
             input_mft_git_path = os.path.join(
                 self._get_out_path_within_repo(stage=self._input_stage),

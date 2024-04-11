@@ -26,7 +26,7 @@ except:
 
 from dask import dataframe as dd
 import dask.bag as db
-from dask.distributed import progress
+from dask.distributed import progress, Client
 
 import git
 
@@ -90,7 +90,7 @@ class DataStage(StrEnum):
 
 
 def validate_stage(
-        data_stage: str, return_value_str: bool = False
+    data_stage: str, return_value_str: bool = False
 ) -> Union[DataStage, str, None]:
     """Validate the provided data stage if it's in the DataStage Enum (key or value).
 
@@ -132,7 +132,7 @@ def validate_granularity(value: str, for_stats: bool = True):
 
 
 def validate_version(
-        v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
+    v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
 ) -> Union[str, None]:
     # accept versions with hyphens in case of mistake
     v = v.replace("-", ".")
@@ -166,7 +166,7 @@ def increment_version(prev_version: str, increment: str) -> str:
         # increase the value of the correct "sub-version" and reset the ones right of it
         list_v[incr_val] = str(int(list_v[incr_val]) + 1)
         if incr_val < 2:
-            list_v[incr_val + 1:] = ["0"] * (2 - incr_val)
+            list_v[incr_val + 1 :] = ["0"] * (2 - incr_val)
         return "v" + ".".join(list_v)
     except ValueError as e:
         logger.error(
@@ -180,7 +180,7 @@ def increment_version(prev_version: str, increment: str) -> str:
 
 
 def find_s3_data_manifest_path(
-        bucket_name: str, data_stage: str, partition: Union[str, None] = None
+    bucket_name: str, data_stage: str, partition: Union[str, None] = None
 ) -> Union[str, None]:
     # fetch the data stage as the naming value
     if type(data_stage) == DataStage:
@@ -196,7 +196,7 @@ def find_s3_data_manifest_path(
         "rebuilt",
         "evenized-rebuilt",
         "passim",
-        "solr-ingestion-text"  # TODO - Comment Maud: rather using the constant above?
+        "solr-ingestion-text",  # TODO - Comment Maud: rather using the constant above?
     ]:
         # manifest in top-level partition of bucket
         bucket = get_boto3_bucket(bucket_name)
@@ -220,9 +220,9 @@ def find_s3_data_manifest_path(
 
 
 def read_manifest_from_s3(
-        bucket_name: str,
-        data_stage: Union[DataStage, str],
-        partition: Union[str, None] = None,
+    bucket_name: str,
+    data_stage: Union[DataStage, str],
+    partition: Union[str, None] = None,
 ) -> Union[tuple[str, dict[str, Any]], tuple[None, None]]:
     # read and extract the contents of an arbitrary manifest, to be returned in dict format.
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
@@ -282,8 +282,7 @@ def is_git_repo(path: str) -> bool:
 
 
 def clone_git_repo(
-        path: str, repo_name: str = "impresso/impresso-data-release",
-        branch: str = "master"
+    path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
 ) -> git.Repo:
     # WARNING: path should be absolute path!!!
     repo_ssh_url = f"git@github.com:{repo_name}.git"
@@ -339,11 +338,11 @@ def clone_git_repo(
 
 
 def write_and_push_to_git(
-        file_contents: str,
-        git_repo: git.Repo,
-        path_in_repo: str,
-        filename: str,
-        commit_msg: Union[str, None] = None,
+    file_contents: str,
+    git_repo: git.Repo,
+    path_in_repo: str,
+    filename: str,
+    commit_msg: Union[str, None] = None,
 ) -> tuple[bool, str]:
     # given the serialized dump or a json file, write it in local git repo
     # folder and push it to the given subpath on git
@@ -357,7 +356,7 @@ def write_and_push_to_git(
 
 
 def git_commit_push(
-        full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
+    full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
 ) -> bool:
     # add, commit and push the file at the given path.
     filename = os.path.basename(full_git_filepath)
@@ -381,7 +380,10 @@ def git_commit_push(
         return False
 
 
-def get_head_commit_url(repo: git.Repo) -> str:
+def get_head_commit_url(repo: str | git.Repo) -> str:
+    if isinstance(repo, str):
+        # get the actual repo if it's only the path.
+        repo = git.Repo(repo)
     # final url of shape 'https://github.com/[orga_name]/[repo_name]/commit/[hash]'
     # warning --> commit on the repo's current branch!
     commit_hash = str(repo.head.commit)
@@ -435,10 +437,10 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
 
 
 def init_media_info(
-        add: bool = True,
-        full_title: bool = True,
-        years: Union[list[str], None] = None,
-        fields: Union[list[str], None] = None,
+    add: bool = True,
+    full_title: bool = True,
+    years: Union[list[str], None] = None,
+    fields: Union[list[str], None] = None,
 ) -> dict[str, Any]:
     return {
         "update_type": "addition" if add else "modification",
@@ -449,7 +451,7 @@ def init_media_info(
 
 
 def counts_for_canonical_issue(
-        issue: dict[str, Any], include_np_yr: bool = False
+    issue: dict[str, Any], include_np_yr: bool = False
 ) -> dict[str, int]:
     counts = (
         {
@@ -471,7 +473,7 @@ def counts_for_canonical_issue(
 
 
 def counts_for_rebuilt(
-        rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
+    rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
 ) -> dict[str, Union[int, str]]:
     split_id = rebuilt_ci["id"].split("-")
     counts = {"np_id": split_id[0]} if include_np else {}
@@ -496,7 +498,7 @@ def counts_for_rebuilt(
 
 
 def compute_stats_in_canonical_bag(
-        s3_canonical_issues: db.core.Bag,
+    s3_canonical_issues: db.core.Bag, client: Client | None = None
 ) -> list[dict[str, Any]]:
     """Computes number of issues and pages per newspaper from a Dask bag of canonical data.
 
@@ -541,7 +543,10 @@ def compute_stats_in_canonical_bag(
         .reset_index()
     ).persist()
 
-    progress(aggregated_df)
+    if client is not None:
+        # only add the progress bar if the client is defined
+        progress(aggregated_df)
+
     print("Finished grouping and aggregating stats by title and year.")
     logger.info("Finished grouping and aggregating stats by title and year.")
     # return as a list of dicts
@@ -570,10 +575,11 @@ tunique = dd.Aggregation("tunique", chunk, agg, finalize)
 
 
 def compute_stats_in_rebuilt_bag(
-        rebuilt_articles: db.core.Bag,
-        key: str = "",
-        include_np: bool = False,
-        passim: bool = False,
+    rebuilt_articles: db.core.Bag,
+    key: str = "",
+    include_np: bool = False,
+    passim: bool = False,
+    client: Client | None = None,
 ) -> list[dict[str, Union[int, str]]]:
     # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
     # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
@@ -625,13 +631,16 @@ def compute_stats_in_rebuilt_bag(
         logger.info("%s for %s", msg, key)
     else:
         logger.info(msg)
-    progress(aggregated_df)
+
+    if client is not None:
+        # only add the progress bar if the client is defined
+        progress(aggregated_df)
 
     return aggregated_df.to_bag(format="dict").compute()
 
 
 def compute_stats_in_entities_bag(
-        s3_entities: db.core.Bag,
+    s3_entities: db.core.Bag, client: Client | None = None
 ) -> list[dict[str, Any]]:
     """TODO
 
@@ -685,12 +694,17 @@ def compute_stats_in_entities_bag(
     print("Finished grouping and aggregating stats by title and year.")
     logger.info("Finished grouping and aggregating stats by title and year.")
 
-    progress(aggregated_df)
+    if client is not None:
+        # only add the progress bar if the client is defined
+        progress(aggregated_df)
+
     # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()
 
 
-def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, Any]]:
+def compute_stats_in_langident_bag(
+    s3_langident: db.core.Bag, client: Client | None = None
+) -> list[dict[str, Any]]:
     def freq(x, col="lang_fd"):
         x[col] = dict(Counter(literal_eval(x[col])))
         return x
@@ -736,12 +750,16 @@ def compute_stats_in_langident_bag(s3_langident: db.core.Bag) -> list[dict[str, 
     # Dask dataframes did not support using literal_eval
     agg_bag = aggregated_df.to_bag(format="dict").map(freq)
 
-    progress(agg_bag)
+    if client is not None:
+        # only add the progress bar if the client is defined
+        progress(agg_bag)
 
     return agg_bag.compute()
 
 
-def compute_stats_in_solr_text_bag(s3_solr_text: db.core.Bag) -> list[dict[str, Any]]:
+def compute_stats_in_solr_text_bag(
+    s3_solr_text: db.core.Bag, client: Client | None = None
+) -> list[dict[str, Any]]:
     count_df = (
         s3_solr_text.map(
             lambda ci: {
@@ -777,7 +795,9 @@ def compute_stats_in_solr_text_bag(s3_solr_text: db.core.Bag) -> list[dict[str, 
     print("Finished grouping and aggregating stats by title and year.")
     logger.info("Finished grouping and aggregating stats by title and year.")
 
-    progress(aggregated_df)
+    if client is not None:
+        # only add the progress bar if the client is defined
+        progress(aggregated_df)
 
     # return as a list of dicts
     return aggregated_df.to_bag(format="dict").compute()
@@ -860,11 +880,11 @@ def manifest_summary(mnf_json: dict[str, Any], extended_summary: bool = False) -
         )
         for key, val in title_nbyear.items():
             print(f"- {key:<18}: {val:>5}y")
-            print(f"\n")
+            print("\n")
 
 
 def filter_new_or_modified_media(
-        rebuilt_mft_path: str, previous_mft_path_str: str
+    rebuilt_mft_path: str, previous_mft_path_str: str
 ) -> dict[str, Any]:
     """
     Compares two manifests to determine new or modified media items.
@@ -907,21 +927,22 @@ def filter_new_or_modified_media(
         if rebuilt_media_item["media_title"] not in previous_media_items:
             filtered_media_list.append(rebuilt_media_item)
         elif (
-                strptime(rebuilt_media_item["last_modification_date"],
-                         "%Y-%m-%d %H:%M:%S")
-                > previous_media_items[rebuilt_media_item["media_title"]]
+            strptime(rebuilt_media_item["last_modification_date"], "%Y-%m-%d %H:%M:%S")
+            > previous_media_items[rebuilt_media_item["media_title"]]
         ):
             filtered_media_list.append(rebuilt_media_item)
 
     logger.info(
-        f"\n*** Getting new or modified items:"
-        f"\nInput (rebuilt) manifest has {len(get_media_titles(rebuilt_mft_json))} media items."
+        "\n*** Getting new or modified items:"
+        "\nInput (rebuilt) manifest has %s media items.",
+        len(get_media_titles(rebuilt_mft_json)),
     )
     logger.info(
-        f"Resulting filtered manifest has {len(filtered_media_list)} media items.")
+        "Resulting filtered manifest has %s media items.", len(filtered_media_list)
+    )
     logger.info(
-        f"Media items that will be newly processed:\n"
-        f"{get_media_titles(filtered_media_list)}\n"
+        "Media items that will be newly processed:\n %s\n",
+        get_media_titles(filtered_media_list),
     )
 
     filtered_manifest["media_list"] = filtered_media_list
@@ -930,7 +951,7 @@ def filter_new_or_modified_media(
 
 
 def get_media_titles(
-        input_data: Union[dict[str, Any], list[dict[str, Any]]]
+    input_data: Union[dict[str, Any], list[dict[str, Any]]]
 ) -> list[str]:
     """
     Extracts media titles from the input data which can be either a manifest
@@ -969,7 +990,7 @@ def get_media_item_years(mnf_json: dict[str, Any]) -> dict[str, dict[str, float]
     bucket_name = mnf_json["mft_s3_path"].rsplit("/", 1)[0]
     media_items_years = {}
 
-    logger.info(f"*** Retrieving size info for each key")
+    logger.info("*** Retrieving size info for each key")
     for media_item in tqdm(mnf_json["media_list"]):
         title = media_item["media_title"]
         years = {}
@@ -992,13 +1013,15 @@ def get_media_item_years(mnf_json: dict[str, Any]) -> dict[str, dict[str, float]
 
         media_items_years[title] = years
 
-    logger.info(f"*** About the collection if s3 keys for each year:")
+    logger.info("*** About the collection if s3 keys for each year:")
     for t, y in media_items_years.items():
         no_s3_keys = [s3k for s3k, size in y.items() if size is None]
         valid_s3_keys = [s3k for s3k, size in y.items() if size is not None]
         logger.info(
-            f"\t[{t}] has {len(valid_s3_keys)} existing s3 keys "
-            f"and {len(no_s3_keys)} missing keys."
+            "\t[%s] has %s existing s3 keys and %s missing keys.",
+            t,
+            len(valid_s3_keys),
+            len(no_s3_keys),
         )
 
     return media_items_years
@@ -1017,6 +1040,9 @@ def remove_media_in_manifest(mnf_json: dict[str, Any], white_list: list[str]) ->
         None: Modifies the input manifest JSON object in-place by removing media items
         not in the whitelist.
     """
-    new_media_list = [media_item for media_item in mnf_json['media_list'] if
-                      media_item['media_title'] in white_list]
-    mnf_json['media_list'] = new_media_list
+    new_media_list = [
+        media_item
+        for media_item in mnf_json["media_list"]
+        if media_item["media_title"] in white_list
+    ]
+    mnf_json["media_list"] = new_media_list

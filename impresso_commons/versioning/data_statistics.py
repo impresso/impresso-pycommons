@@ -203,40 +203,8 @@ class NewspaperStatistics(DataStatistics):
         count_keys = [self.possible_count_keys[3]]
         # add 'issues' and 'titles' (only if corpus granularity)
         count_keys.extend(self.possible_count_keys[start_index:2])
-        # temporarily use if/else to fit with python 3.9
 
-        if self.stage == DataStage.CANONICAL:
-            # add 'pages' and 'images'
-            count_keys.append(self.possible_count_keys[2])
-            count_keys.append(self.possible_count_keys[5])
-            # keys: 'content_items_out', 'titles', 'issues', 'pages', 'images'
-        elif self.stage == DataStage.REBUILT:
-            # add 'ft_tokens'
-            count_keys.append(self.possible_count_keys[4])
-            # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
-        elif self.stage == DataStage.EMBEDDINGS:
-            # add 'embeddings'
-            count_keys.append(self.stage.value)
-        elif self.stage == DataStage.ENTITIES:
-            # add 'ne_entities', 'ne_mentions'
-            count_keys.extend(self.possible_count_keys[7:9])
-            # keys: 'content_items_out', 'titles', 'issues', 'ne_entities', 'ne_mentions'
-        elif self.stage == DataStage.PASSIM:
-            # add 'ft_tokens'
-            count_keys.append(self.possible_count_keys[4])
-            # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
-        elif self.stage == DataStage.LANGIDENT:
-            # add 'titles', 'issues', 'images', 'lang_fd'
-            count_keys.append(self.possible_count_keys[5])
-            count_keys.append(self.possible_count_keys[11])
-        elif self.stage == DataStage.TEXT_REUSE:
-            # add 'text_reuse_clusters'
-            count_keys.append(self.possible_count_keys[12])
-        elif self.stage == DataStage.TOPICS:
-            # add 'topics'
-            count_keys.append(self.possible_count_keys[10])
-
-        """match self.stage:
+        match self.stage:
             case DataStage.CANONICAL:
                 # add 'pages' and 'images'
                 count_keys.append(self.possible_count_keys[2])
@@ -266,7 +234,7 @@ class NewspaperStatistics(DataStatistics):
                 count_keys.append(self.possible_count_keys[12])
             case DataStage.TOPICS:
                 # add 'topics'
-                count_keys.append(self.possible_count_keys[10])"""
+                count_keys.append(self.possible_count_keys[10])
 
         # For case DataStage.SOLR_TEXT, all keys are already added.
         #   keys: 'content_items_out', 'titles', 'issues'

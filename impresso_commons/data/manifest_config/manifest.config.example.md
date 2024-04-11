@@ -37,7 +37,7 @@ Below is an example for the case of NE-processing, as well as a description of e
 - __*input_bucket*__: (optional) The S3 bucket of the data that was used as *input* to the processing step that generated the data that is to be versioned.
   - For any text-mining task, this will correspond to either a bucket with rebuilt or evenized data.
   - Can be left empty (`""` or `null`) in the case of *canonical* processing, were the input data is not on S3.
-- __*git_repository*__: (required) The *local* path to the git repository that was used to process the data to inside `output_bucket` to be versioned. Will be used to extract the last commit on the active branch.
+- __*git_repository*__: (required) The path to the *local* (folder of the) git repository that was used to process the data to inside `output_bucket` to be versioned. Will be used to extract the last commit on the active branch.
 - __*newspapers*__: (required) List of newspaper titles to consider for  the versioning, used for filtering the files within the bucket partition.
   - If left empty, *all* files within the bucket partition will be considered.
   - If the processing can only performed on the entire corpus at once, should be left empty.

@@ -15,10 +15,10 @@ Options:
 import json
 import os
 import traceback
+import logging
+from typing import Any, Union
 import git
 from docopt import docopt
-from typing import Any, Union
-import logging
 
 import dask.bag as db
 from dask.distributed import Client
@@ -91,13 +91,14 @@ def get_files_to_consider(config: dict[str, Any]) -> Union[list[str], None]:
 
 
 def compute_stats_for_stage(
-    files_bag: db.core.Bag, stage: DataStage
+    files_bag: db.core.Bag, stage: DataStage, client: Client | None = None
 ) -> Union[list[dict], None]:
     """Compute statistics for a specific data stage.
 
     Args:
         files_bag (db.core.Bag): A bag containing files for statistics computation.
         stage (DataStage): The data stage for which statistics are computed.
+        client (Client)
 
     Returns:
         list[dict] | None]: List of computed yearly statistics, or None if statistics
@@ -105,13 +106,17 @@ def compute_stats_for_stage(
     """
     match stage:
         case DataStage.CANONICAL:
-            return compute_stats_in_canonical_bag(files_bag)
+            return compute_stats_in_canonical_bag(files_bag, client=client)
         case DataStage.REBUILT:
-            return compute_stats_in_rebuilt_bag(files_bag, include_np=True)
+            return compute_stats_in_rebuilt_bag(
+                files_bag, include_np=True, client=client
+            )
         case DataStage.ENTITIES:
-            return compute_stats_in_entities_bag(files_bag)
+            return compute_stats_in_entities_bag(files_bag, client=client)
         case DataStage.PASSIM:
-            return compute_stats_in_rebuilt_bag(files_bag, include_np=True, passim=True)
+            return compute_stats_in_rebuilt_bag(
+                files_bag, include_np=True, passim=True, client=client
+            )
     raise NotImplementedError(
         "The function computing statistics for this DataStage is not yet implemented."
     )
@@ -143,7 +148,7 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
-def create_manifest(config_dict: dict[str, Any]) -> None:
+def create_manifest(config_dict: dict[str, Any], client: Client | None = None) -> None:
     """Given its configuration, generate the manifest for a given s3 bucket partition.
 
     Note:
@@ -186,7 +191,7 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
     prev_mft = config_dict["previous_mft_s3_path"]
     only_counting = None
     if "only_counting" in config_dict:
-        only_counting = config_dict['only_counting']
+        only_counting = config_dict["only_counting"]
 
     # init the manifest given the configuration
     manifest = DataManifest(
@@ -199,11 +204,11 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
         is_patch=config_dict["is_patch"],
         patched_fields=p_fields,
         previous_mft_path=prev_mft if prev_mft != "" else None,
-        only_counting=only_counting
+        only_counting=only_counting,
     )
 
     logger.info("Starting to compute the statistics on the fetched files...")
-    computed_stats = compute_stats_for_stage(processed_files, stage)
+    computed_stats = compute_stats_for_stage(processed_files, stage, client)
 
     logger.info(
         "Populating the manifest with the resulting %s yearly statistics found...",
@@ -213,7 +218,7 @@ def create_manifest(config_dict: dict[str, Any]) -> None:
 
     for stats in computed_stats:
         title = stats["np_id"]
-        if title not in ['0002088', '0002244']:
+        if title not in ["0002088", "0002244"]:
             year = stats["year"]
             del stats["np_id"]
             del stats["year"]
@@ -269,7 +274,7 @@ def main():
     try:
         logger.info("Provided configuration: ")
         logger.info(config_dict)
-        create_manifest(config_dict)
+        create_manifest(config_dict, client)
 
     except Exception as e:
         traceback.print_tb(e.__traceback__)
