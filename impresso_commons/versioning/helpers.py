@@ -374,18 +374,34 @@ def git_commit_push(
 
 
 def get_head_commit_url(repo: str | git.Repo) -> str:
+    # three possible inputs:
+    # - git.Repo instanciated object
+    # - local path of git repo
+    # - https url to git repo
+    not_repo_url = True
     if isinstance(repo, str):
-        # get the actual repo if it's only the path.
-        repo = git.Repo(repo)
-    # final url of shape 'https://github.com/[orga_name]/[repo_name]/commit/[hash]'
-    # warning --> commit on the repo's current branch!
-    commit_hash = str(repo.head.commit)
-    # url of shape 'git@github.com:[orga_name]/[repo_name].git'
-    # or of shape 'https://github.com/[orga_name]/[repo_name].git'
-    raw_url = repo.remotes.origin.url
+        if "https" in repo:
+            # if it's the https link to the repo, get the hash of last commit
+            not_repo_url = False
+            commit_hash = git.cmd.Git().ls_remote(repo, heads=True).split()[0]
+            raw_url = repo
+        else:
+            # get the actual repo if it's only the path.
+            repo = git.Repo(repo)
+
+    if not_repo_url:
+        # final url of shape 'https://github.com/[orga_name]/[repo_name]/commit/[hash]'
+        # warning --> commit on the repo's current branch!
+        commit_hash = str(repo.head.commit)
+        # url of shape 'git@github.com:[orga_name]/[repo_name].git'
+        # or of shape 'https://github.com/[orga_name]/[repo_name].git'
+        raw_url = repo.remotes.origin.url
+
     if raw_url.startswith("https://"):
-        url_end = "/".join(["", "commit", commit_hash])
-        return raw_url.replace(".git", url_end)
+        if ".git" in raw_url:
+            url_end = "/".join(["", "commit", commit_hash])
+            return raw_url.replace(".git", url_end)
+        return "/".join([raw_url, "commit", commit_hash])
 
     # now list with contents ['git', 'github', 'com', [orga_name]/[repo_name], 'git']
     url_pieces = re.split(r"[@.:]", raw_url)
