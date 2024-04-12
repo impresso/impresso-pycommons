@@ -57,7 +57,7 @@ class DataStage(StrEnum):
     ENTITIES = "entities"
     LANGIDENT = "langident"
     LINGUISTIC_PROCESSING = "lingproc"
-    OCRQA = "orcqa"
+    OCRQA = "ocrqa"
     TEXT_REUSE = "text-reuse"
     TOPICS = "topics"
     SOLR_TEXT = "solr-ingestion-text"
