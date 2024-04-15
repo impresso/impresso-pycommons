@@ -30,6 +30,7 @@ from impresso_commons.versioning.helpers import (
     compute_stats_in_canonical_bag,
     compute_stats_in_rebuilt_bag,
     compute_stats_in_entities_bag,
+    compute_stats_in_langident_bag,
 )
 from impresso_commons.versioning.data_manifest import DataManifest
 
@@ -117,6 +118,8 @@ def compute_stats_for_stage(
             return compute_stats_in_rebuilt_bag(
                 files_bag, include_np=True, passim=True, client=client
             )
+        case DataStage.LANGIDENT:
+            return compute_stats_in_langident_bag(files_bag, client=client)
     raise NotImplementedError(
         "The function computing statistics for this DataStage is not yet implemented."
     )
@@ -252,7 +255,7 @@ def main():
     config_file_path = arguments["--config-file"]
     log_file = arguments["--log-file"]
     log_level = logging.DEBUG if arguments["--verbose"] else logging.INFO
-    nworkers = arguments["--nworkers"] if arguments["--nworkers"] else 8
+    nworkers = int(arguments["--nworkers"]) if arguments["--nworkers"] else 8
     scheduler = arguments["--scheduler"]
 
     init_logger(log_level, log_file)
