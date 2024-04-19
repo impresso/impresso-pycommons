@@ -63,6 +63,8 @@ class DataManifest:
         # directly provide the s3 path of the manifest to use as base
         previous_mft_path: Union[str, None] = None,
         only_counting: Union[bool, None] = False,
+        notes: Union[str, None] = None,
+        push_to_git: Union[bool, None] = False,
     ) -> None:
 
         # TODO remove all non-necessary attributes
@@ -70,6 +72,7 @@ class DataManifest:
         self.input_bucket_name = s3_input_bucket
         self.only_counting = only_counting
         self.modified_info = False
+        self.push_to_git = push_to_git
 
         # s3_output_bucket is the path to actual data partition
         s3_output_bucket = s3_output_bucket.replace("s3://", "")
@@ -82,7 +85,7 @@ class DataManifest:
 
         self.temp_dir = temp_dir
         os.makedirs(temp_dir, exist_ok=True)
-        self.notes = None
+        self.notes = notes
 
         # attributes relating to GitHub
         self.branch = self._get_output_branch(staging)
@@ -672,6 +675,9 @@ class DataManifest:
         else:
             input_mft_git_path = None
 
+        if self.notes is None:
+            self.notes = ""
+
         # populate the dict with all gathered information
         self.manifest_data = {
             "mft_version": self.version,
@@ -688,8 +694,16 @@ class DataManifest:
         logger.info("%s Manifest successfully generated! %s", "-" * 15, "-" * 15)
 
         if export_to_git_and_s3:
-            # If exporting directly, wil both upload to s3 and push to git.
-            success = self.validate_and_export_manifest(True, commit_msg)
+
+            # if push_to_git is not defined and exporting directly,
+            # will both upload to s3 and push to git.
+            push = self.push_to_git if self.push_to_git is not None else True
+            if not push:
+                logger.info(
+                    "Argument export_to_git_and_s3 was set to True but push_to_git was set to False. "
+                    "Exporting to S3 but not pushing to git."
+                )
+            success = self.validate_and_export_manifest(push, commit_msg)
 
             if success:
                 logger.info(

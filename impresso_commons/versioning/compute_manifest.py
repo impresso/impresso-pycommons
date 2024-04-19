@@ -43,6 +43,7 @@ OPT_CONFIG_KEYS = [
     "previous_mft_s3_path",
     "is_patch",
     "patched_fields",
+    "only_counting",
     "push_to_git",
     "notes",
 ]
@@ -92,14 +93,14 @@ def get_files_to_consider(config: dict[str, Any]) -> Union[list[str], None]:
 
 
 def compute_stats_for_stage(
-    files_bag: db.core.Bag, stage: DataStage, client: Client | None = None
+    files_bag: db.core.Bag, stage: DataStage, client: Union[Client, None] = None
 ) -> Union[list[dict], None]:
     """Compute statistics for a specific data stage.
 
     Args:
         files_bag (db.core.Bag): A bag containing files for statistics computation.
         stage (DataStage): The data stage for which statistics are computed.
-        client (Client)
+        client (Client | None, optional): Dask client to use.
 
     Returns:
         list[dict] | None]: List of computed yearly statistics, or None if statistics
@@ -151,7 +152,9 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
-def create_manifest(config_dict: dict[str, Any], client: Client | None = None) -> None:
+def create_manifest(
+    config_dict: dict[str, Any], client: Union[Client, None] = None
+) -> None:
     """Given its configuration, generate the manifest for a given s3 bucket partition.
 
     Note:
@@ -160,6 +163,7 @@ def create_manifest(config_dict: dict[str, Any], client: Client | None = None) -
 
     Args:
         config_dict (dict[str, Any]): Configuration following the guidelines.
+        client (Client | None, optional): Dask client to use.
     """
     # if the logger was not previously inialized, do it
     if not logger.hasHandlers():
@@ -221,14 +225,11 @@ def create_manifest(config_dict: dict[str, Any], client: Client | None = None) -
 
     for stats in computed_stats:
         title = stats["np_id"]
-        if title not in ["0002088", "0002244"]:
-            year = stats["year"]
-            del stats["np_id"]
-            del stats["year"]
-            logger.debug("Adding %s to %s-%s", stats, title, year)
-            manifest.add_by_title_year(title, year, stats)
-        else:
-            logger.info("Skipping %s as it's BL and only a sample.", title)
+        year = stats["year"]
+        del stats["np_id"]
+        del stats["year"]
+        logger.debug("Adding %s to %s-%s", stats, title, year)
+        manifest.add_by_title_year(title, year, stats)
 
     logger.info("Finalizing the manifest, and computing the result...")
     # Add the note to the manifest
