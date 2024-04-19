@@ -257,6 +257,10 @@ def main():
 
     init_logger(log_level, log_file)
 
+    # suppressing botocore's verbose logging
+    logging.getLogger("botocore").setLevel(logging.WARNING)
+    logging.getLogger("smart_open").setLevel(logging.WARNING)
+
     # start the dask local cluster
     if scheduler is None:
         client = Client(n_workers=nworkers, threads_per_worker=1)
