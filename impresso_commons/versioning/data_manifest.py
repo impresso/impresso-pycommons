@@ -121,6 +121,11 @@ class DataManifest:
 
     @property
     def _input_stage(self) -> DataStage:
+        """Get the DataStage associated to the input data of this manifest.
+
+        Returns:
+            DataStage: The input DataStage.
+        """
         return (
             DataStage.CANONICAL
             if self.stage in [DataStage.REBUILT, DataStage.CANONICAL]
@@ -129,6 +134,11 @@ class DataManifest:
 
     @property
     def _manifest_filename(self) -> str:
+        """Get the manifest filename based on convention stage-value_vM-m-p.json.
+
+        Returns:
+            str: The manifest filename.
+        """
         if self.version is None:
             logger.warning("The manifest name is only available once the version is.")
             return ""
@@ -137,6 +147,17 @@ class DataManifest:
 
     @property
     def output_mft_s3_path(self) -> str:
+        """Get this manifest's output S3 path based on its output bucket.
+
+        The manifest will be uploaded to the S3 bucket and partition corresponding
+        to the value provided for its input argument `s3_output_bucket`.
+        If the versison attribute for this manifest is not defined, the S3 output
+        path cannot be provided and the empty string will be returned.
+
+        Returns:
+            str: Full S3 path of this manifest if the version is already defined,
+                the empty string otherwise.
+        """
         if self.version is None:
             logger.warning(
                 "The manifest s3 path is only available once the version is."
@@ -176,6 +197,16 @@ class DataManifest:
         return "staging" if staging_out_bucket or for_staging else "master"
 
     def _get_prev_version_manifest(self) -> Union[dict[str, Any], None]:
+        """Find and return the previous version manifest of this DataStage and bucket.
+
+        Will try to find the previous manifest in the provided S3 output bucket
+        partition, unless `self._prev_mft_s3_path` is defined, in which case it reads
+        it from S3 and returns it.
+
+        Returns:
+            Union[dict[str, Any], None]: The previous version of the manifest,
+                if available, otherwise None.
+        """
         # previous version manifest is in the output bucket, except when:
         # _prev_mft_s3_path is defined upon instantiation, then use it directly
         logger.debug("Reading the previous version of the manifest from S3.")
@@ -205,7 +236,11 @@ class DataManifest:
             keys,by re-ingestion (not field-specific modifications).
         - p when a patch or small fix is made, modifying one or more fields for several
             titles, leaving the rest of the data unchanged.
-            When `attr:self.is_patch` is True or `attr:patched_fields` is defined.
+            When `self.is_patch` is True or `self.patched_fields` is defined.
+            Also when `self.only_counting` is set to True and no counts changed since
+            the previous manifest version.
+
+        If no previous version exists, the version returned will be v0.0.1.
 
         Args:
             addition (bool, optional): Whether new data was added during the processing.
@@ -224,9 +259,6 @@ class DataManifest:
             self.is_patch,
             self.only_counting,
             self.modified_info,
-        )
-        print(
-            f"Addition: {addition}, self.is_patch: {self.is_patch}, self.only_counting: {self.only_counting}, self.modified_info: {self.modified_info}"
         )
 
         if addition:
@@ -256,6 +288,20 @@ class DataManifest:
         return increment_version(self.prev_version, "minor")
 
     def _get_input_data_overall_stats(self) -> list[dict[str, Any]]:
+        """Return the `"overall_statistics"` of the input manifest or an empty list.
+
+        The input manifest is the manifest versioning the data used as input to the
+        processing used to generate data of this manifest's `DataStage`.
+        If `s3_input_bucket` is defined, find and read this manifest on S3, and extract
+        its `"overall_statistics"`.
+        When `self.stage=DataStage.CANONICAL`, no previous stage exists, so the empty
+        list will be returned.
+        For other stages, the `"overall_statistics"` for all upstream stages will be
+        contained in the returned list.
+
+        Returns:
+            list[dict[str, Any]]: Input manifest's `"overall_statistics"` or empty list.
+        """
         # reading the input manifest only if the input s3 bucket is defined
         if self.input_bucket_name is not None:
             logger.debug("Reading the input data's manifest from S3.")
@@ -277,6 +323,18 @@ class DataManifest:
         folder_prefix: str = "data-processing-versioning",
         stage: Union[DataStage, None] = None,
     ) -> str:
+        """Get the output path within the "impresso-data-release" repository.
+
+
+        Args:
+            folder_prefix (str, optional): Folder prefix to use within the repository.
+                Defaults to "data-processing-versioning".
+            stage (Union[DataStage, None], optional): DataStage to consider if not
+                `self.stage`. Defaults to None.
+
+        Returns:
+            str: The output path within the repository based on `self.stage`.
+        """
         stage = stage if stage is not None else self.stage
         if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
             sub_folder = "data-preparation"
