@@ -15,14 +15,12 @@ from typing import Any, Union, Self
 from enum import StrEnum
 from tqdm import tqdm
 
-from impresso_commons.utils.utils import bytes_to
-
+import git
 from dask import dataframe as dd
 import dask.bag as db
 from dask.distributed import progress, Client
 
-import git
-
+from impresso_commons.utils.utils import bytes_to
 from impresso_commons.utils.s3 import (
     fixed_s3fs_glob,
     alternative_read_text,
@@ -33,9 +31,9 @@ from impresso_commons.utils.s3 import (
 
 logger = logging.getLogger(__name__)
 
-POSSIBLE_GRANULARITIES = ["corpus", "title", "year"]
-IMPRESSO_STORAGEOPT = get_storage_options()
 
+IMPRESSO_STORAGEOPT = get_storage_options()
+POSSIBLE_GRANULARITIES = ["corpus", "title", "year"]
 VERSION_INCREMENTS = ["major", "minor", "patch"]
 
 
@@ -110,11 +108,24 @@ def validate_stage(
         raise e
 
 
-def validate_granularity(value: str, for_stats: bool = True):
+def validate_granularity(value: str) -> Union[str, None]:
+    """Validate that the granularity value provided is valid.
+
+    Statistics are computed on three granularity levels:
+    corpus, title and year.
+
+    Args:
+        value (str): Granularity value to validate
+
+    Raises:
+        ValueError: The provided granularity isn't one of corpus, title and year.
+
+    Returns:
+        Union[str, None]: The provided value, in lower case, or None if not valid.
+    """
     lower = value.lower()
     if lower in POSSIBLE_GRANULARITIES:
-        if not for_stats or (for_stats and lower != "issue"):
-            return lower
+        return lower
     # only incorrect granularity values will not be returned
     logger.critical("Provided granularity '%s' isn't valid.", lower)
     raise ValueError
@@ -127,6 +138,19 @@ def validate_granularity(value: str, for_stats: bool = True):
 def validate_version(
     v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
 ) -> Union[str, None]:
+    """Validate the provided string version against a regex.
+
+    The provided version should be in format "vM.m.p", where M, m and p are
+    integers representing respectively the Major, minor and patch version.
+
+    Args:
+        v (str): version in string format to validate.
+        regex (str, optional): Regex against which to match the version.
+            Defaults to "^v([0-9]+[.]){2}[0-9]+$".
+
+    Returns:
+        Union[str, None]: The provided version if it's valid, None otherwise.
+    """
     # accept versions with hyphens in case of mistake
     v = v.replace("-", ".")
 
@@ -139,12 +163,38 @@ def validate_version(
 
 
 def version_as_list(version: str) -> list[int]:
-    start = 1 if version[0] == "v" else 0
+    """Return the provided string version as a list of three ints.
+
+    Args:
+        version (str): String version to return as list
+
+    Returns:
+        list[int]: list of len 3 where indices respecively correspond to the
+            Major, minor and patch versions.
+    """
+    if version[0] == "v":
+        version = validate_version(version)
+        start = 1
+    else:
+        start = 0
     sep = "." if "." in version else "-"
     return version[start:].split(sep)
 
 
-def extract_version(name_or_path: str, as_int: bool = False) -> Union[str, list[str]]:
+def extract_version(name_or_path: str, as_int: bool = False) -> Union[str, int]:
+    """Extract the version from a string filename or path.
+
+    This function is in particular mean to extract the version from paths or filenames
+    of manifests: structured as [data-stage]_vM-m-p.json.
+
+    Args:
+        name_or_path (str): Filename or path from which to extract the version.
+        as_int (bool, optional): Whether to return the extracted version as int or str.
+            Defaults to False.
+
+    Returns:
+        Union[str, int]: Extracted version, as int or str based on `as_int`.
+    """
     # in the case it's a path
     basename = os.path.basename(name_or_path)
     version = basename.replace(".json", "").split("_")[-1]
@@ -153,6 +203,20 @@ def extract_version(name_or_path: str, as_int: bool = False) -> Union[str, list[
 
 
 def increment_version(prev_version: str, increment: str) -> str:
+    """Update  given version accoding to the given increment.
+
+    When the increment is major or minor, all following numbers are reset to 0.
+
+    Args:
+        prev_version (str): Version to increment
+        increment (str): Increment, can be one of major, minor and patch.
+
+    Raises:
+        e: Increment value provided is not valid.
+
+    Returns:
+        str: Vesion incremented accordingly.
+    """
     try:
         incr_val = VERSION_INCREMENTS.index(increment)
         list_v = version_as_list(prev_version)
@@ -175,6 +239,24 @@ def increment_version(prev_version: str, increment: str) -> str:
 def find_s3_data_manifest_path(
     bucket_name: str, data_stage: str, partition: Union[str, None] = None
 ) -> Union[str, None]:
+    """Find and return the latest data manifest in a given S3 bucket.
+
+    On S3, different Data stages will be stored in different ways.
+    In particular, data stages corresponding to enrichments are all placed in the
+    same bucket but in different partitions.
+    Data stages "canonical", "rebuilt", "evenized-rebuilt" & ones related to Solr
+    are the ones where each stage has its own bucket.
+
+    Args:
+        bucket_name (str): Name of the bucket in which to look.
+        data_stage (str): Data stage corresponding to the manifest to fetch.
+        partition (Union[str, None], optional): Partition within the bucket to look
+            into. Defaults to None.
+
+    Returns:
+        Union[str, None]: S3 path of the latest manifest in the bucket, None if no
+            manifests were found inside.
+    """
     # fetch the data stage as the naming value
     if isinstance(data_stage, DataStage):
         stage_value = data_stage.value
@@ -206,8 +288,9 @@ def find_s3_data_manifest_path(
     if len(matches) == 1:
         return matches[0]
     if len(matches) == 0:
-        # no matches means it's hte first manifest for the stage or bucket
+        # no matches means it's the first manifest for the stage or bucket
         return None
+
     # if multiple versions exist, return the latest one
     return sorted(matches, key=lambda x: extract_version(x, as_int=True))[-1]
 
@@ -217,7 +300,19 @@ def read_manifest_from_s3(
     data_stage: Union[DataStage, str],
     partition: Union[str, None] = None,
 ) -> Union[tuple[str, dict[str, Any]], tuple[None, None]]:
-    # read and extract the contents of an arbitrary manifest, to be returned in dict format.
+    """Read and load manifest given an S3 bucket.
+
+    Args:
+        bucket_name (str): NAme of the s3 bucket to look into
+        data_stage (Union[DataStage, str]): Data stage corresponding to the
+            manifest to fetch.
+        partition (Union[str, None], optional): Partition within the bucket to look
+            into. Defaults to None.
+
+    Returns:
+        Union[tuple[str, dict[str, Any]], tuple[None, None]]: S3 path of the manifest
+            and corresponding contents, if a manifest was found, None otherwise.
+    """
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
     if manifest_s3_path is None:
         logger.info("No %s manifest found in bucket %s", data_stage, bucket_name)
@@ -231,7 +326,14 @@ def read_manifest_from_s3(
 
 
 def read_manifest_from_s3_path(manifest_s3_path: str) -> Union[dict[str, Any], None]:
-    # read and extract the contents of an arbitrary manifest, to be returned in dict format.
+    """read and extract the contents of an arbitrary manifest,
+
+    Args:
+        manifest_s3_path (str): S3 path of the manifest to read.
+
+    Returns:
+        Union[dict[str, Any], None]: Contents of manifest if found on S3, None otherwise.
+    """
     try:
         raw_text = alternative_read_text(
             manifest_s3_path, IMPRESSO_STORAGEOPT, line_by_line=False

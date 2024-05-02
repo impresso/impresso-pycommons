@@ -51,7 +51,7 @@ class DataStatistics(ABC):
     ) -> None:
 
         self.stage = validate_stage(data_stage)
-        self.granularity = validate_granularity(granularity, for_stats=True)
+        self.granularity = validate_granularity(granularity)
         self.element = element
         self.count_keys = self._define_count_keys()
 
