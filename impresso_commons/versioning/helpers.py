@@ -348,14 +348,34 @@ def read_manifest_from_s3_path(manifest_s3_path: str) -> Union[dict[str, Any], N
 ###### GIT FUNCTIONS ######
 
 
-def write_dump_to_fs(file_contents: str, abs_path: str, filename: str) -> str:
+def write_dump_to_fs(
+    file_contents: str, abs_path: str, filename: str
+) -> Union[str, None]:
+    """Write a provided string dump to the local filesystem given its path and filename.
+
+    TODO: Potentially moving this method to `utils.py`.
+
+    Args:
+        file_contents (str): Dumped contents in str format, ready to be written.
+        abs_path (str): Local path to the directory in which the file will be.
+        filename (str): Filename of the file to write, including its extension.
+
+    Returns:
+        Union[str, None]: Full path of writen file, or None if an IOError occurred.
+    """
     full_file_path = os.path.join(abs_path, filename)
 
     # write file to absolute path provided
-    with open(full_file_path, "w", encoding="utf-8") as outfile:
-        outfile.write(file_contents)
+    try:
+        with open(full_file_path, "w", encoding="utf-8") as outfile:
+            outfile.write(file_contents)
 
-    return full_file_path
+        return full_file_path
+    except IOError as e:
+        logger.error(
+            "Writing dump %s to local fs triggered the error: %s", full_file_path, e
+        )
+        return None
 
 
 def is_git_repo(path: str) -> bool:
@@ -379,6 +399,20 @@ def is_git_repo(path: str) -> bool:
 def clone_git_repo(
     path: str, repo_name: str = "impresso/impresso-data-release", branch: str = "master"
 ) -> git.Repo:
+    """Clone a git repository into a given path in the local file-system.
+
+    Args:
+        path (str): Path (ideally absolute) to the dir in which to clone the git repo.
+        repo_name (str, optional): Full name of the git repository to clone, as it
+            appears in its URL. Defaults to "impresso/impresso-data-release".
+        branch (str, optional): Specific branch to clone. Defaults to "master".
+
+    Raises:
+        e: Cloning the repo failed, both using SSH and HTTPS.
+
+    Returns:
+        git.Repo: Object representing the cloned repository if it was cloned.
+    """
     # WARNING: path should be absolute path!!!
     repo_ssh_url = f"git@github.com:{repo_name}.git"
     repo_https_url = f"https://github.com/{repo_name}.git"
@@ -413,6 +447,7 @@ def clone_git_repo(
     try:
         logger.info("Cloning the %s git repository with ssh.", repo_name)
         return git.Repo.clone_from(repo_ssh_url, repo_path, branch=branch)
+
     except git.exc.GitCommandError as e:
         err_msg = (
             f"Error while cloning the git repository {repo_name} using ssh, trying "
@@ -423,6 +458,7 @@ def clone_git_repo(
     try:
         logger.info("Cloning the %s git repository with https.", repo_name)
         return git.Repo.clone_from(repo_https_url, repo_path, branch=branch)
+
     except Exception as e:
         err_msg = (
             f"Error while cloning the git repository {repo_name}, it was not possible "
@@ -439,6 +475,19 @@ def write_and_push_to_git(
     filename: str,
     commit_msg: Union[str, None] = None,
 ) -> tuple[bool, str]:
+    """Given a serialized dump, write it in local git repo, commit and push.
+
+    Args:
+        file_contents (str): Serialized dump of a JSON file.
+        git_repo (git.Repo): Object representing the git repository to push to.
+        path_in_repo (str): Relative path where to write the file.
+        filename (str): Desired name for the file, including extension.
+        commit_msg (Union[str, None], optional): Commit message. If not defined, a
+            basic message on the added manifest will be used.Defaults to None.
+
+    Returns:
+        tuple[bool, str]: Whether the process was successful and corresponding filepath.
+    """
     # given the serialized dump or a json file, write it in local git repo
     # folder and push it to the given subpath on git
     local_repo_base_dir = git_repo.working_tree_dir
@@ -447,12 +496,28 @@ def write_and_push_to_git(
     # write file in git repo cloned locally
     full_git_path = write_dump_to_fs(file_contents, git_path, filename)
 
-    return git_commit_push(full_git_path, git_repo, commit_msg), full_git_path
+    if full_git_path is not None:
+        return git_commit_push(full_git_path, git_repo, commit_msg), full_git_path
+    else:
+        return False, os.path.join(git_path, filename)
 
 
 def git_commit_push(
     full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
 ) -> bool:
+    """Commit and push the addition of a given file within the repository.
+
+    TODO: make more general for non-manifest related uses?
+
+    Args:
+        full_git_filepath (str): Path to the file added to the git repository.
+        git_repo (git.Repo): git.Repo object of the repository to commit and push to.
+        commit_msg (Union[str, None], optional): Message to use when commiting. If not
+            defined, a basic message on the added manifest will be used. Defaults to None.
+
+    Returns:
+        bool: Whether the commit and push operations were successful.
+    """
     # add, commit and push the file at the given path.
     filename = os.path.basename(full_git_filepath)
     # git add file
@@ -476,10 +541,25 @@ def git_commit_push(
 
 
 def get_head_commit_url(repo: str | git.Repo) -> str:
-    # three possible inputs:
-    # - git.Repo instanciated object
-    # - local path of git repo
-    # - https url to git repo
+    """Get the URL of the last commit on a given Git repository.
+
+    TODO: test the function when repo is https url of repository.
+    TODO: provide branch argument.
+    `repo` can be one of three things:
+    - a git.Repo instantiated object (if alreaday instantiated outside).
+    - the local path to the git repository (previously cloned).
+    - the HTTPS URL to the Git repository
+
+    Note:
+        The returned commit URL corresponds to the one on the repository's active
+        branch (master for the URL).
+
+    Args:
+        repo (str | git.Repo): local path, git.Repo object or URL of the repository.
+
+    Returns:
+        str: The HTTPS URL of the last commit on the git repository's master branch.
+    """
     not_repo_url = True
     if isinstance(repo, str):
         if "https" in repo:
@@ -524,8 +604,22 @@ def get_head_commit_url(repo: str | git.Repo) -> str:
 
 
 def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
-    # extract a media list (np_title -> "media" dict) from a manifest json
-    # where  "media" dict also contains stats organized as a dict with years as keys.
+    """Extract the `media_list` from a manifest as a dict where each title is a key.
+
+    For each title, all fields from the original media list will still be present
+    along with an additional `stats_as_dict` field containing a dict mapping each
+    year to its specific statistics.
+    As a result:
+    - All represented titles are within the keys of the returned media list.
+    - For each title, represented years are in the keys of its `stats_as_dict` field.
+
+    Args:
+        json_mft (dict[str, Any]): Dict following the JSON schema of a manifest from
+            which to extract the media list.
+
+    Returns:
+        dict[str, dict]: Media list of given manifest, with `stats_as_dict` field.
+    """
     # prevent modification or original manifest, to recover later
     manifest = copy.deepcopy(json_mft)
     new_media_list = {}
@@ -553,6 +647,23 @@ def init_media_info(
     years: Union[list[str], None] = None,
     fields: Union[list[str], None] = None,
 ) -> dict[str, Any]:
+    """Initialize the media update dict for a title given relevant information.
+
+    All the update informations are relating to the newly processed data, in
+    comparison with the one computed during the last processing.
+
+    Args:
+        add (bool, optional): Whether new data was added. Defaults to True.
+        full_title (bool, optional): Whether all the title's years were modified.
+            Defaults to True.
+        years (Union[list[str], None], optional): When `full_title`, the specific years
+            which were modified/updated. Defaults to None.
+        fields (Union[list[str], None], optional): List of specific fields that were
+            modified/updated. Defaults to None.
+
+    Returns:
+        dict[str, Any]: Instantiated dict with the update information for a given media.
+    """
     return {
         "update_type": "addition" if add else "modification",
         "update_level": "title" if full_title else "year",
@@ -564,6 +675,16 @@ def init_media_info(
 def counts_for_canonical_issue(
     issue: dict[str, Any], include_np_yr: bool = False
 ) -> dict[str, int]:
+    """Given the canonical representation of an issue, get its counts.
+
+    Args:
+        issue (dict[str, Any]): Canonical JSON representation of an issue.
+        include_np_yr (bool, optional): Whether the newspaper title and year should
+            be included in the returned dict for later aggregation. Defaults to False.
+
+    Returns:
+        dict[str, int]: Dict listing the counts for this issue, ready to be aggregated.
+    """
     counts = (
         {
             "np_id": issue["id"].split("-")[0],
