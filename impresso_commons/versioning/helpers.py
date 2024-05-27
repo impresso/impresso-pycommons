@@ -61,6 +61,7 @@ class DataStage(StrEnum):
     SOLR_TEXT = "solr-ingestion-text"
     SOLR_ENTITIES = "solr-ingestion-entities"
     SOLR_EMBS = "solr-ingestion-emb"
+    MYSQL_CIS = "mysql-ingestion"
 
     @classmethod
     def has_value(cls: Self, value: str) -> bool:
@@ -1200,7 +1201,7 @@ def get_media_titles(
         TypeError: If the input data is not in the expected format.
         KeyError: If the 'media_title' key is not found in the input data.
     """
-    if type(input_data) is list:
+    if isinstance(input_data, list):
         titles = [media_item["media_title"] for media_item in input_data]
     else:
         titles = [media_item["media_title"] for media_item in input_data["media_list"]]

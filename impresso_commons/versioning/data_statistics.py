@@ -188,6 +188,7 @@ class NewspaperStatistics(DataStatistics):
         "topics",
         "lang_fd",  # '_fd' suffix signifies a frenquency dict
         "text_reuse_clusters",
+        "text_reuse_passages",
     ]
 
     def _define_count_keys(self) -> list[str]:
@@ -217,6 +218,8 @@ class NewspaperStatistics(DataStatistics):
             case DataStage.EMBEDDINGS:
                 # add 'embeddings'
                 count_keys.append(self.stage.value)
+                # TODO update
+                # keys: 'content_items_out', 'titles', 'issues', 'embeddings'
             case DataStage.ENTITIES:
                 # add 'ne_entities', 'ne_mentions'
                 count_keys.extend(self.possible_count_keys[7:9])
@@ -226,15 +229,23 @@ class NewspaperStatistics(DataStatistics):
                 count_keys.append(self.possible_count_keys[4])
                 # keys: 'content_items_out', 'titles', 'issues', 'ft_tokens'
             case DataStage.LANGIDENT:
-                # add 'titles', 'issues', 'images', 'lang_fd'
+                # add 'images', 'lang_fd'
                 count_keys.append(self.possible_count_keys[5])
                 count_keys.append(self.possible_count_keys[11])
+                # keys: 'content_items_out', 'titles', 'issues', 'pages', 'lang_fd'
             case DataStage.TEXT_REUSE:
-                # add 'text_reuse_clusters'
+                # add 'text_reuse_clusters' and 'text_reuse_passages'
                 count_keys.append(self.possible_count_keys[12])
+                count_keys.append(self.possible_count_keys[13])
+                # keys: 'content_items_out', 'titles', 'issues', 'text_reuse_clusters', 'text_reuse_passages'
             case DataStage.TOPICS:
                 # add 'topics'
+                # TODO update
                 count_keys.append(self.possible_count_keys[10])
+            case DataStage.MYSQL_CIS:
+                # add 'pages'
+                count_keys.append(self.possible_count_keys[2])
+                # keys: 'content_items_out', 'titles', 'issues', 'pages'
 
         # For case DataStage.SOLR_TEXT, all keys are already added.
         #   keys: 'content_items_out', 'titles', 'issues'

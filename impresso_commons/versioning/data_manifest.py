@@ -67,7 +67,6 @@ class DataManifest:
         push_to_git: Union[bool, None] = False,
     ) -> None:
 
-        # TODO remove all non-necessary attributes
         self.stage = validate_stage(data_stage)  # update once all stages are final
         self.input_bucket_name = s3_input_bucket
         self.only_counting = only_counting
@@ -94,7 +93,6 @@ class DataManifest:
 
         # init attributes of previous manifest
         self._prev_mft_s3_path = previous_mft_path
-        self._prev_v_mft_yearly_stats = None
         self.prev_version = None
 
         # init attribute of input_manifest
@@ -107,9 +105,6 @@ class DataManifest:
         # either as list of fields or dict mapping each media to its patched fields
         self.patched_fields = patched_fields
         self.is_patch = is_patch or (patched_fields is not None)
-
-        # example of 1 yearly stats format to gather the necessary keys
-        self._eg_yearly_stats = NewspaperStatistics(self.stage, "year")
 
         # dict mapping from title to year to np_stat,
         # where the statistics will be aggregated during the processing
@@ -126,11 +121,19 @@ class DataManifest:
         Returns:
             DataStage: The input DataStage.
         """
-        return (
-            DataStage.CANONICAL
-            if self.stage in [DataStage.REBUILT, DataStage.CANONICAL]
-            else DataStage.REBUILT
-        )
+        if self.stage in [
+            DataStage.REBUILT,
+            DataStage.CANONICAL,
+            DataStage.PASSIM,
+            DataStage.MYSQL_CIS,
+        ]:
+            # datastages that directly follow or use canonical data
+            return DataStage.CANONICAL
+        if self.stage in [DataStage.TEXT_REUSE]:
+            # text reuse uses passim rebuilt text
+            return DataStage.PASSIM
+        # all other stages use the rebuilt as input
+        return DataStage.REBUILT
 
     @property
     def _manifest_filename(self) -> str:
@@ -184,16 +187,31 @@ class DataManifest:
         return full_s3_path
 
     def _get_output_branch(self, for_staging: Union[bool, None]) -> str:
-        # TODO recheck logic
+        """Get the git repository branch on which to add the manifest once generated-
+
+        The logic to choose the branch is the following:
+        - If no `for_staging` argument was provided, only the output bucket name is used
+            to infer the branch.
+            - If "final" -> "master", and "staging" -> "staging"
+            - If the stage is not in the bucket name, use "staging" branch by default
+        - If the `for_staging` argument was provided, it can override the result.
+
+        Hence, "master" branch is chosen only if:
+        - `for_staging` was defined and False
+        - `final` was in the output bucket name and `for_staging` was None
+
+        Args:
+            for_staging (Union[bool, None]): Whether this manifest is meant for staging.
+
+        Returns:
+            str: Branch to use on the repo, either "staging" or "master"
+        """
         staging_out_bucket = "staging" in self.output_bucket_name
         final_out_bucket = "final" in self.output_bucket_name
+
         if for_staging is None:
-            # if no argument was provided, use only the output bucket name to infer
-            # if the stage is not in the bucket name, use staging branch by default
             for_staging = not (staging_out_bucket or final_out_bucket)
-        # only pushing to master branch if `for_staging` was defined and False
-        # or if 'final' was in the output s3 bucket and `for_staging` was None
-        # --> `for_staging` overrides the result.
+
         return "staging" if staging_out_bucket or for_staging else "master"
 
     def _get_prev_version_manifest(self) -> Union[dict[str, Any], None]:
@@ -350,6 +368,27 @@ class DataManifest:
         push_to_git: bool = False,
         commit_msg: Union[str, None] = None,
     ) -> bool:
+        """Validate the current manifest against a schema and export it (s3 and Git).
+
+        This function will always upload the generated manifest to S3, using a path
+        constructed based on `self.output_bucket_name` and the DataStage.
+
+        If `push_to_git`is True, by default the commit message used will be
+        "Add generated manifest file {filename}." It can be overriden.
+
+        Note:
+            If a problem occurs when pushing to Git, a critical message will be logged,
+            but it won't modify or alter the upload of the manifest to S3.
+
+        Args:
+            push_to_git (bool, optional): Whether to also push the generated manifest to
+                GitHub (impresso/impresso-data-release). Defaults to False.
+            commit_msg (Union[str, None], optional): Commit message to override the
+                default message. Defaults to None.
+
+        Returns:
+            bool: Whether the upload to s3 was successful.
+        """
         msg = "Validating and exporting manifest to s3"
 
         # validate the manifest against the schema
@@ -396,13 +435,29 @@ class DataManifest:
         return upload_to_s3(out_file_path, mft_filename, self.output_bucket_name)
 
     def get_count_keys(self) -> list[str]:
-        return self._eg_yearly_stats.count_keys
+        """Get the list of count keys for this manifest's media dict.
+
+        Returns:
+            list[str]: Count keys corresponding to this manifest's DataStage.
+        """
+        return NewspaperStatistics(self.stage, "year").count_keys
 
     def init_yearly_count_dict(self) -> dict[str, int]:
-        return self._eg_yearly_stats.init_counts()
+        """Initialize new newspaper statistics counts for this manifest.
+
+        Returns:
+            dict[str, int]: Initialized counts for this manifest.
+        """
+        return NewspaperStatistics(self.stage, "year").init_counts()
 
     def _log_failed_action(self, title: str, year: str, action: str) -> None:
+        """Log and add to the notes that an action on the counts/statistics failed.
 
+        Args:
+            title (str): Newspaper title on/with which this failure took place.
+            year (str): Year on/with which this failure took place.
+            action (str): Specific action during which failure took plave.
+        """
         failed_note = f"{title}-{year}: {action} provided counts failed (invalid)."
 
         logger.warning(" ".join([failed_note, "Adding information to notes."]))
@@ -423,6 +478,15 @@ class DataManifest:
         return np_stats, success
 
     def has_title_year_key(self, title: str, year: str) -> bool:
+        """Verify whether the provided title and year have been processed.
+
+        Args:
+            title (str): Newspaper title to check.
+            year (str): Year to check.
+
+        Returns:
+            bool: True if the title-year pair has instantiated counts, false otherwise.
+        """
         if title in self._processing_stats:
             return year in self._processing_stats[title]
 
