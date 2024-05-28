@@ -793,20 +793,18 @@ class DataManifest:
                 modif_media_info = True
 
             # if self.only_counting is True, only update media info if stats changed
-            # same_stats = stats.same_counts(old_media_list[title]["stats_as_dict"][year])
-            elif (
-                not self.only_counting
-                or old_media_list[title]["stats_as_dict"][year]
-                != stats.pretty_print()  # TODO update to compare without the date
+            elif not self.only_counting or stats.same_counts(
+                old_media_list[title]["stats_as_dict"][year]
             ):
-                print(
-                    'old_media_list[title]["stats_as_dict"][year] != stats: ',
+                logger.debug(
+                    'old_media_list[title]["stats_as_dict"][year] != stats: %s and %s',
                     old_media_list[title]["stats_as_dict"][year],
                     stats,
                 )
                 modif_media_info = True
 
             print("Setting stats for ", title, year)
+            logger.debug("Setting stats for %s-%s", title, year)
             old_media_list[title]["stats_as_dict"][year] = stats
 
         return old_media_list, modif_media_info
@@ -892,12 +890,14 @@ class DataManifest:
             if isinstance(np_year_stat, DataStatistics):
                 # newly added titles will be DataStatistics objects -> needs pretty print
                 title_cumm_stats.add_counts(np_year_stat.counts)
+                # include the modification date at the year level
                 pretty_counts.append(
-                    np_year_stat.pretty_print()  # modif_date=self._generation_date)
+                    np_year_stat.pretty_print(modif_date=self._generation_date)
                 )
             else:
                 # non-modified stats will be in pretty-print dict format -> can be added directly
                 title_cumm_stats.add_counts(np_year_stat["nps_stats"])
+                # TODO add the modification year after
                 pretty_counts.append(np_year_stat)
 
         # insert the title-level statistics at the "top" of the statistics

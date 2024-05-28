@@ -115,13 +115,18 @@ class DataStatistics(ABC):
 
         return False
 
-    def pretty_print(self, include_counts: bool = False) -> dict[str, Any]:
+    def pretty_print(
+        self, modif_date: Union[str, None] = None, include_counts: bool = False
+    ) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
         These stats are agnostic to the type of statistics they represent so the values
         of `self.counts` are excluded by default, to be included in child classes.
+        The modification date can also be included (when granularity='year')
 
         Args:
+            modif_date (Union[str, None], optional): Last modification date of the
+                corresponding elements. Defaults to None.
             include_counts (bool, optional): Whether to include the current counts with
                 key "stats". Defaults to False.
 
@@ -140,6 +145,16 @@ class DataStatistics(ABC):
             else:
                 logger.warning("Missing the element when pretty-printing!")
 
+        # If a modification date is provided, add it.
+        if modif_date is not None:
+            stats_dict["last_modification_date"] = modif_date
+            if self.granularity != "year":
+                # if the granularity is not year, log a warning (unexpected behavior)
+                logger.warning(
+                    "'last_modification_date' field was added although granularity is %s",
+                    self.granularity,
+                )
+
         if include_counts:
             stats_dict["stats"] = {
                 k: (
@@ -152,6 +167,10 @@ class DataStatistics(ABC):
             }
 
         return stats_dict
+
+    @abstractmethod
+    def same_counts(self, other_stats: dict[str, Any]) -> bool:
+        """Given another dict of stats, check whether the values are the same."""
 
 
 class NewspaperStatistics(DataStatistics):
@@ -285,17 +304,21 @@ class NewspaperStatistics(DataStatistics):
         # the provided counts were conforming
         return True
 
-    def pretty_print(self, include_counts: bool = True) -> dict[str, Any]:
+    def pretty_print(
+        self, modif_date: Union[str, None] = None, include_counts: bool = True
+    ) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
         Args:
+            modif_date (Union[str, None], optional): Last modification date of the
+                corresponding elements. Defaults to None.
             include_counts (bool, optional): Whether to include the current newspaper
                 counts with key "nps_stats". Defaults to True.
 
         Returns:
             dict[str, Any]: A dict representation of these statistics.
         """
-        stats_dict = super().pretty_print()
+        stats_dict = super().pretty_print(modif_date=modif_date)
         # add the newspaper stats
         if include_counts:
             stats_dict["nps_stats"] = {
@@ -309,3 +332,16 @@ class NewspaperStatistics(DataStatistics):
             }
 
         return stats_dict
+
+    def same_counts(self, other_stats: dict[str, Any]) -> bool:
+        """Given another dict of stats, check whether the values are the same.
+
+        Args:
+            other_stats (dict[str, Any]): Dict with pretty-printed newspaper stats.
+
+        Returns:
+            bool: True if the values for the various fields of `nps_stats` where the
+                same, False otherwise.
+        """
+        self_stats = self.pretty_print()
+        return self_stats["nps_stats"] == other_stats["nps_stats"]

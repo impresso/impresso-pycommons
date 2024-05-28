@@ -786,6 +786,7 @@ def compute_stats_in_canonical_bag(
     return aggregated_df.to_bag(format="dict").compute()
 
 
+### DEFINITION of tunique ###
 # define locally the nunique() aggregation function for dask
 def chunk(s):
     # The function applied to the individual partition (map)
@@ -805,6 +806,7 @@ def finalize(s):
 
 # aggregating function implementing np.nunique()
 tunique = dd.Aggregation("tunique", chunk, agg, finalize)
+### DEFINITION of tunique ###
 
 
 def compute_stats_in_rebuilt_bag(
