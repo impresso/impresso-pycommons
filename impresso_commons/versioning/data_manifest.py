@@ -67,6 +67,8 @@ class DataManifest:
         push_to_git: Union[bool, None] = False,
     ) -> None:
 
+        # TODO when integrating radio data: init a media_type attribute and add RadioStatistics.
+
         self.stage = validate_stage(data_stage)  # update once all stages are final
         self.input_bucket_name = s3_input_bucket
         self.only_counting = only_counting
@@ -437,6 +439,8 @@ class DataManifest:
     def get_count_keys(self) -> list[str]:
         """Get the list of count keys for this manifest's media dict.
 
+        TODO when integrating radio data: init RadioStatistics instead.
+
         Returns:
             list[str]: Count keys corresponding to this manifest's DataStage.
         """
@@ -444,6 +448,8 @@ class DataManifest:
 
     def init_yearly_count_dict(self) -> dict[str, int]:
         """Initialize new newspaper statistics counts for this manifest.
+
+        TODO when integrating radio data: init RadioStatistics instead.
 
         Returns:
             dict[str, int]: Initialized counts for this manifest.
@@ -454,7 +460,7 @@ class DataManifest:
         """Log and add to the notes that an action on the counts/statistics failed.
 
         Args:
-            title (str): Newspaper title on/with which this failure took place.
+            title (str): Media title on/with which this failure took place.
             year (str): Year on/with which this failure took place.
             action (str): Specific action during which failure took plave.
         """
@@ -466,11 +472,24 @@ class DataManifest:
     def _init_yearly_stats(
         self, title: str, year: str, counts: dict[str, int]
     ) -> tuple[NewspaperStatistics, bool]:
+        """Initialize the stats fro a given title and year given precomputed counts.
+
+        TODO when integrating radio data: init RadioStatistics instead.
+
+        Args:
+            title (str): Media title to add the stats to.
+            year (str): Year to which the stats correspond.
+            counts (dict[str, int]): Precomputed counts used directly to initialize.
+
+        Returns:
+            tuple[NewspaperStatistics, bool]: The initiailized stats and whether this
+                initialization was successful.
+        """
         logger.debug("Initializing counts for %s-%s", title, year)
         elem = f"{title}-{year}"
         np_stats = NewspaperStatistics(self.stage, "year", elem, counts=counts)
         success = True
-        # if the created count keys
+        # if the created stats don't have the initialized values
         if np_stats.counts != counts:
             success = False
             self._log_failed_action(title, year, "initializing with")
@@ -481,7 +500,7 @@ class DataManifest:
         """Verify whether the provided title and year have been processed.
 
         Args:
-            title (str): Newspaper title to check.
+            title (str): Media title to check.
             year (str): Year to check.
 
         Returns:
@@ -495,6 +514,21 @@ class DataManifest:
     def _modify_processing_stats(
         self, title: str, year: str, counts: dict[str, int], adding: bool = True
     ) -> bool:
+        """Update or replace the processing stats for a given title-year pair.
+
+        If the provided title-year key was not associated with any value in
+        `processing_stats`, addition and replacement are the same: initialization.
+
+        Args:
+            title (str): Media title which should be updated with the new counts.
+            year (str): Year which should be updated with the new counts.
+            counts (dict[str, int]): Counts to use to add or replace current stats.
+            adding (bool, optional): Whether this update should be an addition or
+                replacement of any existing counts. Defaults to True.
+
+        Returns:
+            bool: True if the modification was a success, False otherwise.
+        """
         # check if title/year pair is already in processing stats
         if self.has_title_year_key(title, year):
             # if title in self._processing_stats:
@@ -502,17 +536,16 @@ class DataManifest:
             success = self._processing_stats[title][year].add_counts(
                 counts, replace=(not adding)
             )
-
             if not success:
                 action = "adding" if adding else "replacing with"
                 self._log_failed_action(title, year, action)
+
             # notify user of outcome
             return success
 
         if title not in self._processing_stats:
             logger.debug("Adding first stats for %s", title)
             self._processing_stats[title] = {}
-
         # initialize new statistics for this title-year pair:
         self._processing_stats[title][year], success = self._init_yearly_stats(
             title, year, counts
@@ -521,29 +554,104 @@ class DataManifest:
         return success
 
     def add_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
+        """Add new counts corresponding to a specific content-item ID.
+
+        Args:
+            ci_id (str): Content-item canonical ID to which the counts correspond.
+            counts (dict[str, int]): Counts corresponding to that ID.
+
+        Returns:
+            bool: True if the processing stats' update was successful, False otherwise.
+        """
         title, year = ci_id.split("-")[0:2]
         return self._modify_processing_stats(title, year, counts)
 
     def add_by_title_year(self, title: str, year: str, counts: dict[str, int]) -> bool:
+        """Add new counts corresponding to a specific media title and year.
+
+        Args:
+            title (str): Media title to which the counts correspond.
+            year (str): Year to which the counts correspond.
+            counts (dict[str, int]): Counts corresponding to that title and year.
+
+        Returns:
+            bool: True if the processing stats' update was successful, False otherwise.
+        """
         return self._modify_processing_stats(title, str(year), counts)
 
     def add_count_list_by_title_year(
         self, title: str, year: str, all_counts: list[dict[str, int]]
     ) -> bool:
+        """Add a list of new counts corresponding to a specific media title and year.
+
+        Args:
+            title (str): Media title to which the counts correspond.
+            year (str): Year to which the counts correspond.
+            all_counts (list[dict[str, int]]): Lsit of counts for that title and year.
+
+        Returns:
+            bool: True if all the updates were successful, False otherwise.
+        """
         return all(
-            [self._modify_processing_stats(title, str(year), c) for c in all_counts]
+            self._modify_processing_stats(title, str(year), c) for c in all_counts
         )
 
     def replace_by_ci_id(self, ci_id: str, counts: dict[str, int]) -> bool:
+        """Replace the current counts for a CI id's title-year pair with new ones.
+
+        Warning:
+            This operation will overwrite any current counts corresponding to the
+            media title and year of the provided content-item ID. If the goal isn't
+            to overwrite these counts, `add_by_ci_id` is better suited.
+
+        Args:
+            ci_id (str): Content-item canonical ID to which the counts correspond.
+            counts (dict[str, int]): Counts for that ID to overwrite current counts with.
+
+        Returns:
+            bool: True if the stats' modification was successful, False otherwise.
+        """
         title, year = ci_id.split("-")[0:2]
+        logger.warning(
+            "The counts for %s-%s will be replaced by %s (corresponding to id: %s)",
+            title,
+            year,
+            counts,
+            ci_id,
+        )
         return self._modify_processing_stats(title, year, counts, adding=False)
 
     def replace_by_title_year(
         self, title: str, year: str, counts: dict[str, int]
     ) -> bool:
+        """Replace the current counts for a given title-year pair with new ones.
+
+        Warning:
+            This operation will overwrite any current counts corresponding to the
+            media title and year of the provided content-item ID. If the goal isn't
+            to overwrite these counts, `add_by_title_year` is better suited.
+
+        Args:
+            title (str): Media title to which the counts correspond.
+            year (str): Year to which the counts correspond.
+            counts (dict[str, int]): Counts for that ID to overwrite current counts with.
+
+        Returns:
+            bool: True if the stats' modification was successful, False otherwise.
+        """
+        logger.warning(
+            "The counts for %s-%s will be replaced by %s", title, year, counts
+        )
         return self._modify_processing_stats(title, str(year), counts, adding=False)
 
     def append_to_notes(self, contents: str, to_start: bool = True) -> None:
+        """Append a string content to the manifest notes, initialize them if needed.
+
+        Args:
+            contents (str): Text to add to the manifest notes.
+            to_start (bool, optional): Whether the contents should be added to the
+                start of the notes instead of the end. Defaults to True.
+        """
         if self.notes is None:
             self.notes = contents
         else:
@@ -553,6 +661,20 @@ class DataManifest:
             self.notes = " — ".join(new_notes)
 
     def new_media(self, title: str) -> dict[str, Any]:
+        """Add a new media dict to the media list, given its title.
+
+        By default, this means the update information will be the following:
+        - "update_type": "addition"
+        - "update_level": "title"
+        - "updated_years": [] # all represented years will be new
+        - "updated_fields": [] # all fields will be new
+
+        Args:
+            title (str): Media title for which to add a new media.
+
+        Returns:
+            dict[str, Any]: _description_
+        """
         # adding a new media means by default addition update type and title update level.
         logger.info("Creating new media dict for %s.", title)
         media = {
@@ -573,6 +695,34 @@ class DataManifest:
     def update_info_for_title(
         self, processed_years: set[str], prev_version_years: set[str]
     ) -> dict[str, Union[str, list]]:
+        """Define a title's update info from the previous and newly updated years.
+
+        The update information for a given title corresponds to four keys, for which
+        the values provide information about what modifications took place during the
+        processing this manifest is documenting.
+        They are defined based on various values:
+        - `self.patched_fields`: fields updated during the processing (eg. for a patch).
+        - `processed_years` and `prev_version_years`
+
+        Four cases exist:
+        1. All newly processed years were in the previous version
+            -> full title update, only modification.
+        2. Part of the previous years were updated, and no newly added years:
+            -> year-specific update, where all modified years will be listed.
+        3. All previous years were updated, and new years were added:
+            -> full title update with addition.
+        4. Part of the previous years were updated, and new years were added:
+            -> year-specific update, with addition.
+
+        Args:
+            processed_years (set[str]): Years for which statistics were computed for
+                this manifest.
+            prev_version_years (set[str]): Years for which statistics has already been
+                computed for the previous version of this manifest.
+
+        Returns:
+            dict[str, Union[str, list]]: New update info dict for the given title.
+        """
         new_info = {"last_modification_date": self._generation_date}
 
         if processed_years == prev_version_years:
@@ -609,21 +759,45 @@ class DataManifest:
     def update_media_stats(
         self, title: str, yearly_stats: dict[str, dict], old_media_list: dict[str, dict]
     ) -> Union[dict, bool]:
+        """Update a title's media statistics given the its newly computed yearly stats.
 
+        Note that it's actually the `old_media_list`'s contents which are updated when
+        necessary.
+        In addition, the value of `self.only_counting` will change the behavior:
+        - When False, the computation of the manifest should follow a processing, and
+            all data within the `_processing_stats` (here `yearly_stats` for 1 title)
+            will be considered to have been modified (or re-generated).
+        - When True, the manifest is computed to verify the contents of the data, and
+            the media's information will be update only if differences in statisitics
+            are found between the previous and current version.
+
+        Args:
+            title (str): Media title for which to update the media list.
+            yearly_stats (dict[str, dict]): New yearly statistics for the title.
+            old_media_list (dict[str, dict]): Previous version manifest' media list.
+
+        Returns:
+            Union[dict, bool]: Previous manifest's media list potentially updated to match
+                new counts, and whether they were modified for this title
+        """
         modif_media_info = False
 
         for year, stats in yearly_stats.items():
             if year not in old_media_list[title]["stats_as_dict"]:
                 if old_media_list[title]["updated_years"] != []:
+                    # if the year wasn't in old media list, ensure it's marked as updated
                     assert year in old_media_list[title]["updated_years"]
                 else:
                     logger.debug("Adding new year %s to %s", year, title)
                     print(f"Adding new year {year} to {title}")
                 modif_media_info = True
+
             # if self.only_counting is True, only update media info if stats changed
+            # same_stats = stats.same_counts(old_media_list[title]["stats_as_dict"][year])
             elif (
                 not self.only_counting
-                or old_media_list[title]["stats_as_dict"][year] != stats.pretty_print()
+                or old_media_list[title]["stats_as_dict"][year]
+                != stats.pretty_print()  # TODO update to compare without the date
             ):
                 print(
                     'old_media_list[title]["stats_as_dict"][year] != stats: ',
@@ -638,10 +812,22 @@ class DataManifest:
         return old_media_list, modif_media_info
 
     def generate_media_dict(self, old_media_list: dict[str, dict]) -> tuple[dict, bool]:
-        #   if new keys exist --> addition flag --> major increment
-        #   update previous version media list with current processing media list:
-        #       - setting new modification date & git url for each modified title
-        #       - compute update level & targets if not patch
+        """Given the previous manifest's and current statistics, generate new media dict.
+
+        The previous version media list is updated with current processing media list:
+        - Setting new modification date & git url for each modified title.
+        - Compute update level & targets if not the processing is not a patch.
+
+        From this update, also conclude on whether new data was added, informing the
+        how the version should be increased: if new title-year keys exist, the "addition"
+        flag will conduct to a major verison increase.
+
+        Args:
+            old_media_list (dict[str, dict]): _description_
+
+        Returns:
+            tuple[dict, bool]: _description_
+        """
         addition = False
         for title, yearly_stats in self._processing_stats.items():
 
@@ -680,23 +866,41 @@ class DataManifest:
 
         return old_media_list, addition
 
-    def aggregate_stats_for_title(self, title: str, media_dict: dict[str, Any]):
+    def aggregate_stats_for_title(
+        self, title: str, media_dict: dict[str, Any]
+    ) -> tuple[dict[str, Any], NewspaperStatistics]:
+        """Aggregate all stats of given title and export them to a "pretty print" dict.
+
+        TODO once the radio data is handled, add RadioStatistics
+
+        The `DataStatistics` objects don't display in the dict format by default,
+        but need to be converted to dicts to show as desired on the final manifest.
+
+        Args:
+            title (str): Media title for which to aggregate the yearly stats.
+            media_dict (dict[str, Any]): Title's media dict with formatted statistics.
+
+        Returns:
+            tuple[dict[str, Any], NewspaperStatistics]: Updated media dict and
+                corresponding title-level DataStatistics object.
+        """
         logger.debug("Aggregating title-level stats for %s.", title)
-        # instantiate a NewspaperStatistics object for the title
         title_cumm_stats = NewspaperStatistics(self.stage, "title", title)
-        # instantiate the list of counts for display
         pretty_counts = []
+
         for _, np_year_stat in media_dict["stats_as_dict"].items():
-            # newly added titles will be NewspaperStatistics objects
-            if type(np_year_stat) == NewspaperStatistics:
-                # add the title yearly counts
+            if isinstance(np_year_stat, DataStatistics):
+                # newly added titles will be DataStatistics objects -> needs pretty print
                 title_cumm_stats.add_counts(np_year_stat.counts)
-                pretty_counts.append(np_year_stat.pretty_print())
+                pretty_counts.append(
+                    np_year_stat.pretty_print()  # modif_date=self._generation_date)
+                )
             else:
-                # non-modified stats will be in pretty-print dict format and can be added directly
+                # non-modified stats will be in pretty-print dict format -> can be added directly
                 title_cumm_stats.add_counts(np_year_stat["nps_stats"])
                 pretty_counts.append(np_year_stat)
-        # insert the title-level statistics at the top of the statistics
+
+        # insert the title-level statistics at the "top" of the statistics
         pretty_counts.insert(0, title_cumm_stats.pretty_print())
         media_dict["media_statistics"] = pretty_counts
 
@@ -705,6 +909,18 @@ class DataManifest:
     def title_level_stats(
         self, media_list: dict[str, dict]
     ) -> tuple[list[DataStatistics], dict[str, dict]]:
+        """Compute the title-level statistics from the new media list.
+
+        Also removes the `stats_as_dict` field from the media list, and returns
+        the media list with each NewspaperStatistics object "pretty printed".
+
+        Args:
+            media_list (dict[str, dict]): Updated media list for this manifest.
+
+        Returns:
+            tuple[list[DataStatistics], dict[str, dict]]: New title-level stats and
+                media list.
+        """
         full_title_stats = []
         for title, media_as_dict in media_list.items():
             # update the canonical_media_list with the new media_dict
@@ -719,8 +935,15 @@ class DataManifest:
         return full_title_stats, media_list
 
     def overall_stats(self, title_stats: list[DataStatistics]) -> list[dict]:
-        # generate overall stats & append input manifest overall stats
+        """Generate the overall stats and append the ones from the input manifest.
 
+        Args:
+            title_stats (list[DataStatistics]): List of all title-level statistics
+                used to compute the overall stats.
+
+        Returns:
+            list[dict]: This manifest's overall stats with the ones of previous stages.
+        """
         corpus_stats = NewspaperStatistics(self.stage, "corpus", "")
         for np_stats in title_stats:
             corpus_stats.add_counts(np_stats.counts)
@@ -736,100 +959,122 @@ class DataManifest:
     def compute(
         self, export_to_git_and_s3: bool = True, commit_msg: Union[str, None] = None
     ) -> None:
-        # function that will perform all the logic to construct the manifest
-        # (similarly to NewsPaperPages)
+        """Perform all necessary logic to compute and construct the resulting manifest.
 
+        This lazy behavior ensures all necessary information is ready and accessible
+        when generating the manifest (in particular the `_processing_stats`).
+
+        The steps of this computation are the following:
+        1. Ensure `_processing_stats` is not empty so the manifest can be computed
+            and crystallize the time this function is called as the `_generation_date`.
+        2. Fetch the previous version of this manifest from S3, extract its media list.
+        3. Generate the new media list given the previous one and `_processing_stats`.
+        4. Compute the new title and corpus level statistics using the new media list.
+        5. Compute the new version based on the performed updates.
+        6. Define the `manifest_data` attribute corresponding to the final manifest.
+        7. Optionally, dump it to JSON, export it to S3 and Git.
+
+        Args:
+            export_to_git_and_s3 (bool, optional): Whether to export the final
+                `manifest_data` as JSON to S3 and GitHub. Defaults to True. If False,
+                `validate_and_export_manifest` can be called separately to do it.
+            commit_msg (Union[str, None], optional): Commit message to use instead of
+                the default from `validate_and_export_manifest`. Defaults to None.
+        """
         if not self._processing_stats:
-            msg = "The manifest cannot be computed without having provided any statistics!"
+            # `self._processing_stats` is empty the manifest can't be computed, directly stop.
+            msg = "The manifest can't be computed without having provided statistics!"
             logger.warning(msg)
-            return None
-
-        logger.info("Starting to compute the manifest...")
-
-        self._generation_date = strftime("%Y-%m-%d %H:%M:%S")
-
-        #### IMPLEMENT LOGIC AND FILL MANIFEST DATA
-
-        logger.info("Loading the previous version of this manifest if it exists.")
-        # load previous version of this manifest
-        prev_version_mft = self._get_prev_version_manifest()
-
-        if prev_version_mft is not None:
-            logger.info("Found previous version manifest, loading its contents.")
-            # ensure a non-modified version remains
-            old_mft = copy.deepcopy(prev_version_mft)
-            old_media_list = media_list_from_mft_json(old_mft)
 
         else:
-            logger.info("No previous version found, reinitializaing the media list.")
-            # if no previous version media list, generate media list from scratch
-            old_media_list = {}
+            logger.info("Starting to compute the manifest...")
 
-            if self.only_counting:
+            self._generation_date = strftime("%Y-%m-%d %H:%M:%S")
+
+            #### IMPLEMENT LOGIC AND FILL MANIFEST DATA
+
+            logger.info("Loading the previous version of this manifest if it exists.")
+            # load previous version of this manifest
+            prev_version_mft = self._get_prev_version_manifest()
+
+            if prev_version_mft is not None:
+                logger.info("Found previous version manifest, loading its contents.")
+                # ensure a non-modified version remains
+                old_mft = copy.deepcopy(prev_version_mft)
+                old_media_list = media_list_from_mft_json(old_mft)
+
+            else:
                 logger.info(
-                    "When no previous version exists, the option to only "
-                    "count (only_counting=True) is not available."
+                    "No previous version found, reinitializaing the media list."
                 )
-                self.only_counting = False
+                # if no previous version media list, generate media list from scratch
+                old_media_list = {}
 
-        logger.info("Updating the media statistics with the new information...")
-        # compare current stats to previous version stats
-        updated_media, addition = self.generate_media_dict(old_media_list)
+                if self.only_counting:
+                    logger.info(
+                        "When no previous version exists, the option to only "
+                        "count (only_counting=True) is not available."
+                    )
+                    self.only_counting = False
 
-        logger.info("Computing the title-level statistics...")
-        full_title_stats, updated_media = self.title_level_stats(updated_media)
+            logger.info("Updating the media statistics with the new information...")
+            # compare current stats to previous version stats
+            updated_media, addition = self.generate_media_dict(old_media_list)
 
-        logger.info("Computing the overall statistics...")
-        overall_stats = self.overall_stats(full_title_stats)
+            logger.info("Computing the title-level statistics...")
+            full_title_stats, updated_media = self.title_level_stats(updated_media)
 
-        # compute current version
-        self.version = self._get_current_version(addition)
+            logger.info("Computing the overall statistics...")
+            overall_stats = self.overall_stats(full_title_stats)
 
-        # the canonical has no input stage
-        if (
-            self.stage != DataStage.CANONICAL
-            and self.input_manifest_s3_path is not None
-        ):
-            input_mft_git_path = os.path.join(
-                self._get_out_path_within_repo(stage=self._input_stage),
-                self.input_manifest_s3_path.split("/")[-1],
-            )
-        else:
-            input_mft_git_path = None
+            # compute current version
+            self.version = self._get_current_version(addition)
 
-        if self.notes is None:
-            self.notes = ""
-
-        # populate the dict with all gathered information
-        self.manifest_data = {
-            "mft_version": self.version,
-            "mft_generation_date": self._generation_date,
-            "mft_s3_path": self.output_mft_s3_path,
-            "input_mft_s3_path": self.input_manifest_s3_path,
-            "input_mft_git_path": input_mft_git_path,
-            "code_git_commit": self.commit_url,
-            "media_list": list(updated_media.values()),
-            "overall_statistics": overall_stats,
-            "notes": self.notes,
-        }
-
-        logger.info("%s Manifest successfully generated! %s", "-" * 15, "-" * 15)
-
-        if export_to_git_and_s3:
-
-            # if push_to_git is not defined and exporting directly,
-            # will both upload to s3 and push to git.
-            push = self.push_to_git if self.push_to_git is not None else True
-            if not push:
-                logger.info(
-                    "Argument export_to_git_and_s3 was set to True but push_to_git was set to False. "
-                    "Exporting to S3 but not pushing to git."
+            # the canonical has no input stage
+            if (
+                self.stage != DataStage.CANONICAL
+                and self.input_manifest_s3_path is not None
+            ):
+                input_mft_git_path = os.path.join(
+                    self._get_out_path_within_repo(stage=self._input_stage),
+                    self.input_manifest_s3_path.split("/")[-1],
                 )
-            success = self.validate_and_export_manifest(push, commit_msg)
+            else:
+                input_mft_git_path = None
 
-            if success:
-                logger.info(
-                    "%s Manifest successfully uploaded to S3 and GitHub! %s",
-                    "-" * 15,
-                    "-" * 15,
-                )
+            if self.notes is None:
+                self.notes = ""
+
+            # populate the dict with all gathered information
+            self.manifest_data = {
+                "mft_version": self.version,
+                "mft_generation_date": self._generation_date,
+                "mft_s3_path": self.output_mft_s3_path,
+                "input_mft_s3_path": self.input_manifest_s3_path,
+                "input_mft_git_path": input_mft_git_path,
+                "code_git_commit": self.commit_url,
+                "media_list": list(updated_media.values()),
+                "overall_statistics": overall_stats,
+                "notes": self.notes,
+            }
+
+            logger.info("%s Manifest successfully generated! %s", "-" * 15, "-" * 15)
+
+            if export_to_git_and_s3:
+
+                # if push_to_git is not defined and exporting directly,
+                # will both upload to s3 and push to git.
+                push = self.push_to_git if self.push_to_git is not None else True
+                if not push:
+                    logger.info(
+                        "Argument export_to_git_and_s3 was set to True but push_to_git"
+                        " was set to False. Exporting to S3 but not pushing to git."
+                    )
+                success = self.validate_and_export_manifest(push, commit_msg)
+
+                if success:
+                    logger.info(
+                        "%s Manifest successfully uploaded to S3 and GitHub! %s",
+                        "-" * 15,
+                        "-" * 15,
+                    )
