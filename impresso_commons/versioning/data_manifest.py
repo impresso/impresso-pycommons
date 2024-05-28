@@ -791,9 +791,13 @@ class DataManifest:
                     logger.debug("Adding new year %s to %s", year, title)
                     print(f"Adding new year {year} to {title}")
                 modif_media_info = True
+                # TODO check if this covers all cases or if there is a problem
+                print("Setting stats for ", title, year)
+                logger.debug("Setting stats for %s-%s", title, year)
+                old_media_list[title]["stats_as_dict"][year] = stats
 
             # if self.only_counting is True, only update media info if stats changed
-            elif not self.only_counting or stats.same_counts(
+            elif not self.only_counting or not stats.same_counts(
                 old_media_list[title]["stats_as_dict"][year]
             ):
                 logger.debug(
@@ -802,10 +806,10 @@ class DataManifest:
                     stats,
                 )
                 modif_media_info = True
-
-            print("Setting stats for ", title, year)
-            logger.debug("Setting stats for %s-%s", title, year)
-            old_media_list[title]["stats_as_dict"][year] = stats
+                # TODO check if this covers all cases or if there is a problem
+                print("Setting stats for ", title, year)
+                logger.debug("Setting stats for %s-%s", title, year)
+                old_media_list[title]["stats_as_dict"][year] = stats
 
         return old_media_list, modif_media_info
 
@@ -897,7 +901,6 @@ class DataManifest:
             else:
                 # non-modified stats will be in pretty-print dict format -> can be added directly
                 title_cumm_stats.add_counts(np_year_stat["nps_stats"])
-                # TODO add the modification year after
                 pretty_counts.append(np_year_stat)
 
         # insert the title-level statistics at the "top" of the statistics

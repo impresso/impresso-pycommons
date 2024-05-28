@@ -82,6 +82,7 @@ def get_files_to_consider(config: dict[str, Any]) -> Union[list[str], None]:
         # return all filenames in the given bucket partition with the correct extension
         return fixed_s3fs_glob(os.path.join(config["output_bucket"], extension_filter))
 
+    # here list newspapers instead and s3_files becomes a dict np -> liest of files
     logger.info("Fetching the files to consider for titles %s...", config["newspapers"])
     s3_files = []
     for np in config["newspapers"]:
@@ -178,6 +179,8 @@ def create_manifest(
 
     # fetch the names of the files to consider
     s3_files = get_files_to_consider(config_dict)
+    # in format: 's3://31-passim-rebuilt-staging/passim/indeplux/indeplux-1889.jsonl.bz2'
+    # --> sep per title?
 
     logger.info("Collected a total of %s files, reading them...", len(s3_files))
     logger.debug("The list of files selected is: %s", s3_files)

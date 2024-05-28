@@ -7,7 +7,7 @@ progressively count the number of elements modified or added by the processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Union
+from typing import Any, Union, Self
 
 # from impresso_commons.versioning.data_manifest import DataStage
 from impresso_commons.versioning.helpers import (
@@ -169,7 +169,7 @@ class DataStatistics(ABC):
         return stats_dict
 
     @abstractmethod
-    def same_counts(self, other_stats: dict[str, Any]) -> bool:
+    def same_counts(self, other_stats: Union[dict[str, Any], Self]) -> bool:
         """Given another dict of stats, check whether the values are the same."""
 
 
@@ -333,15 +333,19 @@ class NewspaperStatistics(DataStatistics):
 
         return stats_dict
 
-    def same_counts(self, other_stats: dict[str, Any]) -> bool:
+    def same_counts(self, other_stats: Union[dict[str, Any], Self]) -> bool:
         """Given another dict of stats, check whether the values are the same.
 
         Args:
-            other_stats (dict[str, Any]): Dict with pretty-printed newspaper stats.
+            other_stats (Union[dict[str, Any], Self]): Dict with pretty-printed
+                newspaper statistics or other NewspaperStatistics object.
 
         Returns:
             bool: True if the values for the various fields of `nps_stats` where the
                 same, False otherwise.
         """
+        if isinstance(other_stats, NewspaperStatistics):
+            other_stats = other_stats.pretty_print()
+
         self_stats = self.pretty_print()
         return self_stats["nps_stats"] == other_stats["nps_stats"]
