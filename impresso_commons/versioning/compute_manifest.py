@@ -74,7 +74,12 @@ def extract_np_key(s3_key: str, bucket: str) -> str:
         str: Name of the corresponding newspaper, extracted form the s3 path.
     """
     # in format: 's3://31-passim-rebuilt-staging/passim/indeplux/indeplux-1889.jsonl.bz2'
-    return s3_key.replace(f"s3://{bucket}/", "").split("/")[0]
+    key_no_bucket = s3_key.replace(f"s3://{bucket}/", "")
+    # Not all buckets separate the data per title, but the title will always come first.
+    if "/" in key_no_bucket:
+        return key_no_bucket.split("/")[0]
+    else:
+        return key_no_bucket.split("-")[0]
 
 
 def get_files_to_consider(config: dict[str, Any]) -> Union[dict[str, list[str]], None]:
