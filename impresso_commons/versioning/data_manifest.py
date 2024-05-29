@@ -358,7 +358,7 @@ class DataManifest:
         stage = stage if stage is not None else self.stage
         if stage in ["canonical", "rebuilt", "passim", "evenized-rebuilt"]:
             sub_folder = "data-preparation"
-        elif "solr" in stage:
+        elif "solr" in stage or "mysql":
             sub_folder = "data-ingestion"
         else:
             sub_folder = "data-processing"
@@ -692,7 +692,7 @@ class DataManifest:
 
         return media
 
-    def update_info_for_title(
+    def define_update_info_for_title(
         self, processed_years: set[str], prev_version_years: set[str]
     ) -> dict[str, Union[str, list]]:
         """Define a title's update info from the previous and newly updated years.
@@ -758,7 +758,7 @@ class DataManifest:
 
     def update_media_stats(
         self, title: str, yearly_stats: dict[str, dict], old_media_list: dict[str, dict]
-    ) -> Union[dict, bool]:
+    ) -> Union[dict, list[str]]:
         """Update a title's media statistics given the its newly computed yearly stats.
 
         Note that it's actually the `old_media_list`'s contents which are updated when
@@ -777,22 +777,21 @@ class DataManifest:
             old_media_list (dict[str, dict]): Previous version manifest' media list.
 
         Returns:
-            Union[dict, bool]: Previous manifest's media list potentially updated to match
-                new counts, and whether they were modified for this title
+            Union[dict, list[str]]: Previous manifest's media list potentially updated to match
+                new counts, and the list of years which have been modified
         """
-        modif_media_info = False
-
+        # modif_media_info = False
+        # list of modified years
+        modif_years = []
+        logger.debug("---- INSIDE update_media_stats for %s ----", title)
         for year, stats in yearly_stats.items():
+
+            # newly added title
             if year not in old_media_list[title]["stats_as_dict"]:
-                if old_media_list[title]["updated_years"] != []:
-                    # if the year wasn't in old media list, ensure it's marked as updated
-                    assert year in old_media_list[title]["updated_years"]
-                else:
-                    logger.debug("Adding new year %s to %s", year, title)
-                    print(f"Adding new year {year} to {title}")
-                modif_media_info = True
-                # TODO check if this covers all cases or if there is a problem
-                print("Setting stats for ", title, year)
+                logger.info("update_media_stats - Adding new key %s-%s.", year, title)
+                print(f"update_media_stats - Adding new key {year}-{title}.")
+                # modif_media_info = True
+                modif_years.append(year)
                 logger.debug("Setting stats for %s-%s", title, year)
                 old_media_list[title]["stats_as_dict"][year] = stats
 
@@ -800,18 +799,22 @@ class DataManifest:
             elif not self.only_counting or not stats.same_counts(
                 old_media_list[title]["stats_as_dict"][year]
             ):
-                logger.debug(
-                    'old_media_list[title]["stats_as_dict"][year] != stats: %s and %s',
-                    old_media_list[title]["stats_as_dict"][year],
-                    stats,
-                )
-                modif_media_info = True
-                # TODO check if this covers all cases or if there is a problem
-                print("Setting stats for ", title, year)
-                logger.debug("Setting stats for %s-%s", title, year)
+                # modif_media_info = True
+                modif_years.append(year)
+                if not self.only_counting:
+                    logger.debug(
+                        "update_media_stats - modified stats -> Setting stats for %s-%s",
+                        title,
+                        year,
+                    )
                 old_media_list[title]["stats_as_dict"][year] = stats
 
-        return old_media_list, modif_media_info
+        logger.info(
+            "---- FINISHED update_media_stats for %s – had modifications:%s ----",
+            title,
+            len(modif_years) != 0,
+        )
+        return old_media_list, modif_years
 
     def generate_media_dict(self, old_media_list: dict[str, dict]) -> tuple[dict, bool]:
         """Given the previous manifest's and current statistics, generate new media dict.
@@ -844,27 +847,43 @@ class DataManifest:
                     title, yearly_stats, old_media_list
                 )
             else:
-                # if title was already present, update the information with current processing
-                media_update_info = self.update_info_for_title(
-                    set(yearly_stats.keys()),
-                    set(old_media_list[title]["stats_as_dict"].keys()),
-                )
+                prev_version_years = set(old_media_list[title]["stats_as_dict"].keys())
 
-                if not addition and media_update_info["update_type"] == "addition":
-                    # only one addition is enough
-                    addition = True
-
-                # update the statistics and identify if the media info needs change
-                old_media_list, modif_media_info = self.update_media_stats(
+                # update the statistics and identify if the media info needs to change
+                old_media_list, modif_years = self.update_media_stats(
                     title, yearly_stats, old_media_list
                 )
 
-                if modif_media_info:
+                if len(modif_years) != 0:
+
+                    # if only counting, only consider the years which were actually modified/added
+                    processed_years = (
+                        set(modif_years)
+                        if self.only_counting
+                        else set(yearly_stats.keys())
+                    )
+
+                    media_update_info = self.define_update_info_for_title(
+                        processed_years,
+                        prev_version_years,
+                    )
+
+                    logger.debug(
+                        "define_update_info_for_title for %s, new update info: %s",
+                        title,
+                        media_update_info,
+                    )
+
                     old_media_list[title].update(media_update_info)
                     print("Updated media information for %s", title)
                     logger.info("Updated media information for %s", title)
                     # keep track that media info was updated for version increase
                     self.modified_info = True
+
+                    # if title was already present, update the information with current processing
+                    if not addition and media_update_info["update_type"] == "addition":
+                        # only one addition is enough
+                        addition = True
 
         return old_media_list, addition
 
