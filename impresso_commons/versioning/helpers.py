@@ -726,7 +726,6 @@ def counts_for_rebuilt(
             }
         )
 
-    # print(f"{strftime('%Y-%m-%d %H:%M:%S')}  –  id: {rebuilt_ci['id']}")
     return counts
 
 
