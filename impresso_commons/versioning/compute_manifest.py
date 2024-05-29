@@ -249,10 +249,11 @@ def create_manifest(
     # processing newspapers one at a time
     for np_title, np_s3_files in s3_files.items():
 
+        logger.info("---------- %s ----------", np_title)
         logger.debug(
             "The list of files selected for %s is: %s",
             np_title,
-            list(np_s3_files.values()),
+            np_s3_files,
         )
         # load the selected files in dask bags
         processed_files = db.read_text(
@@ -281,7 +282,6 @@ def create_manifest(
             manifest.add_by_title_year(title, year, stats)
 
         logger.info("%s - Finished adding stats, going to the next title...", np_title)
-        logger.info("-" * 10)
 
     logger.info("Finalizing the manifest, and computing the result...")
     # Add the note to the manifest
