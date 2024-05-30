@@ -764,13 +764,14 @@ class DataManifest:
 
         Note that it's actually the `old_media_list`'s contents which are updated when
         necessary.
+
         In addition, the value of `self.only_counting` will change the behavior:
-        - When False, the computation of the manifest should follow a processing, and
-        all data within the `_processing_stats` (here `yearly_stats` for 1 title) will
-        be considered to have been modified (or re-generated).
-        - When True, the manifest is computed to verify the contents of the data, and
-        the media's information will be update only if differences in statisitics are
-        found between the previous and current version.
+            - When False, the computation of the manifest should follow a processing, and
+              all data within the `_processing_stats` (here `yearly_stats` for 1 title) will
+              be considered to have been modified (or re-generated).
+            - When True, the manifest is computed to verify the contents of the data, and
+              the media's information will be update only if differences in statisitics are
+              found between the previous and current version.
 
         Args:
             title (str): Media title for which to update the media list.
@@ -989,9 +990,9 @@ class DataManifest:
 
         The steps of this computation are the following:
             - Ensure `_processing_stats` is not empty so the manifest can be computed and
-              crystallize the time this function is called as the `_generation_date` .
+              crystallize the time this function is called as the `_generation_date`.
             - Fetch the previous version of this manifest from S3, extract its media list.
-            - Generate the new media list given the previous one and `_processing_stats` .
+            - Generate the new media list given the previous one and `_processing_stats`.
             - Compute the new title and corpus level statistics using the new media list.
             - Compute the new version based on the performed updates.
             - Define the `manifest_data` attribute corresponding to the final manifest.

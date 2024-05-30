@@ -48,7 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Versioning</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.versioning.data_statistics">Data Statistics and NewspaperStatistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.versioning.data_statistics">Data Statistics and Newspaper Statistics</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.versioning.data_statistics.DataStatistics"><code class="docutils literal notranslate"><span class="pre">DataStatistics</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#impresso_commons.versioning.data_statistics.DataStatistics.stage"><code class="docutils literal notranslate"><span class="pre">DataStatistics.stage</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#impresso_commons.versioning.data_statistics.DataStatistics.granularity"><code class="docutils literal notranslate"><span class="pre">DataStatistics.granularity</span></code></a></li>
@@ -200,7 +200,7 @@
 <li><p><strong>Ensure transparency:</strong> Citation of the various data stages and datasets should be straightforward; users should know when using the interface exactly what versions they are using, and should be able to consult the precise statistics related to them.</p></li>
 </ol>
 <section id="module-impresso_commons.versioning.data_statistics">
-<span id="data-statistics-and-newspaperstatistics"></span><h2>Data Statistics and NewspaperStatistics<a class="headerlink" href="#module-impresso_commons.versioning.data_statistics" title="Link to this heading"></a></h2>
+<span id="data-statistics-and-newspaper-statistics"></span><h2>Data Statistics and Newspaper Statistics<a class="headerlink" href="#module-impresso_commons.versioning.data_statistics" title="Link to this heading"></a></h2>
 <p>This module contains the definition of a data statistics class.</p>
 <p>A DataStatstics object should be instantiated during each processing step of
 the data preprocessing and augmentation of the Impresso project, and used to
@@ -592,9 +592,9 @@ when generating the manifest (in particular the <cite>_processing_stats</cite>).
 <dl class="simple">
 <dt>The steps of this computation are the following:</dt><dd><ul class="simple">
 <li><p>Ensure <cite>_processing_stats</cite> is not empty so the manifest can be computed and
-crystallize the time this function is called as the <cite>_generation_date</cite> .</p></li>
+crystallize the time this function is called as the <cite>_generation_date</cite>.</p></li>
 <li><p>Fetch the previous version of this manifest from S3, extract its media list.</p></li>
-<li><p>Generate the new media list given the previous one and <cite>_processing_stats</cite> .</p></li>
+<li><p>Generate the new media list given the previous one and <cite>_processing_stats</cite>.</p></li>
 <li><p>Compute the new title and corpus level statistics using the new media list.</p></li>
 <li><p>Compute the new version based on the performed updates.</p></li>
 <li><p>Define the <cite>manifest_data</cite> attribute corresponding to the final manifest.</p></li>
@@ -894,14 +894,18 @@ the media list with each NewspaperStatistics object “pretty printed”.</p>
 <span class="sig-name descname"><span class="pre">update_media_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yearly_stats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old_media_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.versioning.data_manifest.DataManifest.update_media_stats" title="Link to this definition"></a></dt>
 <dd><p>Update a title’s media statistics given the its newly computed yearly stats.</p>
 <p>Note that it’s actually the <cite>old_media_list</cite>’s contents which are updated when
-necessary.
-In addition, the value of <cite>self.only_counting</cite> will change the behavior:
-- When False, the computation of the manifest should follow a processing, and
+necessary.</p>
+<dl class="simple">
+<dt>In addition, the value of <cite>self.only_counting</cite> will change the behavior:</dt><dd><ul class="simple">
+<li><p>When False, the computation of the manifest should follow a processing, and
 all data within the <cite>_processing_stats</cite> (here <cite>yearly_stats</cite> for 1 title) will
-be considered to have been modified (or re-generated).
-- When True, the manifest is computed to verify the contents of the data, and
+be considered to have been modified (or re-generated).</p></li>
+<li><p>When True, the manifest is computed to verify the contents of the data, and
 the media’s information will be update only if differences in statisitics are
-found between the previous and current version.</p>
+found between the previous and current version.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

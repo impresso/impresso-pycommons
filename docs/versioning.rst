@@ -12,7 +12,7 @@ The main goal of this approach is to version the data and track information at e
 3. **Ensure transparency:** Citation of the various data stages and datasets should be straightforward; users should know when using the interface exactly what versions they are using, and should be able to consult the precise statistics related to them.
 
 
-Data Statistics and NewspaperStatistics
+Data Statistics and Newspaper Statistics
 ------------------------------------------
 
 .. automodule:: impresso_commons.versioning.data_statistics
