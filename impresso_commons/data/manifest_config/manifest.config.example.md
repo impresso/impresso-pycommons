@@ -32,7 +32,7 @@ Below is an example for the case of NE-processing, as well as a description of e
 
 ## Arguments
 
-- __*data_stage*__: (required) The data stage of the data to version with the manifest. Should be a valid data stage: one of : ```"canonical", "rebuilt", "evenized-rebuilt", "entities", "embeddings", "langident", "lingproc", "orcqa", "text-reuse", "topics"```. The exact list is temporary and subject to change based on needs.
+- __*data_stage*__: (required) The data stage of the data to version with the manifest. Should be a valid data stage: one of : ```"canonical", "rebuilt", "evenized-rebuilt", "entities", "embeddings", "langident", "lingproc", "orcqa", "text-reuse", "topics", "solr-ingestion-text", "solr-ingestion-entities", "solr-ingestion-emb", "mysql-ingestion"```. The exact list is temporary and subject to change based on needs.
 - __*output_bucket*__: (required) The S3 bucket (*including* partition if applicable) to read the data from and upload the created manifest to. This is the bucket (partition) that is to be versioned.
 - __*input_bucket*__: (optional) The S3 bucket of the data that was used as *input* to the processing step that generated the data that is to be versioned.
   - For any text-mining task, this will correspond to either a bucket with rebuilt or evenized data.

@@ -24,7 +24,7 @@ The library supports configuration of s3 credentials via project-specific local 
 
 The second project 'impresso - Media Monitoring of the Past II. Beyond Borders: Connecting Historical Newspapers and Radio' is funded by the Swiss National Science Foundation (SNSF) under grant number [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891.
 
-Aiming to develop and consolidate tools to process and explore large-scale collections of historical newspapers and radio archives, and to study the impact of this tooling on historical research practices, _Impresso II_ builds upon the first project – 'impresso - Media Monitoring of the Past' (grant number [CRSII5_173719](http://p3.snf.ch/project-173719), Sinergia program). More information at https://impresso-project.ch.
+Aiming to develop and consolidate tools to process and explore large-scale collections of historical newspapers and radio archives, and to study the impact of this tooling on historical research practices, _Impresso II_ builds upon the first project – 'impresso - Media Monitoring of the Past' (grant number [CRSII5_173719](http://p3.snf.ch/project-173719), Sinergia program). More information at <https://impresso-project.ch>.
 
 Copyright (C) 2024  The _impresso_ team (contributors to this program: Matteo Romanello, Maud Ehrmann, Alex Flückinger, Edoardo Tarek Hölzl, Pauline Conti).
 
@@ -47,17 +47,23 @@ The main goal of this approach is to version the data and track information at e
 
 Impresso's data processing pipeline is organised in thre main data "meta-stages", mirroring the main processing steps. During each of those meta-stages, different formats of data are created as output of processes and in turn used as inputs to other downstream tasks.
 
-1. **[Data Preparation]**: TODO
-2. **[Data Enrichment]**: TODO
-3. **[Data Indexation]**: TODO
-4. **[Data Releases]**: TODO
+1. **[Data Preparation]**: Conversion of the original media collections to unified base formats which will serve as input to the various data enrichment tasks and processes. Produces **prepared data**.
+    - Includes the data stages: _canonical_, _rebuilt_, _evenized-rebuilt_ and _passim_ (rebuilt format adapted to the passim algorithm).
+2. **[Data Enrichment]**: All processes and task performing **text and media mining** on the prepared data, through which media collections are enriched with various annotations at different levels, and turned into vector representations.
+    - Includes the data stages: _entities_, _langident_, _text-reuse_, _topics_, _ocrqa_, _embeddings_, (and _lingproc_).
+3. **[Data Indexation]**: All processes of **data ingestion** of the prepared and enriched data into the backend servers: Solr and MySQL.
+    - Includes the data stages: _solr-ingestion-text_, _solr-ingestion-entities_, _solr-ingestion-emb_, _mysql-ingestion_.
+4. **[Data Releases]**: Packages of **Impresso released data**, composed of the datasets of all previously mentioned data stages, along with their corresponding versioned manifests, to be cited on the interface.
+    - They will be accessible on the [impresso-data-release](https://github.com/impresso/impresso-data-release) GitHub repository.
+
+**TODO**: Update/finalize the exact list of stages once every stage has been included.
 
 ### Data Manifests
 
 The versioning aiming to document the data at each step through versions and statistics is implemented through **manifest files**, in JSON format which follow a specific [schema](https://github.com/impresso/impresso-schemas/blob/master/json/versioning/manifest.schema.json). (TODO update JSON schema with yearly modif date.)
 
 After each processing step, a manifest should be created documenting the changes made to the data resulting from that processing. It can also be created on the fly during a processing, and in-between processings to count and sanity-check the contents of a given S3 bucket.
-Once created, the manifest file will automatically be uploaded to the S3 bucket corresponding to the data it was computed on, and optionally pushed to the [impresso-data-release](https://github.com/impresso/impresso-data-release) GitHub repository to keep track of all changes made throughout the versions.
+Once created, the manifest file will automatically be uploaded to the S3 bucket corresponding to the data it was computed on, and optionally pushed to the [impresso-data-release](https://github.com/impresso/impresso-data-release) repository to keep track of all changes made throughout the versions.
 
 #### Computing a manifest - `compute_manifest.py` script
 
@@ -75,28 +81,92 @@ Where the `config_file` should be a simple json file, with specific arguments, a
 
 #### Computing a manifest on the fly during a process
 
-TODO
+It's also possible to compute a manfest on the fly during a process. In particular when the output from the process is not stored on S3, this method is more adapted; eg. for data indexation.
+To do so, some simple modifications should be made to the process' code:
+
+1. **Instantiation of a DataManifest object:** The `DataManifest` class holds all methods and attributed necessary to generate a manifest. It counts a relatively large number of input arguments (most of which are optional) which allow a precise specification and configuration, and ease all other interactions. All of them are also described in the [manifest configuration](https://github.com/impresso/impresso-pycommons/blob/data-workflow-versioning/impresso_commons/data/manifest_config/manifest.config.example.md):
+    - Example instantiation:
+
+    ```python
+    manifest = DataManifest(
+        data_stage="passim", # DataStage.PASSIM also accepted
+        s3_output_bucket="32-passim-rebuilt-final/passim", # includes partition within bucket
+        s3_input_bucket="22-rebuilt-final", # includes partition within bucket
+        git_repo="/local/path/to/impresso-pycommons",
+        temp_dir="/local/path/to/git_temp_folder",
+        staging=False, # If True, will be pushed to 'staging' branch of impresso-data-release, else 'master'
+        is_patch=True,
+        patched_fields=["series", "id"], # fields in the passim-rebuilt schema that were modified
+        previous_mft_path=None, # a manifest already exists on S3 inside "32-passim-rebuilt-final/passim"
+        only_counting=False,
+        notes="Patching some information in the passim-rebuilt",
+        push_to_git=True,
+    )
+    ```
+
+2. **Addition of data and counts:** Once the manifest is instantiated the main interaction with the manifest instantiated object will be through the `add_by_title_year` or `add_by_ci_id` methods (the same with "replace" instead also exist, as well as `add_count_list_by_title_year`), which take as input:
+    - The _media title_ and _year_  the provided counts correspond to
+    - The _counts_ dict which maps string keys to integer values. Each data stage has its own set of keys to instantiate, which can be obtained through the `get_count_keys` method or the [NewspaperStatistics](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/data_statistics.py#L176) class. The values corresponding to each key can be computed by the user "by hand" or by using/adapting functions like `counts_for_canonical_issue`, `counts_for_rebuilt` to their situation which can be found in the [versioning helpers.py](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/helpers.py#L708).
+        - The count keys will always include at least `"content_items_out"` and `"issues"`.
+    - Example:
+
+    ```python
+    # for all title-years pairs or content-items processed within the task
+    counts = {...} # compute counts for a given title and year of data or content-item
+    manifest.add_by_title_year("title", "year", counts)
+    # OR
+    manifest.add_by_ci_id("content-item-id", counts)
+    ```
+
+    - Note that it can be useful to only add counts for items or title-year pairs for which it's certain that the processing was successful. For instance, if the resulting output is written in files and uplodaded to S3, it would be preferable to add the counts corresponding to each file only once the upload is over without any exceptions or issues. This ensures the manifest's counts actually reflect the result of the processing.
+
+3. **Computation, validation and export of the manifest:** Finally, after all counts have been added to the manifest, its lazy computation can be triggered. This corresponds to a series of processing steps that compare the provided counts to the ones of previous versions, computes title and corpus-level statistics, serializes the generated manifest to JSON and uploads it to S3 (optionally Git).
+    - This computation is triggered as follows:
+
+    ```python
+    [...] # instantiate the manifest, and add all counts for processed objects
+    
+    # To compute the manifest, upload to S3 AND push to GitHub
+    manifest.compute(export_to_git_and_s3=True) 
+
+    # OR
+
+    # To compute the manifest, without exporting it directly
+    manifest.compute(export_to_git_and_s3=False)
+    # Then one can explore/verify the generated manifest with
+    manifest.manifest_data
+    # To export it to S3, and optionally push it to Git if it's ALREADY BEEN GENERATED
+    manifest.validate_and_export_manifest(push_to_git=[True or False])
+    ```
 
 #### Versions and version increments
 
-The manifests use a semantic versioning system, where increments are automatically deduced based on the changes made to the data during a given processing or since the last manifest computation on a bucket. Hence, by default, any data "shown" to the manifest (so added to be taken into account in the statistics) is considered to have been "modified" or re-generated.
-However, the option has also been added to compute a manifest on a given bucket to simply count and document its contents (after data was copied from one bucket ot he next for instance). Such cases are noted with the `only_counting` parameter, thank's to which only modifications in the statistics will result in updates/modifications in the final manifest generated.
+The manifests use **semantic versioning**, where increments are automatically deduced based on the changes made to the data during a given processing or since the last manifest computation on a bucket.
+There are two main "modes" in which the manifest computation can be configured:
 
-When the computing of a manifest is launched, the following will take place to determine the version to give to the resulting manifest: 
+- **Documenting an update (`only_counting=False`):**
+  - By default, any data "shown"/added to the manifest (so to be taken into account in the statistics) is _considered to have been "modified"_ or re-generated.
+  - If one desires to generate a manifest after a _partial update_ of the data of a given stage, without taking the whole corpus into consideration, the best approach is to _provide the exact list of media titles_ to include in the versioning.
+- **Documenting the contents of a bucket independently of a processing (`only_counting=True`):**
+  - However, the option has also been added to compute a manifest on a given bucket to _simply count and document its contents_ (after data was copied from one bucket ot he next for instance).
+  - In such cases, _only modifications in the statistics_ for a given title-year pair will result in updates/modifications in the final manifest generated (in particular, the `"last_modification_date"` field of the manifest, associated to statistics would stay the same for any title for which no changes were identified).
+
+When the computing of a manifest is launched, the following will take place to determine the version to give to the resulting manifest:
 
 - _If a an existing version of the manifest for a given data stage exists in the `output_bucket` provided_, this manifest will be read and updated. Its version will be the basis to identify what the version increment should be based on the type of modifications.
 - _If no such manifest exists and no manifest can be found in the `output_bucket` provided_, the there are two possibilities:
   - The argument `previous_mft_s3_path` is provided, with the path to a previously computed manifest which is present in _another_ bucket. This manifest is used as the previous one like described above to update the data and compute the next verison.
   - The argument `previous_mft_s3_path` is not provided, then this is the original manifest for a given data stage, and the version in this case is 0.0.1. This is the case for your first manifest.
-- Based on the information that was updated, the version increment varies:
-  - **Major** version increment if _new title-year pairs_ have been added that were not present in the previous manifest. 
-  - **Minor** version increment if:
-    - _No new title-year pairs_ have been provided as part of the new manifest's data, and the processing was _not a patch_. 
-    - This is in particular the version increment if we re-ingest or re-generate a portion of the corpus, where the underlying stats do not change. If a part of the corpus only was modified/reingested, the specific newspaper titles should be provided within the `newspapers` parameter to indicate which data (within the `media_list`) to consider and update.
-  - **Patch** version increment if:
-    - The _`only_counting` parameter is set to True_. 
-      - This parameter is exactly made for the case scenarios where one wants to recompute the manifest on an _entire bucket of existing data_ which has not necessarily been recomputed or changed (for instance if data was copied, or simply to recount etc). 
-      - The computation of the manifest in this context is meant more as a sanity-check of the bucket's contents.
-      - The counts and statistics will be computed like in other cases, but the update information (modification date, updated years, git commit url etc) will not be updated unless a change in the statstics is identified (in which case the version is incremented accordingly).
-    - The _`is_patch` or `patched_fields` parameters are set to True_. The processing or ingestion versioned in this case is a patch, and the patched_fields will be updated according to the values provided as parameters.
 
+Based on the information that was updated, the version increment varies:
+
+- **Major** version increment if _new title-year pairs_ have been added that were not present in the previous manifest.
+- **Minor** version increment if:
+  - _No new title-year pairs_ have been provided as part of the new manifest's data, and the processing was _not a patch_.
+  - This is in particular the version increment if we re-ingest or re-generate a portion of the corpus, where the underlying stats do not change. If a part of the corpus only was modified/reingested, the specific newspaper titles should be provided within the `newspapers` parameter to indicate which data (within the `media_list`) to consider and update.
+- **Patch** version increment if:
+  - The _`is_patch` or `patched_fields` parameters are set to True_. The processing or ingestion versioned in this case is a patch, and the patched_fields will be updated according to the values provided as parameters.
+  - The _`only_counting` parameter is set to True_.
+    - This parameter is exactly made for the case scenarios where one wants to recompute the manifest on an _entire bucket of existing data_ which has not necessarily been recomputed or changed (for instance if data was copied, or simply to recount etc).
+    - The computation of the manifest in this context is meant more as a sanity-check of the bucket's contents.
+    - The counts and statistics will be computed like in other cases, but the update information (modification date, updated years, git commit url etc) will not be updated unless a change in the statstics is identified (in which case the resulting manifest version is incremented accordingly).
