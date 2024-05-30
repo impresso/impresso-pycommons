@@ -193,10 +193,12 @@
   <section id="data-versioning">
 <h1>Data Versioning<a class="headerlink" href="#data-versioning" title="Link to this heading"></a></h1>
 <p>The <cite>versioning</cite> package of <cite>impresso_commons</cite> contains several modules and scripts with classes and functions that allow to version Impresso’s data at various stages of the processing pipeline.</p>
-<p>The main goal of this approach is to version the data and track information at every stage to:
-1. <strong>Ensure data consisteny and ease of debugging:</strong> Data elements should be consistent across stages, and inconsistencies/differences should be justifiable through the identification of data leakage points.
-2. <strong>Allow partial updates:</strong> It should be possible to (re)run all or part of the processes on subsets of the data, knowing which version of the data was used at each step. This can be necessary when new media collections arrive, or when an existing collection has been patched.
-3. <strong>Ensure transparency:</strong> Citation of the various data stages and datasets should be straightforward; users should know when using the interface exactly what versions they are using, and should be able to consult the precise statistics related to them.</p>
+<p>The main goal of this approach is to version the data and track information at every stage to:</p>
+<ol class="arabic simple">
+<li><p><strong>Ensure data consisteny and ease of debugging:</strong> Data elements should be consistent across stages, and inconsistencies/differences should be justifiable through the identification of data leakage points.</p></li>
+<li><p><strong>Allow partial updates:</strong> It should be possible to (re)run all or part of the processes on subsets of the data, knowing which version of the data was used at each step. This can be necessary when new media collections arrive, or when an existing collection has been patched.</p></li>
+<li><p><strong>Ensure transparency:</strong> Citation of the various data stages and datasets should be straightforward; users should know when using the interface exactly what versions they are using, and should be able to consult the precise statistics related to them.</p></li>
+</ol>
 <section id="module-impresso_commons.versioning.data_statistics">
 <span id="data-statistics-and-newspaperstatistics"></span><h2>Data Statistics and NewspaperStatistics<a class="headerlink" href="#module-impresso_commons.versioning.data_statistics" title="Link to this heading"></a></h2>
 <p>This module contains the definition of a data statistics class.</p>
@@ -587,15 +589,19 @@ start of the notes instead of the end. Defaults to True.</p></li>
 <dd><p>Perform all necessary logic to compute and construct the resulting manifest.</p>
 <p>This lazy behavior ensures all necessary information is ready and accessible
 when generating the manifest (in particular the <cite>_processing_stats</cite>).</p>
-<p>The steps of this computation are the following:
-- Ensure <cite>_processing_stats</cite> is not empty so the manifest can be computed and
-crystallize the time this function is called as the <cite>_generation_date</cite> .
-- Fetch the previous version of this manifest from S3, extract its media list.
-- Generate the new media list given the previous one and <cite>_processing_stats</cite> .
-- Compute the new title and corpus level statistics using the new media list.
-- Compute the new version based on the performed updates.
-- Define the <cite>manifest_data</cite> attribute corresponding to the final manifest.
-- Optionally, dump it to JSON, export it to S3 and Git.</p>
+<dl class="simple">
+<dt>The steps of this computation are the following:</dt><dd><ul class="simple">
+<li><p>Ensure <cite>_processing_stats</cite> is not empty so the manifest can be computed and
+crystallize the time this function is called as the <cite>_generation_date</cite> .</p></li>
+<li><p>Fetch the previous version of this manifest from S3, extract its media list.</p></li>
+<li><p>Generate the new media list given the previous one and <cite>_processing_stats</cite> .</p></li>
+<li><p>Compute the new title and corpus level statistics using the new media list.</p></li>
+<li><p>Compute the new version based on the performed updates.</p></li>
+<li><p>Define the <cite>manifest_data</cite> attribute corresponding to the final manifest.</p></li>
+<li><p>Optionally, dump it to JSON, export it to S3 and Git.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -615,19 +621,37 @@ the default from <cite>validate_and_export_manifest</cite>. Defaults to None.</p
 <dd><p>Define a title’s update info from the previous and newly updated years.</p>
 <p>The update information for a given title corresponds to four keys, for which
 the values provide information about what modifications took place during the
-processing this manifest is documenting.
-They are defined based on various values:
-- <cite>self.patched_fields</cite>: fields updated during the processing (eg. for a patch).
-- <cite>processed_years</cite> and <cite>prev_version_years</cite></p>
-<p>Four cases exist:
-1. All newly processed years were in the previous version
--&gt; full title update, only modification.
-2. Part of the previous years were updated, and no newly added years:
--&gt; year-specific update, where all modified years will be listed.
-3. All previous years were updated, and new years were added:
--&gt; full title update with addition.
-4. Part of the previous years were updated, and new years were added:
--&gt; year-specific update, with addition.</p>
+processing this manifest is documenting.</p>
+<dl class="simple">
+<dt>They are defined based on various values:</dt><dd><ul class="simple">
+<li><p><cite>self.patched_fields</cite>: fields updated during the processing (eg. for a patch).</p></li>
+<li><p><cite>processed_years</cite> and <cite>prev_version_years</cite></p></li>
+</ul>
+</dd>
+<dt>Four cases exist:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>All newly processed years were in the previous version</dt><dd><p>-&gt; full title update, only modification.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Part of the previous years were updated, and no newly added years:</dt><dd><p>-&gt; year-specific update, where all modified years will be listed.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>All previous years were updated, and new years were added:</dt><dd><p>-&gt; full title update with addition.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Part of the previous years were updated, and new years were added:</dt><dd><p>-&gt; year-specific update, with addition.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -650,9 +674,13 @@ computed for the previous version of this manifest.</p></li>
 <dt class="sig sig-object py" id="impresso_commons.versioning.data_manifest.DataManifest.generate_media_dict">
 <span class="sig-name descname"><span class="pre">generate_media_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_media_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.versioning.data_manifest.DataManifest.generate_media_dict" title="Link to this definition"></a></dt>
 <dd><p>Given the previous manifest’s and current statistics, generate new media dict.</p>
-<p>The previous version media list is updated with current processing media list:
-- Setting new modification date &amp; git url for each modified title.
-- Compute update level &amp; targets if not the processing is not a patch.</p>
+<dl class="simple">
+<dt>The previous version media list is updated with current processing media list:</dt><dd><ul class="simple">
+<li><p>Setting new modification date &amp; git url for each modified title.</p></li>
+<li><p>Compute update level &amp; targets if not the processing is not a patch.</p></li>
+</ul>
+</dd>
+</dl>
 <p>From this update, also conclude on whether new data was added, informing the
 how the version should be increased: if new title-year keys exist, the “addition”
 flag will conduct to a major verison increase.</p>
@@ -723,11 +751,15 @@ flag will conduct to a major verison increase.</p>
 <dt class="sig sig-object py" id="impresso_commons.versioning.data_manifest.DataManifest.new_media">
 <span class="sig-name descname"><span class="pre">new_media</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.versioning.data_manifest.DataManifest.new_media" title="Link to this definition"></a></dt>
 <dd><p>Add a new media dict to the media list, given its title.</p>
-<p>By default, this means the update information will be the following:
-- “update_type”: “addition”
-- “update_level”: “title”
-- “updated_years”: [] # all represented years will be new
-- “updated_fields”: [] # all fields will be new</p>
+<dl class="simple">
+<dt>By default, this means the update information will be the following:</dt><dd><ul class="simple">
+<li><p>“update_type”: “addition”</p></li>
+<li><p>“update_level”: “title”</p></li>
+<li><p>“updated_years”: [] # all represented years will be new</p></li>
+<li><p>“updated_fields”: [] # all fields will be new</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>title</strong> (<em>str</em>) – Media title for which to add a new media.</p>
@@ -1314,11 +1346,15 @@ into. Defaults to None.</p></li>
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">get_head_commit_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Repo</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#impresso_commons.versioning.helpers.get_head_commit_url" title="Link to this definition"></a></dt>
 <dd><p>Get the URL of the last commit on a given Git repository.</p>
 <p>TODO: test the function when repo is https url of repository.
-TODO: provide branch argument.
-<cite>repo</cite> can be one of three things:
-- a git.Repo instantiated object (if alreaday instantiated outside).
-- the local path to the git repository (previously cloned).
-- the HTTPS URL to the Git repository</p>
+TODO: provide branch argument.</p>
+<dl class="simple">
+<dt><cite>repo</cite> can be one of three things:</dt><dd><ul class="simple">
+<li><p>a git.Repo instantiated object (if alreaday instantiated outside).</p></li>
+<li><p>the local path to the git repository (previously cloned).</p></li>
+<li><p>the HTTPS URL to the Git repository.</p></li>
+</ul>
+</dd>
+</dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The returned commit URL corresponds to the one on the repository’s active
@@ -1511,10 +1547,14 @@ and modifications.</p>
 <dd><p>Extract the <cite>media_list</cite> from a manifest as a dict where each title is a key.</p>
 <p>For each title, all fields from the original media list will still be present
 along with an additional <cite>stats_as_dict</cite> field containing a dict mapping each
-year to its specific statistics.
-As a result:
-- All represented titles are within the keys of the returned media list.
-- For each title, represented years are in the keys of its <cite>stats_as_dict</cite> field.</p>
+year to its specific statistics.</p>
+<dl class="simple">
+<dt>As a result:</dt><dd><ul class="simple">
+<li><p>All represented titles are within the keys of the returned media list.</p></li>
+<li><p>For each title, represented years are in the keys of its <cite>stats_as_dict</cite> field.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>json_mft</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Dict following the JSON schema of a manifest from

@@ -192,15 +192,15 @@ class DataManifest:
         """Get the git repository branch on which to add the manifest once generated-
 
         The logic to choose the branch is the following:
-        - If no `for_staging` argument was provided, only the output bucket name is used
-            to infer the branch.
-            - If "final" -> "master", and "staging" -> "staging"
-            - If the stage is not in the bucket name, use "staging" branch by default
-        - If the `for_staging` argument was provided, it can override the result.
+            - If no `for_staging` argument was provided, only the output bucket name is used
+                to infer the branch.
+                - If "final" -> "master", and "staging" -> "staging"
+                - If the stage is not in the bucket name, use "staging" branch by default
+            - If the `for_staging` argument was provided, it can override the result.
 
         Hence, "master" branch is chosen only if:
-        - `for_staging` was defined and False
-        - `final` was in the output bucket name and `for_staging` was None
+            - `for_staging` was defined and False
+            - `final` was in the output bucket name and `for_staging` was None
 
         Args:
             for_staging (Union[bool, None]): Whether this manifest is meant for staging.
@@ -251,14 +251,14 @@ class DataManifest:
         """Get the current version of manifest for the data stage.
 
         Versions are of format vM.m.p (=Major.minor.patch), where:
-        - M changes in the case of additions to the collection (new “title-year” keys).
-        - m when modifications are made to existing data (keeping the same ‘title-year’
-            keys,by re-ingestion (not field-specific modifications).
-        - p when a patch or small fix is made, modifying one or more fields for several
-            titles, leaving the rest of the data unchanged.
-            When `self.is_patch` is True or `self.patched_fields` is defined.
-            Also when `self.only_counting` is set to True and no counts changed since
-            the previous manifest version.
+            - M changes in the case of additions to the collection (new “title-year” keys).
+            - m when modifications are made to existing data (keeping the same ‘title-year’
+                keys,by re-ingestion (not field-specific modifications).
+            - p when a patch or small fix is made, modifying one or more fields for several
+                titles, leaving the rest of the data unchanged.
+                When `self.is_patch` is True or `self.patched_fields` is defined.
+                Also when `self.only_counting` is set to True and no counts changed since
+                the previous manifest version.
 
         If no previous version exists, the version returned will be v0.0.1.
 
@@ -664,10 +664,10 @@ class DataManifest:
         """Add a new media dict to the media list, given its title.
 
         By default, this means the update information will be the following:
-        - "update_type": "addition"
-        - "update_level": "title"
-        - "updated_years": [] # all represented years will be new
-        - "updated_fields": [] # all fields will be new
+            - "update_type": "addition"
+            - "update_level": "title"
+            - "updated_years": [] # all represented years will be new
+            - "updated_fields": [] # all fields will be new
 
         Args:
             title (str): Media title for which to add a new media.
@@ -700,19 +700,20 @@ class DataManifest:
         The update information for a given title corresponds to four keys, for which
         the values provide information about what modifications took place during the
         processing this manifest is documenting.
+
         They are defined based on various values:
-        - `self.patched_fields`: fields updated during the processing (eg. for a patch).
-        - `processed_years` and `prev_version_years`
+            - `self.patched_fields`: fields updated during the processing (eg. for a patch).
+            - `processed_years` and `prev_version_years`
 
         Four cases exist:
-        1. All newly processed years were in the previous version
-        -> full title update, only modification.
-        2. Part of the previous years were updated, and no newly added years:
-        -> year-specific update, where all modified years will be listed.
-        3. All previous years were updated, and new years were added:
-        -> full title update with addition.
-        4. Part of the previous years were updated, and new years were added:
-        -> year-specific update, with addition.
+            - All newly processed years were in the previous version
+                -> full title update, only modification.
+            - Part of the previous years were updated, and no newly added years:
+                -> year-specific update, where all modified years will be listed.
+            - All previous years were updated, and new years were added:
+                -> full title update with addition.
+            - Part of the previous years were updated, and new years were added:
+                -> year-specific update, with addition.
 
         Args:
             processed_years (set[str]): Years for which statistics were computed for
@@ -820,8 +821,8 @@ class DataManifest:
         """Given the previous manifest's and current statistics, generate new media dict.
 
         The previous version media list is updated with current processing media list:
-        - Setting new modification date & git url for each modified title.
-        - Compute update level & targets if not the processing is not a patch.
+            - Setting new modification date & git url for each modified title.
+            - Compute update level & targets if not the processing is not a patch.
 
         From this update, also conclude on whether new data was added, informing the
         how the version should be increased: if new title-year keys exist, the "addition"
@@ -987,14 +988,14 @@ class DataManifest:
         when generating the manifest (in particular the `_processing_stats`).
 
         The steps of this computation are the following:
-        - Ensure `_processing_stats` is not empty so the manifest can be computed and
-        crystallize the time this function is called as the `_generation_date` .
-        - Fetch the previous version of this manifest from S3, extract its media list.
-        - Generate the new media list given the previous one and `_processing_stats` .
-        - Compute the new title and corpus level statistics using the new media list.
-        - Compute the new version based on the performed updates.
-        - Define the `manifest_data` attribute corresponding to the final manifest.
-        - Optionally, dump it to JSON, export it to S3 and Git.
+            - Ensure `_processing_stats` is not empty so the manifest can be computed and
+              crystallize the time this function is called as the `_generation_date` .
+            - Fetch the previous version of this manifest from S3, extract its media list.
+            - Generate the new media list given the previous one and `_processing_stats` .
+            - Compute the new title and corpus level statistics using the new media list.
+            - Compute the new version based on the performed updates.
+            - Define the `manifest_data` attribute corresponding to the final manifest.
+            - Optionally, dump it to JSON, export it to S3 and Git.
 
         Args:
             export_to_git_and_s3 (bool, optional): Whether to export the final

@@ -8,7 +8,7 @@ import os
 import re
 from ast import literal_eval
 from collections import Counter
-from time import strftime, strptime
+from time import strptime
 from typing import Any, Union, Self
 
 # python 3.10+
@@ -546,10 +546,11 @@ def get_head_commit_url(repo: str | git.Repo) -> str:
 
     TODO: test the function when repo is https url of repository.
     TODO: provide branch argument.
+
     `repo` can be one of three things:
-    - a git.Repo instantiated object (if alreaday instantiated outside).
-    - the local path to the git repository (previously cloned).
-    - the HTTPS URL to the Git repository
+        - a git.Repo instantiated object (if alreaday instantiated outside).
+        - the local path to the git repository (previously cloned).
+        - the HTTPS URL to the Git repository.
 
     Note:
         The returned commit URL corresponds to the one on the repository's active
@@ -610,9 +611,10 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
     For each title, all fields from the original media list will still be present
     along with an additional `stats_as_dict` field containing a dict mapping each
     year to its specific statistics.
+
     As a result:
-    - All represented titles are within the keys of the returned media list.
-    - For each title, represented years are in the keys of its `stats_as_dict` field.
+        - All represented titles are within the keys of the returned media list.
+        - For each title, represented years are in the keys of its `stats_as_dict` field.
 
     Args:
         json_mft (dict[str, Any]): Dict following the JSON schema of a manifest from
