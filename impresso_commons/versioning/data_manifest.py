@@ -995,7 +995,7 @@ class DataManifest:
         - Compute the new version based on the performed updates.
         - Define the `manifest_data` attribute corresponding to the final manifest.
         - Optionally, dump it to JSON, export it to S3 and Git.
-        
+
         Args:
             export_to_git_and_s3 (bool, optional): Whether to export the final
                 `manifest_data` as JSON to S3 and GitHub. Defaults to True. If False,

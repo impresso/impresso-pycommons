@@ -1667,11 +1667,19 @@ basic message on the added manifest will be used.Defaults to None.</p></li>
 <dt><kbd><span class="option">--config-file=<var>&lt;cf&gt;</var></span></kbd></dt>
 <dd><p>Path to configuration json file containing all necessary arguments for the computation of the manifest.</p>
 </dd>
+<dt><kbd><span class="option">--log-file=<var>&lt;lf&gt;</var></span></kbd></dt>
+<dd><p>Path to log file to use.</p>
+</dd>
+<dt><kbd><span class="option">--scheduler=<var>&lt;sch&gt;</var></span></kbd></dt>
+<dd><p>Tell dask to use an existing scheduler (otherwise it’ll create one)</p>
+</dd>
+<dt><kbd><span class="option">--nworkers=<var>&lt;nw&gt;</var></span></kbd></dt>
+<dd><p>number of workers for (local) Dask client.</p>
+</dd>
+<dt><kbd><span class="option">--verbose</span></kbd></dt>
+<dd><p>Set logging level to DEBUG (by default is INFO).</p>
+</dd>
 </dl>
-<p>–log-file=&lt;lf&gt; Path to log file to use.
-–scheduler=&lt;sch&gt;  Tell dask to use an existing scheduler (otherwise it’ll create one)
-–nworkers=&lt;nw&gt;  number of workers for (local) Dask client.
-–verbose  Set logging level to DEBUG (by default is INFO).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.versioning.compute_manifest.compute_stats_for_stage">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.compute_manifest.</span></span><span class="sig-name descname"><span class="pre">compute_stats_for_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_bag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Bag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#impresso_commons.versioning.helpers.DataStage" title="impresso_commons.versioning.helpers.DataStage"><span class="pre">DataStage</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Client</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#impresso_commons.versioning.compute_manifest.compute_stats_for_stage" title="Link to this definition"></a></dt>

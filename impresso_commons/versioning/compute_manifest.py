@@ -6,7 +6,7 @@ Usage:
 Options:
 
 --config-file=<cf>  Path to configuration json file containing all necessary arguments for the computation of the manifest.
---log-file=<lf> Path to log file to use.
+--log-file=<lf>  Path to log file to use.
 --scheduler=<sch>  Tell dask to use an existing scheduler (otherwise it'll create one)
 --nworkers=<nw>  number of workers for (local) Dask client.
 --verbose  Set logging level to DEBUG (by default is INFO).
