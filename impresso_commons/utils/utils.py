@@ -108,15 +108,16 @@ def validate_against_schema(
 
 
 def bytes_to(bytes_nb: int, to_unit: str, bsize: int = 1024) -> float:
-    """
-    Convert bytes to the specified unit.
+    """Convert bytes to the specified unit.
+
+    Supported target units:
+    - 'k' (kilobytes), 'm' (megabytes),
+    - 'g' (gigabytes), 't' (terabytes),
+    - 'p' (petabytes), 'e' (exabytes).
 
     Args:
         bytes_nb (int): The number of bytes to be converted.
         to_unit (str): The target unit for conversion.
-            Supported units: 'k' (kilobytes), 'm' (megabytes),
-                             'g' (gigabytes), 't' (terabytes),
-                             'p' (petabytes), 'e' (exabytes).
         bsize (int, optional): The base size used for conversion (default is 1024).
 
     Returns:
@@ -125,5 +126,5 @@ def bytes_to(bytes_nb: int, to_unit: str, bsize: int = 1024) -> float:
     Raises:
         KeyError: If the specified target unit is not supported.
     """
-    units = {'k': 1, 'm': 2, 'g': 3, 't': 4, 'p': 5, 'e': 6}
+    units = {"k": 1, "m": 2, "g": 3, "t": 4, "p": 5, "e": 6}
     return float(bytes_nb) / (bsize ** units[to_unit])

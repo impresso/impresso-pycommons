@@ -45,6 +45,7 @@
 <li class="toctree-l1"><a class="reference internal" href="rebuild.html">Text Rebuild</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="versioning.html">Data Versioning</a></li>
 </ul>
 
         </div>
@@ -81,21 +82,42 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.add_by_ci_id">add_by_ci_id() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.add_by_title_year">add_by_title_year() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.add_count_list_by_title_year">add_count_list_by_title_year() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.add_counts">add_counts() (impresso_commons.versioning.data_statistics.DataStatistics method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.agg">agg() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.aggregate_stats_for_title">aggregate_stats_for_title() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.s3.alternative_read_text">alternative_read_text() (in module impresso_commons.utils.s3)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.append_to_notes">append_to_notes() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -109,12 +131,16 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="images.html#impresso_commons.images.img_utils.BoxStrategy">BoxStrategy (class in impresso_commons.images.img_utils)</a>
 </li>
+      <li><a href="utils.html#impresso_commons.utils.utils.bytes_to">bytes_to() (in module impresso_commons.utils.utils)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.CANONICAL">CANONICAL (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
       <li><a href="io.html#impresso_commons.path.path_fs.canonical_path">canonical_path() (in module impresso_commons.path.path_fs)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.config_loader.Base.check_bucket">check_bucket() (impresso_commons.utils.config_loader.Base method)</a>
@@ -124,14 +150,20 @@
       <li><a href="utils.html#impresso_commons.utils.config_loader.Base.check_params">check_params() (impresso_commons.utils.config_loader.Base method)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.utils.chunk">chunk() (in module impresso_commons.utils.utils)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.helpers.chunk">(in module impresso_commons.versioning.helpers)</a>
 </li>
+      </ul></li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.cleanup">cleanup() (in module impresso_commons.text.rebuilder)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.clone_git_repo">clone_git_repo() (in module impresso_commons.versioning.helpers)</a>
 </li>
       <li><a href="images.html#impresso_commons.images.img_utils.compose">compose() (in module impresso_commons.images.img_utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.compress">compress() (in module impresso_commons.text.rebuilder)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.compute">compute() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
 </li>
       <li><a href="images.html#impresso_commons.images.olive_boxes.compute_box">compute_box() (in module impresso_commons.images.olive_boxes)</a>
 </li>
@@ -139,11 +171,43 @@
 </li>
       <li><a href="images.html#impresso_commons.images.olive_boxes.compute_scale_factor">compute_scale_factor() (in module impresso_commons.images.olive_boxes)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.compute_stats_for_stage">compute_stats_for_stage() (in module impresso_commons.versioning.compute_manifest)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.compute_stats_in_canonical_bag">compute_stats_in_canonical_bag() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.compute_stats_in_entities_bag">compute_stats_in_entities_bag() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.compute_stats_in_langident_bag">compute_stats_in_langident_bag() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.compute_stats_in_rebuilt_bag">compute_stats_in_rebuilt_bag() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.compute_stats_in_solr_text_bag">compute_stats_in_solr_text_bag() (in module impresso_commons.versioning.helpers)</a>
+</li>
       <li><a href="io.html#impresso_commons.path.path_fs.ContentItem">ContentItem (in module impresso_commons.path.path_fs)</a>
 </li>
       <li><a href="images.html#impresso_commons.images.olive_boxes.convert_box">convert_box() (in module impresso_commons.images.olive_boxes)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.count_keys">count_keys (impresso_commons.versioning.data_statistics.DataStatistics attribute)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.count_keys">(impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.counts">counts (impresso_commons.versioning.data_statistics.DataStatistics attribute)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.counts">(impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.counts_for_canonical_issue">counts_for_canonical_issue() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.counts_for_rebuilt">counts_for_rebuilt() (in module impresso_commons.versioning.helpers)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.daskutils.create_even_partitions">create_even_partitions() (in module impresso_commons.utils.daskutils)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.create_manifest">create_manifest() (in module impresso_commons.versioning.compute_manifest)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -151,12 +215,20 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="io.html#impresso_commons.path.path_fs.IssueDir.date">date (impresso_commons.path.path_fs.IssueDir attribute)</a>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest">DataManifest (class in impresso_commons.versioning.data_manifest)</a>
 </li>
-      <li><a href="io.html#impresso_commons.path.path_fs.detect_canonical_issues">detect_canonical_issues() (in module impresso_commons.path.path_fs)</a>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage">DataStage (class in impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics">DataStatistics (class in impresso_commons.versioning.data_statistics)</a>
+</li>
+      <li><a href="io.html#impresso_commons.path.path_fs.IssueDir.date">date (impresso_commons.path.path_fs.IssueDir attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.define_update_info_for_title">define_update_info_for_title() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="io.html#impresso_commons.path.path_fs.detect_canonical_issues">detect_canonical_issues() (in module impresso_commons.path.path_fs)</a>
+</li>
       <li><a href="io.html#impresso_commons.path.path_fs.detect_issues">detect_issues() (in module impresso_commons.path.path_fs)</a>
 </li>
       <li><a href="io.html#impresso_commons.path.path_fs.detect_journal_issues">detect_journal_issues() (in module impresso_commons.path.path_fs)</a>
@@ -169,6 +241,24 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="io.html#impresso_commons.path.path_fs.IssueDir.edition">edition (impresso_commons.path.path_fs.IssueDir attribute)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.element">element (impresso_commons.versioning.data_statistics.DataStatistics attribute)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.element">(impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.EMBEDDINGS">EMBEDDINGS (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.ENTITIES">ENTITIES (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.EVENIZED">EVENIZED (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.extract_np_key">extract_np_key() (in module impresso_commons.versioning.compute_manifest)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.extract_version">extract_version() (in module impresso_commons.versioning.helpers)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -177,8 +267,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="io.html#impresso_commons.path.path_s3.fetch_files">fetch_files() (in module impresso_commons.path.path_s3)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.filter_new_or_modified_media">filter_new_or_modified_media() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.finalize">finalize() (in module impresso_commons.versioning.helpers)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.find_s3_data_manifest_path">find_s3_data_manifest_path() (in module impresso_commons.versioning.helpers)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.s3.fixed_s3fs_glob">fixed_s3fs_glob() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.config_loader.Base.from_json">from_json() (impresso_commons.utils.config_loader.Base class method)</a>
@@ -189,11 +285,19 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.generate_media_dict">generate_media_dict() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.s3.get_boto3_bucket">get_boto3_bucket() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.get_bucket">get_bucket() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.get_bucket_boto3">get_bucket_boto3() (in module impresso_commons.utils.s3)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.get_count_keys">get_count_keys() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.get_files_to_consider">get_files_to_consider() (in module impresso_commons.versioning.compute_manifest)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.get_head_commit_url">get_head_commit_url() (in module impresso_commons.versioning.helpers)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.get_iiif_and_coords">get_iiif_and_coords() (in module impresso_commons.text.helpers)</a>
 </li>
@@ -209,10 +313,14 @@
 </li>
       <li><a href="images.html#impresso_commons.images.img_utils.get_jpg">get_jpg() (in module impresso_commons.images.img_utils)</a>
 </li>
-      <li><a href="utils.html#impresso_commons.utils.s3.get_or_create_bucket">get_or_create_bucket() (in module impresso_commons.utils.s3)</a>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.get_media_item_years">get_media_item_years() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.get_media_titles">get_media_titles() (in module impresso_commons.versioning.helpers)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utils.html#impresso_commons.utils.s3.get_or_create_bucket">get_or_create_bucket() (in module impresso_commons.utils.s3)</a>
+</li>
       <li><a href="images.html#impresso_commons.images.img_utils.get_page_folders">get_page_folders() (in module impresso_commons.images.img_utils)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.utils.get_pkg_resource">get_pkg_resource() (in module impresso_commons.utils.utils)</a>
@@ -222,6 +330,8 @@
       <li><a href="utils.html#impresso_commons.utils.s3.get_s3_client">get_s3_client() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.get_s3_connection">get_s3_connection() (in module impresso_commons.utils.s3)</a>
+</li>
+      <li><a href="utils.html#impresso_commons.utils.s3.get_s3_object_size">get_s3_object_size() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.get_s3_resource">get_s3_resource() (in module impresso_commons.utils.s3)</a>
 </li>
@@ -234,6 +344,26 @@
       <li><a href="utils.html#impresso_commons.utils.s3.get_storage_options">get_storage_options() (in module impresso_commons.utils.s3)</a>
 </li>
       <li><a href="images.html#impresso_commons.images.img_utils.get_tif">get_tif() (in module impresso_commons.images.img_utils)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.git_commit_push">git_commit_push() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.granularity">granularity (impresso_commons.versioning.data_statistics.DataStatistics attribute)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.granularity">(impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.has_title_year_key">has_title_year_key() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.has_value">has_value() (impresso_commons.versioning.helpers.DataStage class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -292,8 +422,6 @@
         <li><a href="rebuild.html#module-impresso_commons.text.rebuilder">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     impresso_commons.utils.config_loader
 
@@ -322,6 +450,8 @@
         <li><a href="utils.html#module-impresso_commons.utils.uima">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     impresso_commons.utils.utils
 
@@ -329,11 +459,51 @@
         <li><a href="utils.html#module-impresso_commons.utils.utils">module</a>
 </li>
       </ul></li>
+      <li>
+    impresso_commons.versioning.compute_manifest
+
+      <ul>
+        <li><a href="versioning.html#module-impresso_commons.versioning.compute_manifest">module</a>
+</li>
+      </ul></li>
+      <li>
+    impresso_commons.versioning.data_manifest
+
+      <ul>
+        <li><a href="versioning.html#module-impresso_commons.versioning.data_manifest">module</a>
+</li>
+      </ul></li>
+      <li>
+    impresso_commons.versioning.data_statistics
+
+      <ul>
+        <li><a href="versioning.html#module-impresso_commons.versioning.data_statistics">module</a>
+</li>
+      </ul></li>
+      <li>
+    impresso_commons.versioning.helpers
+
+      <ul>
+        <li><a href="versioning.html#module-impresso_commons.versioning.helpers">module</a>
+</li>
+      </ul></li>
       <li><a href="io.html#impresso_commons.path.path_s3.impresso_iter_bucket">impresso_iter_bucket() (in module impresso_commons.path.path_s3)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.increment_version">increment_version() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.init_counts">init_counts() (impresso_commons.versioning.data_statistics.DataStatistics method)</a>
+</li>
+      <li><a href="utils.html#impresso_commons.utils.utils.init_logger">init_logger() (in module impresso_commons.utils.utils)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.init_logging">init_logging() (in module impresso_commons.text.rebuilder)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.init_media_info">init_media_info() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.init_yearly_count_dict">init_yearly_count_dict() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.insert_whitespace">insert_whitespace() (in module impresso_commons.text.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.is_git_repo">is_git_repo() (in module impresso_commons.versioning.helpers)</a>
 </li>
       <li><a href="io.html#impresso_commons.path.path_fs.IssueDir">IssueDir (class in impresso_commons.path.path_fs)</a>
 
@@ -361,10 +531,14 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="io.html#impresso_commons.path.path_s3.list_files">list_files() (in module impresso_commons.path.path_s3)</a>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.LANGIDENT">LANGIDENT (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.LINGUISTIC_PROCESSING">LINGUISTIC_PROCESSING (impresso_commons.versioning.helpers.DataStage attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="io.html#impresso_commons.path.path_s3.list_files">list_files() (in module impresso_commons.path.path_s3)</a>
+</li>
       <li><a href="io.html#impresso_commons.path.path_s3.list_newspapers">list_newspapers() (in module impresso_commons.path.path_s3)</a>
 </li>
   </ul></td>
@@ -380,7 +554,13 @@
 </li>
         <li><a href="utils.html#impresso_commons.utils.daskutils.main">(in module impresso_commons.utils.daskutils)</a>
 </li>
+        <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.main">(in module impresso_commons.versioning.compute_manifest)</a>
+</li>
       </ul></li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.manifest_summary">manifest_summary() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.media_list_from_mft_json">media_list_from_mft_json() (in module impresso_commons.versioning.helpers)</a>
+</li>
       <li>
     module
 
@@ -409,7 +589,45 @@
 </li>
         <li><a href="utils.html#module-impresso_commons.utils.utils">impresso_commons.utils.utils</a>
 </li>
+        <li><a href="versioning.html#module-impresso_commons.versioning.compute_manifest">impresso_commons.versioning.compute_manifest</a>
+</li>
+        <li><a href="versioning.html#module-impresso_commons.versioning.data_manifest">impresso_commons.versioning.data_manifest</a>
+</li>
+        <li><a href="versioning.html#module-impresso_commons.versioning.data_statistics">impresso_commons.versioning.data_statistics</a>
+</li>
+        <li><a href="versioning.html#module-impresso_commons.versioning.helpers">impresso_commons.versioning.helpers</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.MYSQL_CIS">MYSQL_CIS (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.new_media">new_media() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics">NewspaperStatistics (class in impresso_commons.versioning.data_statistics)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.OCRQA">OCRQA (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.output_mft_s3_path">output_mft_s3_path (impresso_commons.versioning.data_manifest.DataManifest property)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.overall_stats">overall_stats() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -424,11 +642,13 @@
 </li>
       <li><a href="utils.html#impresso_commons.utils.utils.parse_json">parse_json() (in module impresso_commons.utils.utils)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#impresso_commons.utils.daskutils.partitioner">partitioner() (in module impresso_commons.utils.daskutils)</a>
 </li>
       <li><a href="utils.html#impresso_commons.utils.config_loader.PartitionerConfig">PartitionerConfig (class in impresso_commons.utils.config_loader)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.PASSIM">PASSIM (impresso_commons.versioning.helpers.DataStage attribute)</a>
 </li>
       <li><a href="io.html#impresso_commons.path.path_fs.IssueDir.path">path (impresso_commons.path.path_fs.IssueDir attribute)</a>
 </li>
@@ -436,6 +656,14 @@
 </li>
       <li><a href="images.html#impresso_commons.images.img_utils.BoxStrategy.png_uniq">png_uniq (impresso_commons.images.img_utils.BoxStrategy attribute)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.possible_count_keys">possible_count_keys (impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.pretty_print">pretty_print() (impresso_commons.versioning.data_statistics.DataStatistics method)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.pretty_print">(impresso_commons.versioning.data_statistics.NewspaperStatistics method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -448,6 +676,10 @@
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.read_jsonlines">read_jsonlines() (in module impresso_commons.utils.s3)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.read_manifest_from_s3">read_manifest_from_s3() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.read_manifest_from_s3_path">read_manifest_from_s3_path() (in module impresso_commons.versioning.helpers)</a>
+</li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.read_page">read_page() (in module impresso_commons.text.helpers)</a>
 </li>
       <li><a href="io.html#impresso_commons.path.path_s3.read_s3_issues">read_s3_issues() (in module impresso_commons.path.path_s3)</a>
@@ -456,21 +688,29 @@
 </li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.rebuild_for_passim">rebuild_for_passim() (in module impresso_commons.text.rebuilder)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.rebuild_for_solr">rebuild_for_solr() (in module impresso_commons.text.rebuilder)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.rebuild_issues">rebuild_issues() (in module impresso_commons.text.rebuilder)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.rebuild_text">rebuild_text() (in module impresso_commons.text.rebuilder)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.rebuild_text_passim">rebuild_text_passim() (in module impresso_commons.text.rebuilder)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.REBUILT">REBUILT (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.uima.rebuilt2xmi">rebuilt2xmi() (in module impresso_commons.utils.uima)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.reconstruct_iiif_link">reconstruct_iiif_link() (in module impresso_commons.text.helpers)</a>
 </li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.rejoin_articles">rejoin_articles() (in module impresso_commons.text.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.remove_media_in_manifest">remove_media_in_manifest() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.replace_by_ci_id">replace_by_ci_id() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.replace_by_title_year">replace_by_title_year() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
 </li>
       <li><a href="images.html#impresso_commons.images.img_utils.run_cmd">run_cmd() (in module impresso_commons.images.img_utils)</a>
 </li>
@@ -486,14 +726,32 @@
 </li>
       <li><a href="utils.html#impresso_commons.utils.s3.s3_get_pages">s3_get_pages() (in module impresso_commons.utils.s3)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="io.html#impresso_commons.path.path_s3.s3_iter_bucket">s3_iter_bucket() (in module impresso_commons.path.path_s3)</a>
 </li>
       <li><a href="io.html#impresso_commons.path.path_s3.s3ContentItem">s3ContentItem (class in impresso_commons.path.path_s3)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.same_counts">same_counts() (impresso_commons.versioning.data_statistics.DataStatistics method)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.same_counts">(impresso_commons.versioning.data_statistics.NewspaperStatistics method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="io.html#impresso_commons.path.path_fs.select_issues">select_issues() (in module impresso_commons.path.path_fs)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.SOLR_EMBS">SOLR_EMBS (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.SOLR_ENTITIES">SOLR_ENTITIES (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.SOLR_TEXT">SOLR_TEXT (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_statistics.DataStatistics.stage">stage (impresso_commons.versioning.data_statistics.DataStatistics attribute)</a>
+
+      <ul>
+        <li><a href="versioning.html#impresso_commons.versioning.data_statistics.NewspaperStatistics.stage">(impresso_commons.versioning.data_statistics.NewspaperStatistics attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -504,11 +762,17 @@
 </li>
       <li><a href="rebuild.html#impresso_commons.text.helpers.text_apply_breaks">text_apply_breaks() (in module impresso_commons.text.helpers)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.TEXT_REUSE">TEXT_REUSE (impresso_commons.versioning.helpers.DataStage attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="images.html#impresso_commons.images.img_utils.BoxStrategy.tif">tif (impresso_commons.images.img_utils.BoxStrategy attribute)</a>
 </li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.title_level_stats">title_level_stats() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
       <li><a href="utils.html#impresso_commons.utils.config_loader.Base.to_dict">to_dict() (impresso_commons.utils.config_loader.Base method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.DataStage.TOPICS">TOPICS (impresso_commons.versioning.helpers.DataStage attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -516,6 +780,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.update_media_stats">update_media_stats() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
       <li><a href="rebuild.html#impresso_commons.text.rebuilder.upload">upload() (in module impresso_commons.text.rebuilder)</a>
 
       <ul>
@@ -525,6 +791,40 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#impresso_commons.utils.s3.upload_to_s3">upload_to_s3() (in module impresso_commons.utils.s3)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="utils.html#impresso_commons.utils.utils.validate_against_schema">validate_against_schema() (in module impresso_commons.utils.utils)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.data_manifest.DataManifest.validate_and_export_manifest">validate_and_export_manifest() (impresso_commons.versioning.data_manifest.DataManifest method)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.compute_manifest.validate_config">validate_config() (in module impresso_commons.versioning.compute_manifest)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.validate_granularity">validate_granularity() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.validate_stage">validate_stage() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.validate_version">validate_version() (in module impresso_commons.versioning.helpers)</a>
+</li>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.version_as_list">version_as_list() (in module impresso_commons.versioning.helpers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.write_and_push_to_git">write_and_push_to_git() (in module impresso_commons.versioning.helpers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="versioning.html#impresso_commons.versioning.helpers.write_dump_to_fs">write_dump_to_fs() (in module impresso_commons.versioning.helpers)</a>
 </li>
   </ul></td>
 </tr></table>

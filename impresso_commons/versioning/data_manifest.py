@@ -375,7 +375,7 @@ class DataManifest:
         This function will always upload the generated manifest to S3, using a path
         constructed based on `self.output_bucket_name` and the DataStage.
 
-        If `push_to_git`is True, by default the commit message used will be
+        If `push_to_git` is True, by default the commit message used will be
         "Add generated manifest file {filename}." It can be overriden.
 
         Note:
@@ -706,13 +706,13 @@ class DataManifest:
 
         Four cases exist:
         1. All newly processed years were in the previous version
-            -> full title update, only modification.
+        -> full title update, only modification.
         2. Part of the previous years were updated, and no newly added years:
-            -> year-specific update, where all modified years will be listed.
+        -> year-specific update, where all modified years will be listed.
         3. All previous years were updated, and new years were added:
-            -> full title update with addition.
+        -> full title update with addition.
         4. Part of the previous years were updated, and new years were added:
-            -> year-specific update, with addition.
+        -> year-specific update, with addition.
 
         Args:
             processed_years (set[str]): Years for which statistics were computed for
@@ -765,11 +765,11 @@ class DataManifest:
         necessary.
         In addition, the value of `self.only_counting` will change the behavior:
         - When False, the computation of the manifest should follow a processing, and
-            all data within the `_processing_stats` (here `yearly_stats` for 1 title)
-            will be considered to have been modified (or re-generated).
+        all data within the `_processing_stats` (here `yearly_stats` for 1 title) will
+        be considered to have been modified (or re-generated).
         - When True, the manifest is computed to verify the contents of the data, and
-            the media's information will be update only if differences in statisitics
-            are found between the previous and current version.
+        the media's information will be update only if differences in statisitics are
+        found between the previous and current version.
 
         Args:
             title (str): Media title for which to update the media list.
@@ -987,14 +987,15 @@ class DataManifest:
         when generating the manifest (in particular the `_processing_stats`).
 
         The steps of this computation are the following:
-        1. Ensure `_processing_stats` is not empty so the manifest can be computed
-            and crystallize the time this function is called as the `_generation_date`.
-        2. Fetch the previous version of this manifest from S3, extract its media list.
-        3. Generate the new media list given the previous one and `_processing_stats`.
-        4. Compute the new title and corpus level statistics using the new media list.
-        5. Compute the new version based on the performed updates.
-        6. Define the `manifest_data` attribute corresponding to the final manifest.
-        7. Optionally, dump it to JSON, export it to S3 and Git.
+        - Ensure `_processing_stats` is not empty so the manifest can be computed and
+        crystallize the time this function is called as the `_generation_date` .
+        - Fetch the previous version of this manifest from S3, extract its media list.
+        - Generate the new media list given the previous one and `_processing_stats` .
+        - Compute the new title and corpus level statistics using the new media list.
+        - Compute the new version based on the performed updates.
+        - Define the `manifest_data` attribute corresponding to the final manifest.
+        - Optionally, dump it to JSON, export it to S3 and Git.
+
 
         Args:
             export_to_git_and_s3 (bool, optional): Whether to export the final

@@ -19,7 +19,7 @@ Options:
 --nworkers=<nw>  number of workers for (local) Dask client.
 --git-repo=<gr>   Local path to the "impresso-text-acquisition" git directory (including it).
 --temp-dir=<tp>  Temporary directory in which to clone the impresso-data-release git repository.
---prev-manifest=<pm> Optional S3 path to the previous manifest to use for the manifest generation
+--prev-manifest=<pm>  Optional S3 path to the previous manifest to use for the manifest generation.
 """  # noqa: E501
 
 import sys

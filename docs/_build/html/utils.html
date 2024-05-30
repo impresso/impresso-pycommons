@@ -48,9 +48,12 @@
 <li class="toctree-l1"><a class="reference internal" href="rebuild.html">Text Rebuild</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.utils">Basic Utils Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.bytes_to"><code class="docutils literal notranslate"><span class="pre">bytes_to()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.chunk"><code class="docutils literal notranslate"><span class="pre">chunk()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.get_pkg_resource"><code class="docutils literal notranslate"><span class="pre">get_pkg_resource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.parse_json"><code class="docutils literal notranslate"><span class="pre">parse_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.validate_against_schema"><code class="docutils literal notranslate"><span class="pre">validate_against_schema()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.s3">S3 Utils Functions</a><ul>
@@ -62,6 +65,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_or_create_bucket"><code class="docutils literal notranslate"><span class="pre">get_or_create_bucket()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_client"><code class="docutils literal notranslate"><span class="pre">get_s3_client()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_connection"><code class="docutils literal notranslate"><span class="pre">get_s3_connection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_object_size"><code class="docutils literal notranslate"><span class="pre">get_s3_object_size()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_resource"><code class="docutils literal notranslate"><span class="pre">get_s3_resource()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions"><code class="docutils literal notranslate"><span class="pre">get_s3_versions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions_client"><code class="docutils literal notranslate"><span class="pre">get_s3_versions_client()</span></code></a></li>
@@ -101,6 +105,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="images.html">Image handling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="versioning.html">Data Versioning</a></li>
 </ul>
 
         </div>
@@ -131,6 +136,34 @@
 <h1>Utilities<a class="headerlink" href="#utilities" title="Link to this heading"></a></h1>
 <section id="module-impresso_commons.utils.utils">
 <span id="basic-utils-functions"></span><h2>Basic Utils Functions<a class="headerlink" href="#module-impresso_commons.utils.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.bytes_to">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">bytes_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bytes_nb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1024</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.bytes_to" title="Link to this definition"></a></dt>
+<dd><p>Convert bytes to the specified unit.</p>
+<p>Supported target units:
+- ‘k’ (kilobytes), ‘m’ (megabytes),
+- ‘g’ (gigabytes), ‘t’ (terabytes),
+- ‘p’ (petabytes), ‘e’ (exabytes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bytes_nb</strong> (<em>int</em>) – The number of bytes to be converted.</p></li>
+<li><p><strong>to_unit</strong> (<em>str</em>) – The target unit for conversion.</p></li>
+<li><p><strong>bsize</strong> (<em>int</em><em>, </em><em>optional</em>) – The base size used for conversion (default is 1024).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted value in the specified unit.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>KeyError</strong> – If the specified target unit is not supported.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.utils.chunk">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.chunk" title="Link to this definition"></a></dt>
@@ -165,9 +198,47 @@ is no longer of use.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.init_logger">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">init_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RootLogger</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.init_logger" title="Link to this definition"></a></dt>
+<dd><p>Initialises the root logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>int</em><em>, </em><em>optional</em>) – desired level of logging. Defaults to logging.INFO.</p></li>
+<li><p><strong>file</strong> (<em>str</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the initialised logger</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>logging.RootLogger</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.utils.parse_json">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">parse_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.parse_json" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.validate_against_schema">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">validate_against_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_to_validate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_to_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'schemas/json/versioning/manifest.schema.json'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.validate_against_schema" title="Link to this definition"></a></dt>
+<dd><p>Validate a dict corresponding to a JSON against a provided JSON schema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – JSON data to validate against a schema.</p></li>
+<li><p><strong>path_to_schema</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to the JSON schema to validate against.
+Defaults to “impresso-schemas/json/versioning/manifest.schema.json”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>e</strong> – The provided JSON could not be validated against the provided schema.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 <section id="module-impresso_commons.utils.s3">
@@ -176,7 +247,7 @@ is no longer of use.</p>
 Warning: 2 boto libraries are used, and need to be kept until third party lib dependencies are solved.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.alternative_read_text">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">alternative_read_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s3_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_credentials</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.alternative_read_text" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">alternative_read_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s3_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s3_credentials</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_by_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></span><a class="headerlink" href="#impresso_commons.utils.s3.alternative_read_text" title="Link to this definition"></a></dt>
 <dd><p>Read from S3 a line-separated text file (e.g. <cite>*.jsonl.bz2</cite>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -320,6 +391,26 @@ please prioritize using get_s3_resource instead.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_object_size">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_object_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_object_size" title="Link to this definition"></a></dt>
+<dd><p>Get the size of an object (key) in an S3 bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – The name of the S3 bucket.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key (object) whose size you want to retrieve.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The size of the object in bytes, or None if the object doesn’t exist.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.get_s3_resource">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">get_s3_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host_url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://os.zhdk.cloud.switch.ch/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.get_s3_resource" title="Link to this definition"></a></dt>
 <dd><p>Get a boto3 resource object related to an S3 drive.</p>
@@ -440,7 +531,7 @@ If None, will be the number of detected CPUs.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.upload">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspaper_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.upload" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspaper_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.upload" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

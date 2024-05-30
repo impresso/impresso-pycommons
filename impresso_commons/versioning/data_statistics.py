@@ -190,9 +190,9 @@ class NewspaperStatistics(DataStatistics):
         element (str): The specific element associated with the statistics.
         count_keys (list[str]): The count keys for these statistics.
         counts (dict[str, int]): The count statistics computed on the specific data.
-        possible_count_keys (list[str]): All possible count keys for newspaper data.
     """
 
+    # All possible count keys for newspaper data.
     possible_count_keys = [
         "titles",
         "issues",
