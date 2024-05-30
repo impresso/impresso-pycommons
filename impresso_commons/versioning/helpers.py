@@ -708,6 +708,17 @@ def counts_for_canonical_issue(
 def counts_for_rebuilt(
     rebuilt_ci: dict[str, Any], include_np: bool = False, passim: bool = False
 ) -> dict[str, Union[int, str]]:
+    """Define the counts for 1 given rebuilt content-item to match the count keys.
+
+    Args:
+        rebuilt_ci (dict[str, Any]): Rebuilt content-item from which to extract counts.
+        include_np (bool, optional): Whether to include the title in resulting dict,
+            not necessary for on-the-fly computation. Defaults to False.
+        passim (bool, optional): True if rebuilt is in passim format. Defaults to False.
+
+    Returns:
+        dict[str, Union[int, str]]: Dict with rebuilt (passim) keys and counts for 1 CI.
+    """
     split_id = rebuilt_ci["id"].split("-")
     counts = {"np_id": split_id[0]} if include_np else {}
     counts.update(
@@ -788,18 +799,18 @@ def compute_stats_in_canonical_bag(
 ### DEFINITION of tunique ###
 # define locally the nunique() aggregation function for dask
 def chunk(s):
-    # The function applied to the individual partition (map)
+    """The function applied to the individual partition (map)."""
     return s.apply(lambda x: list(set(x)))
 
 
 def agg(s):
-    # The function which will aggregate the result from all the partitions (reduce)
+    """The function which will aggregate the result from all the partitions (reduce)."""
     s = s._selected_obj
     return s.groupby(level=list(range(s.index.nlevels))).sum()
 
 
 def finalize(s):
-    # The optional function that will be applied to the result of the agg_tu functions
+    """The optional function that will be applied to the result of the agg_tu functions."""
     return s.apply(lambda x: len(set(x)))
 
 
@@ -815,8 +826,23 @@ def compute_stats_in_rebuilt_bag(
     passim: bool = False,
     client: Client | None = None,
 ) -> list[dict[str, Union[int, str]]]:
-    # key can be a title-year (include_titles=False), or lists of titles (include_titles=True)
-    # when called in the rebuilt, all the rebuilt articles in the bag are from the same newspaper and year
+    """Compute stats on a dask bag of rebuilt output content-items.
+
+    Args:
+        rebuilt_articles (db.core.Bag): Bag with the contents of rebuilt files.
+        key (str, optional): Optionally title-year pair for on-the-fly computation.
+            Defaults to "".
+        include_np (bool, optional): Whether to include the title in the groupby,
+            not necessary for on-the-fly computation. Defaults to False.
+        passim (bool, optional): True if rebuilt is in passim format. Defaults to False.
+        client (Client | None, optional): Dask client. Defaults to None.
+
+    Returns:
+        list[dict[str, Union[int, str]]]: List of counts that match rebuilt or paassim
+            DataStatistics keys.
+    """
+    # when called in the rebuilt, all the rebuilt articles in the bag
+    # are from the same newspaper and year
     print("Fetched all files, gathering desired information.")
     logger.info("Fetched all files, gathering desired information.")
 
@@ -876,10 +902,11 @@ def compute_stats_in_rebuilt_bag(
 def compute_stats_in_entities_bag(
     s3_entities: db.core.Bag, client: Client | None = None
 ) -> list[dict[str, Any]]:
-    """TODO
+    """Compute stats on a dask bag of entities output content-items.
 
     Args:
         s3_entities (db.core.Bag): Bag with the contents of entity files.
+        client (Client | None, optional): Dask client. Defaults to None.
 
     Returns:
         list[dict[str, Any]]: List of counts that match NE DataStatistics keys.
@@ -939,6 +966,16 @@ def compute_stats_in_entities_bag(
 def compute_stats_in_langident_bag(
     s3_langident: db.core.Bag, client: Client | None = None
 ) -> list[dict[str, Any]]:
+    """Compute stats on a dask bag of langident output content-items.
+
+    Args:
+        s3_langident (db.core.Bag): Bag of lang-id content-items.
+        client (Client | None, optional): Dask client. Defaults to None.
+
+    Returns:
+        list[dict[str, Any]]:  List of counts that match langident DataStatistics keys.
+    """
+
     def freq(x, col="lang_fd"):
         x[col] = dict(Counter(literal_eval(x[col])))
         return x
@@ -994,6 +1031,15 @@ def compute_stats_in_langident_bag(
 def compute_stats_in_solr_text_bag(
     s3_solr_text: db.core.Bag, client: Client | None = None
 ) -> list[dict[str, Any]]:
+    """Compute stats on a dask bag of content-items formatted for Solr input.
+
+    Args:
+        s3_solr_text (db.core.Bag): Bag or Solr formatted content-items.
+        client (Client | None, optional): Dask client. Defaults to None.
+
+    Returns:
+        list[dict[str, Any]]:  List of counts that match solr text DataStatistics keys.
+    """
     count_df = (
         s3_solr_text.map(
             lambda ci: {
