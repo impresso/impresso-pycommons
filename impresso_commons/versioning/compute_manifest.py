@@ -16,13 +16,12 @@ import json
 import os
 import traceback
 import logging
-from typing import Any, Union
+from typing import Any, Optional
 import git
 from docopt import docopt
 
 import dask.bag as db
 from dask.distributed import Client
-from impresso_commons.path.path_s3 import list_newspapers
 from impresso_commons.utils.s3 import fixed_s3fs_glob, IMPRESSO_STORAGEOPT
 from impresso_commons.utils.utils import init_logger
 from impresso_commons.versioning.helpers import (
@@ -82,7 +81,7 @@ def extract_np_key(s3_key: str, bucket: str) -> str:
         return key_no_bucket.split("-")[0]
 
 
-def get_files_to_consider(config: dict[str, Any]) -> Union[dict[str, list[str]], None]:
+def get_files_to_consider(config: dict[str, Any]) -> Optional[dict[str, list[str]]]:
     """Get the list of S3 files to consider based on the provided configuration.
 
     Args:
@@ -129,8 +128,8 @@ def get_files_to_consider(config: dict[str, Any]) -> Union[dict[str, list[str]],
 
 
 def compute_stats_for_stage(
-    files_bag: db.core.Bag, stage: DataStage, client: Union[Client, None] = None
-) -> Union[list[dict], None]:
+    files_bag: db.core.Bag, stage: DataStage, client: Optional[Client] = None
+) -> Optional[list[dict]]:
     """Compute statistics for a specific data stage.
 
     Args:
@@ -189,7 +188,7 @@ def validate_config(config: dict[str, Any]) -> dict[str, Any]:
 
 
 def create_manifest(
-    config_dict: dict[str, Any], client: Union[Client, None] = None
+    config_dict: dict[str, Any], client: Optional[Client] = None
 ) -> None:
     """Given its configuration, generate the manifest for a given s3 bucket partition.
 

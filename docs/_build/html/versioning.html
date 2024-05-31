@@ -323,7 +323,7 @@ The modification date can also be included (when granularity=’year’)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>modif_date</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Last modification date of the
+<li><p><strong>modif_date</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Last modification date of the
 corresponding elements. Defaults to None.</p></li>
 <li><p><strong>include_counts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include the current counts with
 key “stats”. Defaults to False.</p></li>
@@ -430,7 +430,7 @@ Defaults to None.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>modif_date</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Last modification date of the
+<li><p><strong>modif_date</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Last modification date of the
 corresponding elements. Defaults to None.</p></li>
 <li><p><strong>include_counts</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include the current newspaper
 counts with key “nps_stats”. Defaults to True.</p></li>
@@ -608,7 +608,7 @@ crystallize the time this function is called as the <cite>_generation_date</cite
 <li><p><strong>export_to_git_and_s3</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to export the final
 <cite>manifest_data</cite> as JSON to S3 and GitHub. Defaults to True. If False,
 <cite>validate_and_export_manifest</cite> can be called separately to do it.</p></li>
-<li><p><strong>commit_msg</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Commit message to use instead of
+<li><p><strong>commit_msg</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Commit message to use instead of
 the default from <cite>validate_and_export_manifest</cite>. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -945,7 +945,7 @@ but it won’t modify or alter the upload of the manifest to S3.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>push_to_git</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to also push the generated manifest to
 GitHub (impresso/impresso-data-release). Defaults to False.</p></li>
-<li><p><strong>commit_msg</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Commit message to override the
+<li><p><strong>commit_msg</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Commit message to override the
 default message. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1331,7 +1331,7 @@ are the ones where each stage has its own bucket.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the bucket in which to look.</p></li>
 <li><p><strong>data_stage</strong> (<em>str</em>) – Data stage corresponding to the manifest to fetch.</p></li>
-<li><p><strong>partition</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Partition within the bucket to look
+<li><p><strong>partition</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Partition within the bucket to look
 into. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1343,7 +1343,7 @@ into. Defaults to None.</p></li>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[str, None]</p>
+<dd class="field-odd"><p>Optional[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1437,7 +1437,7 @@ Ex:  [‘Title 1’, ‘Title 2’]</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>full_git_filepath</strong> (<em>str</em>) – Path to the file added to the git repository.</p></li>
 <li><p><strong>git_repo</strong> (<em>git.Repo</em>) – git.Repo object of the repository to commit and push to.</p></li>
-<li><p><strong>commit_msg</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Message to use when commiting. If not
+<li><p><strong>commit_msg</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Message to use when commiting. If not
 defined, a basic message on the added manifest will be used. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1486,9 +1486,9 @@ comparison with the one computed during the last processing.</p>
 <li><p><strong>add</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether new data was added. Defaults to True.</p></li>
 <li><p><strong>full_title</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether all the title’s years were modified.
 Defaults to True.</p></li>
-<li><p><strong>years</strong> (<em>Union</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – When <cite>full_title</cite>, the specific years
+<li><p><strong>years</strong> (<em>Optional</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – When <cite>full_title</cite>, the specific years
 which were modified/updated. Defaults to None.</p></li>
-<li><p><strong>fields</strong> (<em>Union</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – List of specific fields that were
+<li><p><strong>fields</strong> (<em>Optional</em><em>[</em><em>list</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – List of specific fields that were
 modified/updated. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1578,7 +1578,7 @@ which to extract the media list.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.versioning.helpers.read_manifest_from_s3">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">read_manifest_from_s3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#impresso_commons.versioning.helpers.DataStage" title="impresso_commons.versioning.helpers.DataStage"><span class="pre">DataStage</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.versioning.helpers.read_manifest_from_s3" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">read_manifest_from_s3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_stage</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#impresso_commons.versioning.helpers.DataStage" title="impresso_commons.versioning.helpers.DataStage"><span class="pre">DataStage</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#impresso_commons.versioning.helpers.read_manifest_from_s3" title="Link to this definition"></a></dt>
 <dd><p>Read and load manifest given an S3 bucket.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1586,7 +1586,7 @@ which to extract the media list.</p>
 <li><p><strong>bucket_name</strong> (<em>str</em>) – NAme of the s3 bucket to look into</p></li>
 <li><p><strong>data_stage</strong> (<em>Union</em><em>[</em><a class="reference internal" href="#impresso_commons.versioning.helpers.DataStage" title="impresso_commons.versioning.helpers.DataStage"><em>DataStage</em></a><em>, </em><em>str</em><em>]</em>) – Data stage corresponding to the
 manifest to fetch.</p></li>
-<li><p><strong>partition</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Partition within the bucket to look
+<li><p><strong>partition</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Partition within the bucket to look
 into. Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1598,7 +1598,7 @@ into. Defaults to None.</p></li>
 </p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[tuple[str, dict[str, Any]], tuple[None, None]]</p>
+<dd class="field-odd"><p>tuple[str, dict[str, Any]] | tuple[None, None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1615,7 +1615,7 @@ into. Defaults to None.</p></li>
 <dd class="field-even"><p>Contents of manifest if found on S3, None otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[dict[str, Any], None]</p>
+<dd class="field-odd"><p>Optional[dict[str, Any]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1659,7 +1659,7 @@ corpus, title and year.</p>
 <dd class="field-odd"><p>The provided value, in lower case, or None if not valid.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Union[str, None]</p>
+<dd class="field-even"><p>Optional[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1706,7 +1706,7 @@ Defaults to “^v([0-9]+[.]){2}[0-9]+$”.</p></li>
 <dd class="field-even"><p>The provided version if it’s valid, None otherwise.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[str, None]</p>
+<dd class="field-odd"><p>Optional[str]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1743,7 +1743,7 @@ Defaults to “^v([0-9]+[.]){2}[0-9]+$”.</p></li>
 <li><p><strong>git_repo</strong> (<em>git.Repo</em>) – Object representing the git repository to push to.</p></li>
 <li><p><strong>path_in_repo</strong> (<em>str</em>) – Relative path where to write the file.</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – Desired name for the file, including extension.</p></li>
-<li><p><strong>commit_msg</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Commit message. If not defined, a
+<li><p><strong>commit_msg</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Commit message. If not defined, a
 basic message on the added manifest will be used.Defaults to None.</p></li>
 </ul>
 </dd>
@@ -1773,7 +1773,7 @@ basic message on the added manifest will be used.Defaults to None.</p></li>
 <dd class="field-even"><p>Full path of writen file, or None if an IOError occurred.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[str, None]</p>
+<dd class="field-odd"><p>Optional[str]</p>
 </dd>
 </dl>
 </dd></dl>

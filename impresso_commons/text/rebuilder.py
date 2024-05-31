@@ -31,7 +31,7 @@ import logging
 import os
 import shutil
 import signal
-from typing import Any, Union
+from typing import Any, Optional
 import git
 
 import dask.bag as db
@@ -72,7 +72,7 @@ TYPE_MAPPINGS = {
 
 
 def rebuild_text(
-    page: list[dict], language: Union[str, None], string: Union[str, None] = None
+    page: list[dict], language: Optional[str], string: Optional[str] = None
 ) -> tuple[str, dict[list], dict[list]]:
     """Rebuild the text of an article for Solr ingestion.
 
@@ -162,7 +162,7 @@ def rebuild_text(
 
 
 def rebuild_text_passim(
-    page: list[dict], language: Union[str, None], string: Union[str, None] = None
+    page: list[dict], language: Optional[str], string: Optional[str] = None
 ) -> tuple[str, list[dict]]:
     """The text rebuilding function from pages for passim.
 

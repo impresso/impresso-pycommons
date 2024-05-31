@@ -9,7 +9,7 @@ import json
 import logging
 import os
 from time import strftime
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 from git import Repo
 
@@ -52,19 +52,19 @@ class DataManifest:
         git_repo: str | Repo,
         temp_dir: str,
         # S3 bucket of the previous stage, None if stage='canonical'
-        s3_input_bucket: Union[str, None] = None,
-        staging: Union[bool, None] = None,
+        s3_input_bucket: Optional[str] = None,
+        staging: Optional[bool] = None,
         # to directly provide the next version
-        new_version: Union[str, None] = None,
+        new_version: Optional[str] = None,
         # to indicate if patch in later stages
-        is_patch: Union[bool, None] = False,
+        is_patch: Optional[bool] = False,
         # to indiate patch in canonical/rebuilt
         patched_fields: Union[dict[str, list[str]], list[str], None] = None,
         # directly provide the s3 path of the manifest to use as base
-        previous_mft_path: Union[str, None] = None,
-        only_counting: Union[bool, None] = False,
-        notes: Union[str, None] = None,
-        push_to_git: Union[bool, None] = False,
+        previous_mft_path: Optional[str] = None,
+        only_counting: Optional[bool] = False,
+        notes: Optional[str] = None,
+        push_to_git: Optional[bool] = False,
     ) -> None:
 
         # TODO when integrating radio data: init a media_type attribute and add RadioStatistics.
@@ -188,7 +188,7 @@ class DataManifest:
 
         return full_s3_path
 
-    def _get_output_branch(self, for_staging: Union[bool, None]) -> str:
+    def _get_output_branch(self, for_staging: Optional[bool]) -> str:
         """Get the git repository branch on which to add the manifest once generated-
 
         The logic to choose the branch is the following:
@@ -203,7 +203,7 @@ class DataManifest:
             - `final` was in the output bucket name and `for_staging` was None
 
         Args:
-            for_staging (Union[bool, None]): Whether this manifest is meant for staging.
+            for_staging (Optional[bool]): Whether this manifest is meant for staging.
 
         Returns:
             str: Branch to use on the repo, either "staging" or "master"
@@ -341,7 +341,7 @@ class DataManifest:
     def _get_out_path_within_repo(
         self,
         folder_prefix: str = "data-processing-versioning",
-        stage: Union[DataStage, None] = None,
+        stage: Optional[DataStage] = None,
     ) -> str:
         """Get the output path within the "impresso-data-release" repository.
 
@@ -349,7 +349,7 @@ class DataManifest:
         Args:
             folder_prefix (str, optional): Folder prefix to use within the repository.
                 Defaults to "data-processing-versioning".
-            stage (Union[DataStage, None], optional): DataStage to consider if not
+            stage (Optional[DataStage], optional): DataStage to consider if not
                 `self.stage`. Defaults to None.
 
         Returns:
@@ -368,7 +368,7 @@ class DataManifest:
     def validate_and_export_manifest(
         self,
         push_to_git: bool = False,
-        commit_msg: Union[str, None] = None,
+        commit_msg: Optional[str] = None,
     ) -> bool:
         """Validate the current manifest against a schema and export it (s3 and Git).
 
@@ -385,7 +385,7 @@ class DataManifest:
         Args:
             push_to_git (bool, optional): Whether to also push the generated manifest to
                 GitHub (impresso/impresso-data-release). Defaults to False.
-            commit_msg (Union[str, None], optional): Commit message to override the
+            commit_msg (Optional[str], optional): Commit message to override the
                 default message. Defaults to None.
 
         Returns:
@@ -981,7 +981,7 @@ class DataManifest:
         return overall_stats
 
     def compute(
-        self, export_to_git_and_s3: bool = True, commit_msg: Union[str, None] = None
+        self, export_to_git_and_s3: bool = True, commit_msg: Optional[str] = None
     ) -> None:
         """Perform all necessary logic to compute and construct the resulting manifest.
 
@@ -1002,7 +1002,7 @@ class DataManifest:
             export_to_git_and_s3 (bool, optional): Whether to export the final
                 `manifest_data` as JSON to S3 and GitHub. Defaults to True. If False,
                 `validate_and_export_manifest` can be called separately to do it.
-            commit_msg (Union[str, None], optional): Commit message to use instead of
+            commit_msg (Optional[str], optional): Commit message to use instead of
                 the default from `validate_and_export_manifest`. Defaults to None.
         """
         if not self._processing_stats:

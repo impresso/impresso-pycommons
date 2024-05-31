@@ -9,7 +9,7 @@ import re
 from ast import literal_eval
 from collections import Counter
 from time import strptime
-from typing import Any, Union, Self
+from typing import Any, Union, Self, Optional
 
 # python 3.10+
 from enum import StrEnum
@@ -109,7 +109,7 @@ def validate_stage(
         raise e
 
 
-def validate_granularity(value: str) -> Union[str, None]:
+def validate_granularity(value: str) -> Optional[str]:
     """Validate that the granularity value provided is valid.
 
     Statistics are computed on three granularity levels:
@@ -122,7 +122,7 @@ def validate_granularity(value: str) -> Union[str, None]:
         ValueError: The provided granularity isn't one of corpus, title and year.
 
     Returns:
-        Union[str, None]: The provided value, in lower case, or None if not valid.
+        Optional[str]: The provided value, in lower case, or None if not valid.
     """
     lower = value.lower()
     if lower in POSSIBLE_GRANULARITIES:
@@ -136,9 +136,7 @@ def validate_granularity(value: str) -> Union[str, None]:
 ###### VERSION FUNCTIONS ######
 
 
-def validate_version(
-    v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$"
-) -> Union[str, None]:
+def validate_version(v: str, regex: str = "^v([0-9]+[.]){2}[0-9]+$") -> Optional[str]:
     """Validate the provided string version against a regex.
 
     The provided version should be in format "vM.m.p", where M, m and p are
@@ -150,7 +148,7 @@ def validate_version(
             Defaults to "^v([0-9]+[.]){2}[0-9]+$".
 
     Returns:
-        Union[str, None]: The provided version if it's valid, None otherwise.
+        Optional[str]: The provided version if it's valid, None otherwise.
     """
     # accept versions with hyphens in case of mistake
     v = v.replace("-", ".")
@@ -238,8 +236,8 @@ def increment_version(prev_version: str, increment: str) -> str:
 
 
 def find_s3_data_manifest_path(
-    bucket_name: str, data_stage: str, partition: Union[str, None] = None
-) -> Union[str, None]:
+    bucket_name: str, data_stage: str, partition: Optional[str] = None
+) -> Optional[str]:
     """Find and return the latest data manifest in a given S3 bucket.
 
     On S3, different Data stages will be stored in different ways.
@@ -251,11 +249,11 @@ def find_s3_data_manifest_path(
     Args:
         bucket_name (str): Name of the bucket in which to look.
         data_stage (str): Data stage corresponding to the manifest to fetch.
-        partition (Union[str, None], optional): Partition within the bucket to look
+        partition (Optional[str], optional): Partition within the bucket to look
             into. Defaults to None.
 
     Returns:
-        Union[str, None]: S3 path of the latest manifest in the bucket, None if no
+        Optional[str]: S3 path of the latest manifest in the bucket, None if no
             manifests were found inside.
     """
     # fetch the data stage as the naming value
@@ -299,19 +297,19 @@ def find_s3_data_manifest_path(
 def read_manifest_from_s3(
     bucket_name: str,
     data_stage: Union[DataStage, str],
-    partition: Union[str, None] = None,
-) -> Union[tuple[str, dict[str, Any]], tuple[None, None]]:
+    partition: Optional[str] = None,
+) -> Optional[tuple[str, dict[str, Any]]]:
     """Read and load manifest given an S3 bucket.
 
     Args:
         bucket_name (str): NAme of the s3 bucket to look into
         data_stage (Union[DataStage, str]): Data stage corresponding to the
             manifest to fetch.
-        partition (Union[str, None], optional): Partition within the bucket to look
+        partition (Optional[str], optional): Partition within the bucket to look
             into. Defaults to None.
 
     Returns:
-        Union[tuple[str, dict[str, Any]], tuple[None, None]]: S3 path of the manifest
+        tuple[str, dict[str, Any]] | tuple[None, None]: S3 path of the manifest
             and corresponding contents, if a manifest was found, None otherwise.
     """
     manifest_s3_path = find_s3_data_manifest_path(bucket_name, data_stage, partition)
@@ -326,14 +324,14 @@ def read_manifest_from_s3(
     return manifest_s3_path, json.loads(raw_text)
 
 
-def read_manifest_from_s3_path(manifest_s3_path: str) -> Union[dict[str, Any], None]:
+def read_manifest_from_s3_path(manifest_s3_path: str) -> Optional[dict[str, Any]]:
     """read and extract the contents of an arbitrary manifest,
 
     Args:
         manifest_s3_path (str): S3 path of the manifest to read.
 
     Returns:
-        Union[dict[str, Any], None]: Contents of manifest if found on S3, None otherwise.
+        Optional[dict[str, Any]]: Contents of manifest if found on S3, None otherwise.
     """
     try:
         raw_text = alternative_read_text(
@@ -349,9 +347,7 @@ def read_manifest_from_s3_path(manifest_s3_path: str) -> Union[dict[str, Any], N
 ###### GIT FUNCTIONS ######
 
 
-def write_dump_to_fs(
-    file_contents: str, abs_path: str, filename: str
-) -> Union[str, None]:
+def write_dump_to_fs(file_contents: str, abs_path: str, filename: str) -> Optional[str]:
     """Write a provided string dump to the local filesystem given its path and filename.
 
     TODO: Potentially moving this method to `utils.py`.
@@ -362,7 +358,7 @@ def write_dump_to_fs(
         filename (str): Filename of the file to write, including its extension.
 
     Returns:
-        Union[str, None]: Full path of writen file, or None if an IOError occurred.
+        Optional[str]: Full path of writen file, or None if an IOError occurred.
     """
     full_file_path = os.path.join(abs_path, filename)
 
@@ -474,7 +470,7 @@ def write_and_push_to_git(
     git_repo: git.Repo,
     path_in_repo: str,
     filename: str,
-    commit_msg: Union[str, None] = None,
+    commit_msg: Optional[str] = None,
 ) -> tuple[bool, str]:
     """Given a serialized dump, write it in local git repo, commit and push.
 
@@ -483,7 +479,7 @@ def write_and_push_to_git(
         git_repo (git.Repo): Object representing the git repository to push to.
         path_in_repo (str): Relative path where to write the file.
         filename (str): Desired name for the file, including extension.
-        commit_msg (Union[str, None], optional): Commit message. If not defined, a
+        commit_msg (Optional[str], optional): Commit message. If not defined, a
             basic message on the added manifest will be used.Defaults to None.
 
     Returns:
@@ -504,7 +500,7 @@ def write_and_push_to_git(
 
 
 def git_commit_push(
-    full_git_filepath: str, git_repo: git.Repo, commit_msg: Union[str, None] = None
+    full_git_filepath: str, git_repo: git.Repo, commit_msg: Optional[str] = None
 ) -> bool:
     """Commit and push the addition of a given file within the repository.
 
@@ -513,7 +509,7 @@ def git_commit_push(
     Args:
         full_git_filepath (str): Path to the file added to the git repository.
         git_repo (git.Repo): git.Repo object of the repository to commit and push to.
-        commit_msg (Union[str, None], optional): Message to use when commiting. If not
+        commit_msg (Optional[str], optional): Message to use when commiting. If not
             defined, a basic message on the added manifest will be used. Defaults to None.
 
     Returns:
@@ -647,8 +643,8 @@ def media_list_from_mft_json(json_mft: dict[str, Any]) -> dict[str, dict]:
 def init_media_info(
     add: bool = True,
     full_title: bool = True,
-    years: Union[list[str], None] = None,
-    fields: Union[list[str], None] = None,
+    years: Optional[list[str]] = None,
+    fields: Optional[list[str]] = None,
 ) -> dict[str, Any]:
     """Initialize the media update dict for a title given relevant information.
 
@@ -659,9 +655,9 @@ def init_media_info(
         add (bool, optional): Whether new data was added. Defaults to True.
         full_title (bool, optional): Whether all the title's years were modified.
             Defaults to True.
-        years (Union[list[str], None], optional): When `full_title`, the specific years
+        years (Optional[list[str]], optional): When `full_title`, the specific years
             which were modified/updated. Defaults to None.
-        fields (Union[list[str], None], optional): List of specific fields that were
+        fields (Optional[list[str]], optional): List of specific fields that were
             modified/updated. Defaults to None.
 
     Returns:

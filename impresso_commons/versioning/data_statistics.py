@@ -7,7 +7,7 @@ progressively count the number of elements modified or added by the processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Union, Self
+from typing import Any, Union, Self, Optional
 
 # from impresso_commons.versioning.data_manifest import DataStage
 from impresso_commons.versioning.helpers import (
@@ -46,7 +46,7 @@ class DataStatistics(ABC):
         self,
         data_stage: Union[DataStage, str],
         granularity: str,
-        element: Union[str, None] = None,
+        element: Optional[str] = None,
         counts: Union[dict[str, Union[int, dict[str, int]]], None] = None,
     ) -> None:
 
@@ -116,7 +116,7 @@ class DataStatistics(ABC):
         return False
 
     def pretty_print(
-        self, modif_date: Union[str, None] = None, include_counts: bool = False
+        self, modif_date: Optional[str] = None, include_counts: bool = False
     ) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
@@ -125,7 +125,7 @@ class DataStatistics(ABC):
         The modification date can also be included (when granularity='year')
 
         Args:
-            modif_date (Union[str, None], optional): Last modification date of the
+            modif_date (Optional[str], optional): Last modification date of the
                 corresponding elements. Defaults to None.
             include_counts (bool, optional): Whether to include the current counts with
                 key "stats". Defaults to False.
@@ -305,12 +305,12 @@ class NewspaperStatistics(DataStatistics):
         return True
 
     def pretty_print(
-        self, modif_date: Union[str, None] = None, include_counts: bool = True
+        self, modif_date: Optional[str] = None, include_counts: bool = True
     ) -> dict[str, Any]:
         """Generate a dict representation of these statistics to add to a json.
 
         Args:
-            modif_date (Union[str, None], optional): Last modification date of the
+            modif_date (Optional[str], optional): Last modification date of the
                 corresponding elements. Defaults to None.
             include_counts (bool, optional): Whether to include the current newspaper
                 counts with key "nps_stats". Defaults to True.
