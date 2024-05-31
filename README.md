@@ -49,7 +49,7 @@ Impresso's data processing pipeline is organised in thre main data "meta-stages"
 
 1. **[Data Preparation]**: Conversion of the original media collections to unified base formats which will serve as input to the various data enrichment tasks and processes. Produces **prepared data**.
     - Includes the data stages: _canonical_, _rebuilt_, _evenized-rebuilt_ and _passim_ (rebuilt format adapted to the passim algorithm).
-2. **[Data Enrichment]**: All processes and task performing **text and media mining** on the prepared data, through which media collections are enriched with various annotations at different levels, and turned into vector representations.
+2. **[Data Enrichment]**: All processes and tasks performing **text and media mining** on the prepared data, through which media collections are enriched with various annotations at different levels, and turned into vector representations.
     - Includes the data stages: _entities_, _langident_, _text-reuse_, _topics_, _ocrqa_, _embeddings_, (and _lingproc_).
 3. **[Data Indexation]**: All processes of **data ingestion** of the prepared and enriched data into the backend servers: Solr and MySQL.
     - Includes the data stages: _solr-ingestion-text_, _solr-ingestion-entities_, _solr-ingestion-emb_, _mysql-ingestion_.
@@ -76,15 +76,15 @@ python compute_manifest.py --config-file=<cf> --log-file=<lf> [--scheduler=<sch>
 
 Where the `config_file` should be a simple json file, with specific arguments, all described [here](https://github.com/impresso/impresso-pycommons/blob/data-workflow-versioning/impresso_commons/data/manifest_config/manifest.config.example.md).
 
-- The script uses [dask](https://www.dask.org/) to parallelize its task. By default, it will start a local cluster, with the 8 as defualt number of workers (the parameter `nworkers` can be used to specify any desired value).
-- Optinally, a [dask scheduler and workers](https://docs.dask.org/en/stable/deploying-cli.html) can be started in separate terminal windows, and provided to the script via the `scheduler` parameter.
+- The script uses [dask](https://www.dask.org/) to parallelize its task. By default, it will start a local cluster, with 8 as the default number of workers (the parameter `nworkers` can be used to specify any desired value).
+- Optinally, a [dask scheduler and workers](https://docs.dask.org/en/stable/deploying-cli.html) can be started in separate terminal windows, and their IP provided to the script via the `scheduler` parameter.
 
 #### Computing a manifest on the fly during a process
 
 It's also possible to compute a manfest on the fly during a process. In particular when the output from the process is not stored on S3, this method is more adapted; eg. for data indexation.
 To do so, some simple modifications should be made to the process' code:
 
-1. **Instantiation of a DataManifest object:** The `DataManifest` class holds all methods and attributed necessary to generate a manifest. It counts a relatively large number of input arguments (most of which are optional) which allow a precise specification and configuration, and ease all other interactions. All of them are also described in the [manifest configuration](https://github.com/impresso/impresso-pycommons/blob/data-workflow-versioning/impresso_commons/data/manifest_config/manifest.config.example.md):
+1. **Instantiation of a DataManifest object:** The `DataManifest` class holds all methods and attributes necessary to generate a manifest. It counts a relatively large number of input arguments (most of which are optional) which allow a precise specification and configuration, and ease all other interactions with the instantiated manifest object. All of them are also described in the [manifest configuration](https://github.com/impresso/impresso-pycommons/blob/data-workflow-versioning/impresso_commons/data/manifest_config/manifest.config.example.md):
     - Example instantiation:
 
     ```python
@@ -96,7 +96,7 @@ To do so, some simple modifications should be made to the process' code:
         temp_dir="/local/path/to/git_temp_folder",
         staging=False, # If True, will be pushed to 'staging' branch of impresso-data-release, else 'master'
         is_patch=True,
-        patched_fields=["series", "id"], # fields in the passim-rebuilt schema that were modified
+        patched_fields=["series", "id"], # example of modified fields in the passim-rebuilt schema
         previous_mft_path=None, # a manifest already exists on S3 inside "32-passim-rebuilt-final/passim"
         only_counting=False,
         notes="Patching some information in the passim-rebuilt",
@@ -104,23 +104,31 @@ To do so, some simple modifications should be made to the process' code:
     )
     ```
 
-2. **Addition of data and counts:** Once the manifest is instantiated the main interaction with the manifest instantiated object will be through the `add_by_title_year` or `add_by_ci_id` methods (the same with "replace" instead also exist, as well as `add_count_list_by_title_year`), which take as input:
-    - The _media title_ and _year_  the provided counts correspond to
-    - The _counts_ dict which maps string keys to integer values. Each data stage has its own set of keys to instantiate, which can be obtained through the `get_count_keys` method or the [NewspaperStatistics](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/data_statistics.py#L176) class. The values corresponding to each key can be computed by the user "by hand" or by using/adapting functions like `counts_for_canonical_issue`, `counts_for_rebuilt` to their situation which can be found in the [versioning helpers.py](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/helpers.py#L708).
-        - The count keys will always include at least `"content_items_out"` and `"issues"`.
+2. **Addition of data and counts:** Once the manifest is instantiated the main interaction with the instantiated manifest object will be through the `add_by_title_year` or `add_by_ci_id` methods (two other with "replace" instead also exist, as well as `add_count_list_by_title_year`, all described in the [documentation](https://impresso-pycommons.readthedocs.io/)), which take as input:
+    - The _media title_ and _year_  to which the provided counts correspond
+    - The _counts_ dict which maps string keys to integer values. Each data stage has its own set of keys to instantiate, which can be obtained through the `get_count_keys` method or the [NewspaperStatistics](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/data_statistics.py#L176) class. The values corresponding to each key can be computed by the user "by hand" or by using/adapting functions like `counts_for_canonical_issue` (or `counts_for_rebuilt`) to the given situation. All such functions can be found in the [versioning helpers.py](https://github.com/impresso/impresso-pycommons/blob/823adf426588a8698cf00b25943cfe10a625d52b/impresso_commons/versioning/helpers.py#L708).
+        - Note that the count keys will always include at least `"content_items_out"` and `"issues"`.
     - Example:
 
     ```python
     # for all title-years pairs or content-items processed within the task
-    counts = {...} # compute counts for a given title and year of data or content-item
-    manifest.add_by_title_year("title", "year", counts)
+
+    counts = ... # compute counts for a given title and year of data or content-item 
+    # eg. rebuilt counts could be: {"issues": 45, "content_items_out": 9110, "ft_tokens": 1545906} 
+
+    # add the counts to the manifest
+    manifest.add_by_title_year("title_x", "year_y", counts)
     # OR
-    manifest.add_by_ci_id("content-item-id", counts)
+    manifest.add_by_ci_id("content-item-id_z", counts)
     ```
 
     - Note that it can be useful to only add counts for items or title-year pairs for which it's certain that the processing was successful. For instance, if the resulting output is written in files and uplodaded to S3, it would be preferable to add the counts corresponding to each file only once the upload is over without any exceptions or issues. This ensures the manifest's counts actually reflect the result of the processing.
 
-3. **Computation, validation and export of the manifest:** Finally, after all counts have been added to the manifest, its lazy computation can be triggered. This corresponds to a series of processing steps that compare the provided counts to the ones of previous versions, computes title and corpus-level statistics, serializes the generated manifest to JSON and uploads it to S3 (optionally Git).
+3. **Computation, validation and export of the manifest:** Finally, after all counts have been added to the manifest, its lazy computation can be triggered. This corresponds to a series of processing steps that:
+    - compare the provided counts to the ones of previous versions,
+    - compute title and corpus-level statistics,
+    - serialize the generated manifest to JSON and
+    - upload it to S3 (optionally Git).
     - This computation is triggered as follows:
 
     ```python
@@ -134,7 +142,7 @@ To do so, some simple modifications should be made to the process' code:
     # To compute the manifest, without exporting it directly
     manifest.compute(export_to_git_and_s3=False)
     # Then one can explore/verify the generated manifest with
-    manifest.manifest_data
+    print(manifest.manifest_data)
     # To export it to S3, and optionally push it to Git if it's ALREADY BEEN GENERATED
     manifest.validate_and_export_manifest(push_to_git=[True or False])
     ```
