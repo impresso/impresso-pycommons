@@ -1,21 +1,18 @@
 #!/bin/bash
-# Script to be used to launch the dask local cluster and rebuilder script. 
+# Script to be used to launch the dask local cluster and compute_manifest script. 
 # If using Runai, more information available https://github.com/impresso/impresso-infrastructure/blob/main/howtos/runai.md.
 # Will use the environment variables in pvc (on mnt point of cdhvm0002)
-# "/home/$USER_NAME/dhlab-data/data/$USER_NAME-data/config_rebuilt_runai.sh" (or other provided script) for the various configuartions necessary.
+# "/home/$USER_NAME/dhlab-data/data/$USER_NAME-data/config_manifest_runai.sh" for the various options necessary.
 
 # Default number of workers
 DEFAULT_WORKERS='64'
-# Default config script
-DEFAULT_CONFIG='config_rebuilt_runai.sh'
 
 # Display script usage information
 usage() {
-  echo "Usage: $0 [-h|--help] [-w|--nworkers <num> -c|--config-script <script>]"
+  echo "Usage: $0 [-h|--help] [-w|--nworkers <num>]"
   echo "Options:"
   echo "  -h, --help       Display this help message"
   echo "  -w, --nworkers    Number of workers to use (default: $DEFAULT_WORKERS)"
-  echo "  -c, --config-script    Config script to use (default: $DEFAULT_CONFIG)"
   exit 1
 }
 
@@ -35,14 +32,6 @@ while [[ $# -gt 0 ]]; do
       fi
       WORKERS=$1
       ;;
-    -c|--config-script)
-      shift
-      if [[ $# -eq 0 ]]; then
-        echo "Error: Missing value for option -c|--config-script"
-        usage
-      fi
-      CONFIG=$1
-      ;;
     *)
       echo "Unknown option: $1"
       usage
@@ -53,21 +42,18 @@ done
 
 # If number of workers is not provided, use the default value
 WORKERS=${WORKERS:-$DEFAULT_WORKERS}
-# If config script is not provided, use the default value
-CONFIG=${CONFIG:-$DEFAULT_CONFIG}
 
 echo "Using user: $USER_NAME"
-echo "Launching using configuration script $CONFIG with $WORKERS workers."
 
 # move to directory containing init script
 cd /home/$USER_NAME/dhlab-data/data/$USER_NAME-data
 
 # make config script exectuable and execute it.
-chmod -x $CONFIG
-. $CONFIG
+chmod -x config_manifest_runai.sh 
+. config_manifest_runai.sh
 
 # sanity check
-echo "Sanity check: env. variable log_file: $log_file, and rebuilt format: $format"
+echo "Sanity check: env. variable log_file: $log_file"
 
 # change back to /home/$USER_NAME
 cd
@@ -82,4 +68,4 @@ screen -dmS workers dask worker localhost:8786 --nworkers $WORKERS --nthreads 1 
 
 echo "dask dashboard at localhost:8786/status"
 
-screen -dmS rebuilt python $pvc_path/impresso-pycommons/impresso_commons/text/rebuilder.py rebuild_articles --input-bucket=$input_bucket --log-file=$log_file --output-dir=$output_dir --output-bucket=$output_bucket --format=$format --filter-config=$filter_config --git-repo=$git_repo --temp-dir=$temp_dir --prev-manifest=$prev_manifest_path --scheduler=localhost:8786
+screen -dmS compute_mft python $pvc_path/impresso-pycommons/impresso_commons/versioning/compute_manifest.py --config-file=$mft_config --log-file=$log_file --scheduler=localhost:8786

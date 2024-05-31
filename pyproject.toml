@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=68.2.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -23,24 +23,9 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-dynamic = ["version"]
+dynamic = ["version","dependencies"]
 
-dependencies = [
-    "dask[complete]",
-    "boto3",
-    "beautifulsoup4",
-    "docopt",
-    "deprecated",
-    "dkpro-cassis",
-    "scikit-build",
-    "cmake",
-    "opencv-python",
-    "numpy",
-    "smart_open",
-    "jsonlines",
-    "s3fs",
-    "python-dotenv"
-]
+
 
 [project.urls]
 Homepage = "https://github.com/impresso/impresso-pycommons"
@@ -48,7 +33,7 @@ Documentaton = "https://impresso-pycommons.readthedocs.io/en/latest/"
 
 [tool.setuptools.dynamic]
 version = {attr = "impresso_commons.__version__"}
-
+dependencies = {file = ["requirements.txt"]}
 [tool.setuptools.packages.find]
 include = ["impresso_commons*"]
 namespaces = false

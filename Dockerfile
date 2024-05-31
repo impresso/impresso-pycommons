@@ -15,7 +15,8 @@ RUN apt-get update \
         ca-certificates \
         pkg-config \
         cmake \
-        software-properties-common 
+        software-properties-common \
+        jq
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     apt-utils \
@@ -53,9 +54,12 @@ RUN pip install \
     opencv-python \
     smart_open \
     "s3fs>=2023.3.0" \
-    jupyter
+    jupyter \
+    git-python \
+    python-dotenv
 
 EXPOSE 8080
+EXPOSE 8785
 EXPOSE 8786
 EXPOSE 8787
 
@@ -75,5 +79,6 @@ RUN pip install -e .
 
 # Make sure the script launching the rebuilt is executable
 RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/start_rebuilt_runai.sh
+RUN chmod -x /home/${USER_NAME}/impresso_pycommons/scripts/compute_manifest_runai.sh
 
 CMD ["sleep", "infinity"]

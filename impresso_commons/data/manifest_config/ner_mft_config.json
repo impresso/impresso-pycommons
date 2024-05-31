@@ -1,0 +1,16 @@
+{
+    "data_stage": "entities",
+    "output_bucket": "processed-data/ne_entities/ne-entities_v1-0-0",
+    "input_bucket": "rebuilt-staging",
+    "git_repository": "/local/path/to/NER-EL/repo",
+    "newspapers": [],
+    "temp_directory": "/local/path/t/git_temp_folder",
+    "previous_mft_s3_path": "",
+    "is_staging": true,
+    "is_patch": false,
+    "patched_fields": [],
+    "push_to_git": false,
+    "only_counting": false,
+    "notes": "First NER/EL models: 2024-02-01, - NER: hipe2020_model-stacked_release_2024-01-24-mdeberta_num_layers-2_attn_type_adatrans_n_heads-12_head_dims-128_pos_embed_sin_trans_dropout_0.45_fc_dropout0.4_pool_method_max_layers_0,-1,-2,-3,-4,-5/best/best_DataParallel_f_2024-01-25-11-58-42-576046 = stacked-2-mdeberta-v3-base- EL: mGenre finetuned on (all with Qids) HIPE data",
+    "file_extensions": "jsonl.bz2"
+}

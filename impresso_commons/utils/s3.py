@@ -7,15 +7,15 @@ import os
 import logging
 import json
 import warnings
-
-import boto3
 import bz2
+from typing import Union
+import boto3
 from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 from dotenv import load_dotenv
+import botocore
 
 from impresso_commons.utils import _get_cores
-
 
 logger = logging.getLogger(__name__)
 
@@ -396,9 +396,12 @@ def readtext_jsonlines(key_name, bucket_name):
                 yield json.dumps(article_reduced)
 
 
-def upload(partition_name, newspaper_prefix, bucket_name=None):
+def upload(partition_name, newspaper_prefix=None, bucket_name=None):
 
-    key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
+    if newspaper_prefix is not None:
+        key_name = os.path.join("/", newspaper_prefix, partition_name.split("/")[-1])
+    else:
+        key_name = partition_name.split("/")[-1]
     s3 = get_s3_resource()
     try:
         bucket = s3.Bucket(bucket_name)
@@ -469,7 +472,9 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
     return filenames
 
 
-def alternative_read_text(s3_key, s3_credentials):
+def alternative_read_text(
+    s3_key: str, s3_credentials: dict, line_by_line: bool = True
+) -> Union[list[str], str]:
     """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
     Note:
@@ -487,7 +492,34 @@ def alternative_read_text(s3_key, s3_credentials):
         "client": session.client("s3", endpoint_url=s3_endpoint),
     }
 
-    with s_open(s3_key, "r", transport_params=transport_params) as infile:
-        lines = infile.readlines()
+    if line_by_line:
+        with s_open(s3_key, "r", transport_params=transport_params) as infile:
+            text = infile.readlines()
+    else:
+        with s_open(s3_key, "r", transport_params=transport_params) as infile:
+            text = infile.read()
 
-    return lines
+    return text
+
+
+def get_s3_object_size(bucket_name, key):
+    """
+    Get the size of an object (key) in an S3 bucket.
+
+    Args:
+        bucket_name (str): The name of the S3 bucket.
+        key (str): The key (object) whose size you want to retrieve.
+
+    Returns:
+        int: The size of the object in bytes, or None if the object doesn't exist.
+    """
+    s3_client = get_s3_client()
+
+    try:
+        # Get the object metadata to retrieve its size
+        response = s3_client.head_object(Bucket=bucket_name, Key=key)
+        size = response["ContentLength"]
+        return int(size)
+    except botocore.exceptions.ClientError as err:
+        logger.error(f"Error: {err} for {key} in {bucket_name}")
+        return None

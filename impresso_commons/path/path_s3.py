@@ -6,6 +6,7 @@ import logging
 import warnings
 from datetime import date
 from collections import namedtuple
+from typing import Optional, Union
 
 from dask.diagnostics import ProgressBar
 import dask.bag as db
@@ -191,7 +192,7 @@ def impresso_iter_bucket(
     suffix = "issue.json" if item_type == "issue" else ".json"
 
     # collect keys using pagination
-    logger.info(f"Start collecting key from s3 (not parallel)")
+    logger.info("Start collecting key from s3 (not parallel)")
     if filter_config is None:
         keys = _list_bucket_paginator(
             bucket_name, prefix, accept_key=lambda key: key.endswith(suffix)
@@ -294,14 +295,14 @@ def read_s3_issues(newspaper, year, input_bucket):
         issue["s3_version"] = None
         return issue
 
-    issue_path_ons3 = (
+    issue_path_on_s3 = (
         f"{input_bucket}/{newspaper}/issues/{newspaper}-{year}-issues.jsonl.bz2"
     )
     issues = (
-        db.read_text(issue_path_ons3, storage_options=IMPRESSO_STORAGEOPT)
-        .map(lambda x: json.loads(x))
+        db.read_text(issue_path_on_s3, storage_options=IMPRESSO_STORAGEOPT)
+        .map(json.loads)
         .map(add_version)
-        .map(lambda x: (id2IssueDir(x["id"], issue_path_ons3), x))
+        .map(lambda x: (id2IssueDir(x["id"], issue_path_on_s3), x))
         .compute()
     )
     return issues
@@ -359,8 +360,8 @@ def list_newspapers(
 def list_files(
     bucket_name: str,
     file_type: str = "issues",
-    newspapers_filter: list[str] | None = None,
-) -> tuple[list[str] | None, list[str] | None]:
+    newspapers_filter: Optional[list[str]] = None,
+) -> tuple[Optional[list[str]], Optional[list[str]]]:
     """List the canonical files located in a given S3 bucket.
 
     Note:
@@ -399,9 +400,7 @@ def list_files(
             file
             for np in newspapers
             if newspapers_filter is not None and np in newspapers_filter
-            for file in fixed_s3fs_glob(
-                f"{os.path.join(bucket_name, f'{np}/issues/*')}"
-            )
+            for file in fixed_s3fs_glob(os.path.join(bucket_name, f"{np}/issues/*"))
         ]
         print(f"{bucket_name} contains {len(issue_files)} .bz2 issue files {suffix}")
     if file_type in ["pages", "both"]:
@@ -420,8 +419,8 @@ def fetch_files(
     bucket_name: str,
     compute: bool = True,
     file_type: str = "issues",
-    newspapers_filter: list[str] | None = None,
-) -> tuple[db.core.Bag | list[str] | None, db.core.Bag | list[str] | None]:
+    newspapers_filter: Optional[list[str]] = None,
+) -> tuple[Union[db.core.Bag, list[str], None], Union[db.core.Bag, list[str], None]]:
     """Fetch issue and/or page canonical JSON files from an s3 bucket.
 
     If compute=True, the output will be a list of the contents of all files in the

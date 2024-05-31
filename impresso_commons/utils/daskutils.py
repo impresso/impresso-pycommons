@@ -11,16 +11,16 @@ Options:
     --config-file=<cf>  json configuration dict specifying various arguments
 """
 
+import os
 import logging
 import docopt
-import os
 
 from dask.diagnostics import ProgressBar
 import dask.bag as db
 import numpy as np
 
 from impresso_commons.utils import init_logger
-from impresso_commons.utils import Timer, user_confirmation
+from impresso_commons.utils import Timer
 from impresso_commons.path.path_s3 import s3_filter_archives
 from impresso_commons.utils.s3 import get_bucket, read_jsonlines, readtext_jsonlines
 from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
@@ -40,12 +40,14 @@ def partitioner(bag, path, nbpart):
         items.to_textfiles(path)
 
 
-def create_even_partitions(bucket,
-                           config_newspapers,
-                           output_dir,
-                           local_fs=False,
-                           keep_full=False,
-                           nb_partition=500):
+def create_even_partitions(
+    bucket,
+    config_newspapers,
+    output_dir,
+    local_fs=False,
+    keep_full=False,
+    nb_partition=500,
+):
     """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
 
     Enables efficient (distributed) processing, bypassing the size discrepancies of newspaper archives.
@@ -68,7 +70,7 @@ def create_even_partitions(bucket,
         os.makedirs(output_dir, exist_ok=True)
         path = os.path.join(output_dir, "*.jsonl.bz2")
     else:
-        path = f'{output_dir}/*.jsonl.gz'
+        path = f"{output_dir}/*.jsonl.gz"
     logger.info(f"Will write partitions to {path}")
 
     # collect (yearly) keys & load in bag
@@ -77,12 +79,16 @@ def create_even_partitions(bucket,
 
     # read and filter lines (1 elem = list of lines, or articles, from a key)
     if keep_full is False:
-        bag_items = bag_bz2_keys.map(readtext_jsonlines, bucket_name=bucket.name).flatten()
+        bag_items = bag_bz2_keys.map(
+            readtext_jsonlines, bucket_name=bucket.name
+        ).flatten()
     else:
         bag_items = bag_bz2_keys.map(read_jsonlines, bucket_name=bucket.name).flatten()
 
     # repartition evenly
-    grouped_items = bag_items.groupby(lambda x: np.random.randint(1000), npartitions=nb_partition)
+    grouped_items = bag_items.groupby(
+        lambda x: np.random.randint(1000), npartitions=nb_partition
+    )
     items = grouped_items.map(lambda x: x[1]).flatten()
 
     # write partitions
@@ -91,9 +97,7 @@ def create_even_partitions(bucket,
         # if local_fs:
         #     items.to_textfiles(path)
         # else:
-        items.to_textfiles(path,
-                           storage_options=IMPRESSO_STORAGEOPT,
-                           compute=True)
+        items.to_textfiles(path, storage_options=IMPRESSO_STORAGEOPT, compute=True)
 
     logger.info(f"Partitioning done in {t.stop()}.")
 
@@ -116,12 +120,14 @@ def main(args):
     logger.info(f"Retrieved bucket: {bucket.name}")
 
     if args["partition"] is True:
-        create_even_partitions(bucket,
-                               config.newspapers,
-                               config.output_dir,
-                               local_fs=config.local_fs,
-                               keep_full=config.keep_full,
-                               nb_partition=int(nb_partitions))
+        create_even_partitions(
+            bucket,
+            config.newspapers,
+            config.output_dir,
+            local_fs=config.local_fs,
+            keep_full=config.keep_full,
+            nb_partition=int(nb_partitions),
+        )
 
 
 if __name__ == "__main__":
