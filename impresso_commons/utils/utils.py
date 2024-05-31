@@ -6,7 +6,7 @@ import os
 import logging
 import pathlib
 from contextlib import ExitStack
-from typing import Any, Union
+from typing import Any, Optional
 import jsonschema
 import importlib_resources
 
@@ -50,7 +50,7 @@ def get_pkg_resource(
 
 
 def init_logger(
-    level: int = logging.INFO, file: Union[str, None] = None
+    level: int = logging.INFO, file: Optional[str] = None
 ) -> logging.RootLogger:
     """Initialises the root logger.
 

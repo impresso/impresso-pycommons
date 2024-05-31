@@ -8,11 +8,11 @@ import logging
 import json
 import warnings
 import bz2
+from typing import Union
 import boto3
 from smart_open.s3 import iter_bucket
 from smart_open import open as s_open
 from dotenv import load_dotenv
-from typing import Union
 import botocore
 
 from impresso_commons.utils import _get_cores
@@ -518,9 +518,8 @@ def get_s3_object_size(bucket_name, key):
     try:
         # Get the object metadata to retrieve its size
         response = s3_client.head_object(Bucket=bucket_name, Key=key)
-        size = response['ContentLength']
+        size = response["ContentLength"]
         return int(size)
     except botocore.exceptions.ClientError as err:
         logger.error(f"Error: {err} for {key} in {bucket_name}")
         return None
-

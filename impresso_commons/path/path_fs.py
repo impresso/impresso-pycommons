@@ -3,10 +3,8 @@
 import os
 import logging
 from datetime import date, datetime
-from smart_open import s3_iter_bucket
 from collections import namedtuple
 import re
-import json
 
 logger = logging.getLogger(__name__)
 

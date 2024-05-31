@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from impresso_commons.utils.s3 import (
     IMPRESSO_STORAGEOPT,
@@ -235,7 +235,7 @@ def text_apply_breaks(fulltext, breaks):
     return text
 
 
-def get_iiif_and_coords(ci: dict[str, Any]) -> tuple[Union[str, None], Union[str, None]]:
+def get_iiif_and_coords(ci: dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
     """Fetch the iiif link and image coordinates from CI metadata.
 
     Adapts to the various cases currently present in the canonical data, see
@@ -307,7 +307,10 @@ def reconstruct_iiif_link(content_item: dict[str, Any]) -> str:
 
 
 def insert_whitespace(
-    token: str, next_t: Union[str, None], prev_t: Union[str,None], lang: Union[str,None]
+    token: str,
+    next_t: Optional[str],
+    prev_t: Optional[str],
+    lang: Optional[str],
 ) -> bool:
     """Determine whether a whitespace should be inserted after a token.
 
