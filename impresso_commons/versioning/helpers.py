@@ -799,25 +799,34 @@ def compute_stats_in_canonical_bag(
 
 
 ### DEFINITION of tunique ###
+
+
 # define locally the nunique() aggregation function for dask
 def chunk(s):
-    """The function applied to the individual partition (map)."""
+    """The function applied to the individual partition (map).
+    Part of the ggregating function(s) implementing np.nunique()
+    """
     return s.apply(lambda x: list(set(x)))
 
 
 def agg(s):
-    """The function which will aggregate the result from all the partitions (reduce)."""
+    """The function which will aggregate the result from all the partitions (reduce).
+    Part of the ggregating function(s) implementing np.nunique()
+    """
     s = s._selected_obj
     return s.groupby(level=list(range(s.index.nlevels))).sum()
 
 
 def finalize(s):
-    """The optional function that will be applied to the result of the agg_tu functions."""
+    """The optional function that will be applied to the result of the agg_tu functions.
+    Part of the ggregating function(s) implementing np.nunique()
+    """
     return s.apply(lambda x: len(set(x)))
 
 
 # aggregating function implementing np.nunique()
 tunique = dd.Aggregation("tunique", chunk, agg, finalize)
+
 ### DEFINITION of tunique ###
 
 

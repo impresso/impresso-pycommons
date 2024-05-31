@@ -1073,13 +1073,15 @@ TODO: add options for data indexing in Solr</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.versioning.helpers.agg">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.versioning.helpers.agg" title="Link to this definition"></a></dt>
-<dd><p>The function which will aggregate the result from all the partitions (reduce).</p>
+<dd><p>The function which will aggregate the result from all the partitions (reduce).
+Part of the ggregating function(s) implementing np.nunique()</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.versioning.helpers.chunk">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">chunk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.versioning.helpers.chunk" title="Link to this definition"></a></dt>
-<dd><p>The function applied to the individual partition (map).</p>
+<dd><p>The function applied to the individual partition (map).
+Part of the ggregating function(s) implementing np.nunique()</p>
 </dd></dl>
 
 <dl class="py function">
@@ -1311,7 +1313,8 @@ media items that are new or modified in the media list.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.versioning.helpers.finalize">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.versioning.helpers.</span></span><span class="sig-name descname"><span class="pre">finalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.versioning.helpers.finalize" title="Link to this definition"></a></dt>
-<dd><p>The optional function that will be applied to the result of the agg_tu functions.</p>
+<dd><p>The optional function that will be applied to the result of the agg_tu functions.
+Part of the ggregating function(s) implementing np.nunique()</p>
 </dd></dl>
 
 <dl class="py function">
