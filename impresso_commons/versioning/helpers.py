@@ -938,8 +938,7 @@ def compute_stats_in_entities_bag(
                     )
                 ),  # sorted list to ensure all are the same
             }
-        )
-        .to_dataframe(
+        ).to_dataframe(
             meta={
                 "np_id": str,
                 "year": str,
@@ -949,9 +948,14 @@ def compute_stats_in_entities_bag(
                 "ne_entities": object,
             }
         )
-        .explode("ne_entities")
-        .persist()
+        # .explode("ne_entities")
+        # .persist()
     )
+
+    count_df["ne_entities"] = count_df["ne_entities"].apply(
+        lambda x: x if isinstance(x, list) else [x]
+    )
+    count_df = count_df.explode("ne_entities").persist()
 
     # cum the counts for all values collected
     aggregated_df = (
@@ -1179,7 +1183,7 @@ def manifest_summary(mnf_json: dict[str, Any], extended_summary: bool = False) -
 
 
 def filter_new_or_modified_media(
-    rebuilt_mft_path: str, previous_mft_path_str: str
+    rebuilt_mft_json: dict[str, Any], previous_mft_json: dict[str, Any]
 ) -> dict[str, Any]:
     """
     Compares two manifests to determine new or modified media items.
@@ -1188,8 +1192,8 @@ def filter_new_or_modified_media(
     compared to the previous process need to be ingested or processed.
 
     Args:
-        rebuilt_mft_path (str): Path of the rebuilt manifest (new).
-        previous_mft_path_str (str): Path of the previous process manifest.
+        rebuilt_mft_json (dict[str, Any]): json of the rebuilt manifest (new).
+        previous_mft_json (dict[str, Any]): json of the previous process manifest.
 
     Returns:
         list[dict[str, Any]]: A manifest identical to 'rebuilt_mft_path' but only with
@@ -1201,8 +1205,6 @@ def filter_new_or_modified_media(
     {'media_title': 'modified_media_item_2', 'last_modif_date':
     '2024-04-03T12:00:00Z', etc.}]
     """
-    rebuilt_mft_json = read_manifest_from_s3_path(rebuilt_mft_path)
-    previous_mft_json = read_manifest_from_s3_path(previous_mft_path_str)
     filtered_manifest = copy.deepcopy(rebuilt_mft_json)
 
     # Extract last modification date of each media item of the previous process
