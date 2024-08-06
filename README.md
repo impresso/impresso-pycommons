@@ -88,6 +88,8 @@ To do so, some simple modifications should be made to the process' code:
     - Example instantiation:
 
     ```python
+    from impresso_commons.versioning.data_manifest import DataManifest
+    
     manifest = DataManifest(
         data_stage="passim", # DataStage.PASSIM also accepted
         s3_output_bucket="32-passim-rebuilt-final/passim", # includes partition within bucket

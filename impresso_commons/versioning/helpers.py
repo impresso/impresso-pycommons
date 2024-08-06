@@ -927,7 +927,15 @@ def compute_stats_in_entities_bag(
                 "content_items_out": 1,
                 "ne_mentions": len(ci["nes"]),
                 "ne_entities": sorted(
-                    list(set([m["wkd_id"] for m in ci["nes"] if m["wkd_id"] != "NIL"]))
+                    list(
+                        set(
+                            [
+                                m["wkd_id"]
+                                for m in ci["nes"]
+                                if "wkd_id" in m and m["wkd_id"] not in ["NIL", None]
+                            ]
+                        )
+                    )
                 ),  # sorted list to ensure all are the same
             }
         )
