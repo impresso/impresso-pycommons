@@ -16,21 +16,17 @@ With `pip`:
 pip install impresso-commons
 ```
 
+or 
+
+```bash
+pip install --upgrade impresso-commons
+```
+
 ## Notes
 
 The library supports configuration of s3 credentials via project-specific local .env files.
 
-## License
-
-The second project 'impresso - Media Monitoring of the Past II. Beyond Borders: Connecting Historical Newspapers and Radio' is funded by the Swiss National Science Foundation (SNSF) under grant number [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891.
-
-Aiming to develop and consolidate tools to process and explore large-scale collections of historical newspapers and radio archives, and to study the impact of this tooling on historical research practices, _Impresso II_ builds upon the first project – 'impresso - Media Monitoring of the Past' (grant number [CRSII5_173719](http://p3.snf.ch/project-173719), Sinergia program). More information at <https://impresso-project.ch>.
-
-Copyright (C) 2024  The _impresso_ team (contributors to this program: Matteo Romanello, Maud Ehrmann, Alex Flückinger, Edoardo Tarek Hölzl, Pauline Conti).
-
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [GNU Affero General Public License](https://github.com/impresso/impresso-pycommons/blob/master/LICENSE) for more details.
+For EPFL members of the Impresso project, further information on how to run the `rebuilder` and the `compute_manifest` scripts on the Runai platform can be found [here](https://github.com/impresso/impresso-infrastructure). 
 
 ## Data Versioning
 
@@ -65,12 +61,18 @@ The versioning aiming to document the data at each step through versions and sta
 After each processing step, a manifest should be created documenting the changes made to the data resulting from that processing. It can also be created on the fly during a processing, and in-between processings to count and sanity-check the contents of a given S3 bucket.
 Once created, the manifest file will automatically be uploaded to the S3 bucket corresponding to the data it was computed on, and optionally pushed to the [impresso-data-release](https://github.com/impresso/impresso-data-release) repository to keep track of all changes made throughout the versions.
 
-#### Computing a manifest - `compute_manifest.py` script
+There are multiple ways in which the manifest can be created/computed.
 
-The script `compute_manifest.py`, allows one to compute a manifest on the data present within a specific S3 bucket.
-The CLI for this script is the following:
+#### Computing a manifest automatically based on the S3 data - `compute_manifest.py` script
+
+The script `impresso_commons/versioning/compute_manifest.py`, allows one to compute a manifest on the data present within a specific S3 bucket.
+This approach is meant to compute the manifest **after** the processing is over, and will automatically fetch the data (according to the configuration), and compute the needed statistics on it.
+It can be used or run in three ways: the CLI from the cloned `impresso_pycommons` repository, running the script as a module, or calling the function performing the main logic within one's code.
+
+The **CLI** for this script is the following:
 
 ```bash
+# when the working directory is impresso_pycommons/impresso_commons/versioning
 python compute_manifest.py --config-file=<cf> --log-file=<lf> [--scheduler=<sch> --nworkers=<nw> --verbose]
 ```
 
@@ -78,6 +80,30 @@ Where the `config_file` should be a simple json file, with specific arguments, a
 
 - The script uses [dask](https://www.dask.org/) to parallelize its task. By default, it will start a local cluster, with 8 as the default number of workers (the parameter `nworkers` can be used to specify any desired value).
 - Optinally, a [dask scheduler and workers](https://docs.dask.org/en/stable/deploying-cli.html) can be started in separate terminal windows, and their IP provided to the script via the `scheduler` parameter.
+
+It can also be **run as a module** with the CLI, but from any other project or directory, as long as `impresso_commons` is installed in the user's environment. The same arguments apply:
+
+```bash
+# the env where impresso_commons is installed should be active
+python -m impresso_commons.versioning.compute_manifest --config-file=<cf> --log-file=<lf> [--scheduler=<sch> --nworkers=<nw> --verbose]
+```
+
+Finally, one can prefer to **directly incorporate this computation within their code**. That can be done by calling the `create_manifest` function, performing the main logic in the following way:
+```python
+from impresso_commons.versioning.compute_manifest import create_manifest
+
+# optionally, or config_dict can be directly defined
+with open(config_file_path, "r", encoding="utf-8") as f_in:
+    config_dict = json.load(f_in)
+
+# also optional, can be None
+dask_client = Client(n_workers=nworkers, threads_per_worker=1)
+
+create_manifest(config_dict, dask_client)
+```
+- The `config_dict` is a dict with the same contents as the `config_file`, described [here](https://github.com/impresso/impresso-pycommons/blob/data-workflow-versioning/impresso_commons/data/manifest_config/manifest.config.example.md).
+- Providing `dask_client` is optional, and the user can choose whether to include it or not.
+- However, when generating the manifest in this way, the user should add `if __name__ == "__main__":` in the script calling `create_manifest`.
 
 #### Computing a manifest on the fly during a process
 
@@ -88,6 +114,8 @@ To do so, some simple modifications should be made to the process' code:
     - Example instantiation:
 
     ```python
+    from impresso_commons.versioning.data_manifest import DataManifest
+    
     manifest = DataManifest(
         data_stage="passim", # DataStage.PASSIM also accepted
         s3_output_bucket="32-passim-rebuilt-final/passim", # includes partition within bucket
@@ -103,6 +131,7 @@ To do so, some simple modifications should be made to the process' code:
         push_to_git=True,
     )
     ```
+    Note however that as opposed to the previous approach, simply instantiating the manifest **will not do anything**, as it is not filled in with S3 data automatically. Instead, the user should provide it with statistics that they computed on their data and wish to track, as it is described in the next steps.
 
 2. **Addition of data and counts:** Once the manifest is instantiated the main interaction with the instantiated manifest object will be through the `add_by_title_year` or `add_by_ci_id` methods (two other with "replace" instead also exist, as well as `add_count_list_by_title_year`, all described in the [documentation](https://impresso-pycommons.readthedocs.io/)), which take as input:
     - The _media title_ and _year_  to which the provided counts correspond
@@ -178,3 +207,23 @@ Based on the information that was updated, the version increment varies:
     - This parameter is exactly made for the case scenarios where one wants to recompute the manifest on an _entire bucket of existing data_ which has not necessarily been recomputed or changed (for instance if data was copied, or simply to recount etc).
     - The computation of the manifest in this context is meant more as a sanity-check of the bucket's contents.
     - The counts and statistics will be computed like in other cases, but the update information (modification date, updated years, git commit url etc) will not be updated unless a change in the statstics is identified (in which case the resulting manifest version is incremented accordingly).
+
+## About Impresso
+
+### Impresso project
+
+[Impresso - Media Monitoring of the Past](https://impresso-project.ch) is an interdisciplinary research project that aims to develop and consolidate tools for processing and exploring large collections of media archives across modalities, time, languages and national borders. The first project (2017-2021) was funded by the Swiss National Science Foundation under grant No. [CRSII5_173719](http://p3.snf.ch/project-173719) and the second project (2023-2027) by the SNSF under grant No. [CRSII5_213585](https://data.snf.ch/grants/grant/213585) and the Luxembourg National Research Fund under grant No. 17498891.
+
+### Copyright
+
+Copyright (C) 2024 The Impresso team.
+
+### License
+
+This program is provided as open source under the [GNU Affero General Public License](https://github.com/impresso/impresso-pyindexation/blob/master/LICENSE) v3 or later.
+
+---
+
+<p align="center">
+  <img src="https://github.com/impresso/impresso.github.io/blob/master/assets/images/3x1--Yellow-Impresso-Black-on-White--transparent.png?raw=true" width="350" alt="Impresso Project Logo"/>
+</p>
