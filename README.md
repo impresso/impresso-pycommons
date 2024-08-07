@@ -26,6 +26,8 @@ pip install --upgrade impresso-commons
 
 The library supports configuration of s3 credentials via project-specific local .env files.
 
+For EPFL members of the Impresso project, further information on how to run the `rebuilder` and the `compute_manifest` scripts on the Runai platform can be found [here](https://github.com/impresso/impresso-infrastructure). 
+
 ## Data Versioning
 
 ### Motivation
