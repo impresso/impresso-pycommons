@@ -9,6 +9,7 @@ from contextlib import ExitStack
 from typing import Any, Optional
 import jsonschema
 import importlib_resources
+import glob
 
 logger = logging.getLogger(__name__)
 
@@ -128,3 +129,39 @@ def bytes_to(bytes_nb: int, to_unit: str, bsize: int = 1024) -> float:
     """
     units = {"k": 1, "m": 2, "g": 3, "t": 4, "p": 5, "e": 6}
     return float(bytes_nb) / (bsize ** units[to_unit])
+
+
+def glob_with_size(directory: str, file_suffix: str) -> list[str]:
+    """
+    List all files in a directory with a given suffix and their size in MB.
+
+    Args:
+        directory (str): The directory path to search for files.
+        file_suffix (str): The file extension or suffix to match.
+
+    Returns:
+        list[str]: A list of tuples, each containing the file path and its
+                   size in megabytes, rounded to six decimal places.
+    """
+    file_paths = glob.glob(
+        os.path.join(directory, "*"),
+        include_hidden=False
+    )
+    files = [
+        (
+            path,
+            round(bytes_to(os.path.getsize(path), "m"), 6)
+        )
+        for path in file_paths
+        if path.endswith(file_suffix)
+    ]
+
+    return files
+
+
+def list_local_directories(path):
+    return [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+
+
+def get_list_intersection(list1, list2):
+    return list(set(list1).intersection(list2))
