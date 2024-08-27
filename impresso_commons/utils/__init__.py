@@ -3,17 +3,17 @@
 # created on 2018.03.27 using PyCharm
 # project impresso-image-acquisition
 
+import datetime
 import logging
+import multiprocessing
 import sys
 import time
-import datetime
 from datetime import timedelta
 
 import dask
-from dask import compute, delayed
+from dask import compute
 from dask.diagnostics import ProgressBar
 from dask.multiprocessing import get as mp_get
-import multiprocessing
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ def init_logger(logger, log_level, log_file):
     ch.setFormatter(formatter)
 
     logger.addHandler(ch)
-    logger.info("Logger successfully initialised")
+    logger.info("LOGGER - Logger successfully initialised")
 
     return logger
 
@@ -87,14 +87,18 @@ def user_confirmation(question, default=None):
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
-
 def user_question(variable_to_confirm):
-    answer = user_confirmation(f"Is [{variable_to_confirm}] the correct one to work with?", None)
+    answer = user_confirmation(
+        f"\tIs the following the correct item to work with?\n"
+        f"{variable_to_confirm}",
+        None
+    )
+
     if not answer:
-        logger.info(f"Variable {variable_to_confirm} not confirmed, exiting.")
+        logger.info("Variable not confirmed, exiting.")
         sys.exit()
     else:
-        logger.info(f"Variable {variable_to_confirm} confirmed.")
+        logger.info("Variable confirmed.")
 
 
 def timestamp():
@@ -111,6 +115,7 @@ def timestamp():
 
 class Timer:
     """ Basic timer"""
+
     def __init__(self):
         self.start = time.time()
         self.intermediate = time.time()

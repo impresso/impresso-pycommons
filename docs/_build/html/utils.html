@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Utilities &mdash; Impresso PyCommons  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -16,7 +14,7 @@
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -52,8 +50,11 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-impresso_commons.utils.utils">Basic Utils Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.bytes_to"><code class="docutils literal notranslate"><span class="pre">bytes_to()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.chunk"><code class="docutils literal notranslate"><span class="pre">chunk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.get_list_intersection"><code class="docutils literal notranslate"><span class="pre">get_list_intersection()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.get_pkg_resource"><code class="docutils literal notranslate"><span class="pre">get_pkg_resource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.glob_with_size"><code class="docutils literal notranslate"><span class="pre">glob_with_size()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.init_logger"><code class="docutils literal notranslate"><span class="pre">init_logger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.list_local_directories"><code class="docutils literal notranslate"><span class="pre">list_local_directories()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.parse_json"><code class="docutils literal notranslate"><span class="pre">parse_json()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.utils.validate_against_schema"><code class="docutils literal notranslate"><span class="pre">validate_against_schema()</span></code></a></li>
 </ul>
@@ -72,10 +73,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions"><code class="docutils literal notranslate"><span class="pre">get_s3_versions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_s3_versions_client"><code class="docutils literal notranslate"><span class="pre">get_s3_versions_client()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.get_storage_options"><code class="docutils literal notranslate"><span class="pre">get_storage_options()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.list_s3_directories"><code class="docutils literal notranslate"><span class="pre">list_s3_directories()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.read_jsonlines"><code class="docutils literal notranslate"><span class="pre">read_jsonlines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.readtext_jsonlines"><code class="docutils literal notranslate"><span class="pre">readtext_jsonlines()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.s3_get_articles"><code class="docutils literal notranslate"><span class="pre">s3_get_articles()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.s3_get_pages"><code class="docutils literal notranslate"><span class="pre">s3_get_pages()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.s3_glob_with_size"><code class="docutils literal notranslate"><span class="pre">s3_glob_with_size()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.upload"><code class="docutils literal notranslate"><span class="pre">upload()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#impresso_commons.utils.s3.upload_to_s3"><code class="docutils literal notranslate"><span class="pre">upload_to_s3()</span></code></a></li>
 </ul>
@@ -173,6 +176,11 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.get_list_intersection">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_list_intersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.get_list_intersection" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.utils.get_pkg_resource">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">get_pkg_resource</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_manager</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ExitStack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'impresso_commons'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PosixPath</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.get_pkg_resource" title="Link to this definition"></a></dt>
 <dd><p>Return the resource at <cite>path</cite> in <cite>package</cite>, using a context manager.</p>
@@ -200,6 +208,30 @@ is no longer of use.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.glob_with_size">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">glob_with_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.glob_with_size" title="Link to this definition"></a></dt>
+<dd><p>List all files in a directory with a given suffix and their size in MB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>directory</strong> (<em>str</em>) – The directory path to search for files.</p></li>
+<li><p><strong>file_suffix</strong> (<em>str</em>) – The file extension or suffix to match.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list of tuples, each containing the file path and its</dt><dd><p>size in megabytes, rounded to six decimal places.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.utils.init_logger">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">init_logger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">RootLogger</span></span></span><a class="headerlink" href="#impresso_commons.utils.utils.init_logger" title="Link to this definition"></a></dt>
 <dd><p>Initialises the root logger.</p>
@@ -218,6 +250,11 @@ is no longer of use.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.utils.list_local_directories">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.utils.</span></span><span class="sig-name descname"><span class="pre">list_local_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.utils.list_local_directories" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.utils.parse_json">
@@ -461,6 +498,32 @@ please prioritize using get_s3_resource instead.</p>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.list_s3_directories">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">list_s3_directories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.list_s3_directories" title="Link to this definition"></a></dt>
+<dd><p>Retrieve the ‘directory’ names (media titles) in an S3 bucket after a
+given path prefix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bucket_name</strong> (<em>str</em>) – The name of the S3 bucket.</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>) – The prefix path within the bucket to search. Default
+is the root (‘’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list of ‘directory’ names found in the specified bucket</dt><dd><p>and prefix.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.read_jsonlines">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">read_jsonlines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.read_jsonlines" title="Link to this definition"></a></dt>
 <dd><p>Given an S3 key pointing to a jsonl.bz2 archives, extracts and returns lines (=one json doc per line).
@@ -532,6 +595,34 @@ If None, will be the number of detected CPUs.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="impresso_commons.utils.s3.s3_glob_with_size">
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">s3_glob_with_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boto3_bucket</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.s3_glob_with_size" title="Link to this definition"></a></dt>
+<dd><p>Custom glob function to list S3 objects matching a pattern. This function
+works around the 1000-object listing limit in S3 by using boto3 directly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – The S3 path with a wildcard (*) to match files.
+Example: <cite>s3://bucket_name/path/to/files/*.txt</cite>.</p></li>
+<li><p><strong>boto3_bucket</strong> (<em>boto3.Bucket</em><em>, </em><em>optional</em>) – An optional boto3 Bucket object.
+If not provided, it will be
+created from the path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A list of tuples containing the full S3 paths of matching files</dt><dd><p>and their sizes in megabytes.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.s3.upload">
 <span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.s3.</span></span><span class="sig-name descname"><span class="pre">upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newspaper_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.s3.upload" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -584,7 +675,7 @@ Warning: consider well the config_newspapers as it decides what will be in the p
 <li><p><strong>bucket</strong> – name of the bucket where the files to partition are</p></li>
 <li><p><strong>config_newspapers</strong> – json dict specifying the sources to consider (name(s) of newspaper(s) and year span(s))</p></li>
 <li><p><strong>output_dir</strong> – classic FS repository where to write the produced partitions</p></li>
-<li><p><strong>local_fs</strong></p></li>
+<li><p><strong>local_fs</strong> – </p></li>
 <li><p><strong>keep_full</strong> – whether to filter out metadata or not (i.e. keeping only text and leaving out coordinates)</p></li>
 <li><p><strong>nb_partition</strong> – number of partitions</p></li>
 </ul>
@@ -602,8 +693,23 @@ Warning: consider well the config_newspapers as it decides what will be in the p
 
 <dl class="py function">
 <dt class="sig sig-object py" id="impresso_commons.utils.daskutils.partitioner">
-<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">partitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nbpart</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#impresso_commons.utils.daskutils.partitioner" title="Link to this definition"></a></dt>
-<dd><p>Partition a bag into n partitions and write each partition in a file</p>
+<span class="sig-prename descclassname"><span class="pre">impresso_commons.utils.daskutils.</span></span><span class="sig-name descname"><span class="pre">partitioner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Bag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_partitions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#impresso_commons.utils.daskutils.partitioner" title="Link to this definition"></a></dt>
+<dd><p>Partition a Dask bag into n partitions and write each to a separate file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bag</strong> (<em>dask.bag.Bag</em>) – The Dask bag to be partitioned.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Directory path where partitioned files will be saved.</p></li>
+<li><p><strong>nb_partitions</strong> (<em>int</em>) – Number of partitions to create.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The function writes partitioned files to the specified path.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
