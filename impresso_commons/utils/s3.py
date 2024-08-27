@@ -17,7 +17,7 @@ from smart_open import open as s_open
 from smart_open.s3 import iter_bucket
 
 from impresso_commons.utils import _get_cores
-from utils.utils import bytes_to
+from impresso_commons.utils.utils import bytes_to
 
 logger = logging.getLogger(__name__)
 
@@ -557,6 +557,7 @@ def list_s3_directories(bucket_name, prefix=''):
         list: A list of 'directory' names found in the specified bucket
               and prefix.
     """
+    logger.info(f"Listing 'folders'' of '{bucket_name}' under prefix '{prefix}'")
     s3 = get_s3_client()
     result = s3.list_objects_v2(
         Bucket=bucket_name, Prefix=prefix, Delimiter='/'
@@ -568,7 +569,7 @@ def list_s3_directories(bucket_name, prefix=''):
             prefix['Prefix'][:-1].split("/")[-1]
             for prefix in result['CommonPrefixes']
         ]
-
+    logger.info(f"Returning {len(directories)} directories.")
     return directories
 
 

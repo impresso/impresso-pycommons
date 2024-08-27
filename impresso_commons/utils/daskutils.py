@@ -11,29 +11,43 @@ Options:
     --config-file=<cf>  json configuration dict specifying various arguments
 """
 
-import os
 import logging
-import docopt
+import os
 
-from dask.diagnostics import ProgressBar
 import dask.bag as db
+import docopt
 import numpy as np
+from dask.bag import Bag
+from dask.diagnostics import ProgressBar
 
-from impresso_commons.utils import init_logger
-from impresso_commons.utils import Timer
 from impresso_commons.path.path_s3 import s3_filter_archives
-from impresso_commons.utils.s3 import get_bucket, read_jsonlines, readtext_jsonlines
-from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
+from impresso_commons.utils import Timer
+from impresso_commons.utils import init_logger
 from impresso_commons.utils.config_loader import PartitionerConfig
+from impresso_commons.utils.s3 import IMPRESSO_STORAGEOPT
+from impresso_commons.utils.s3 import get_bucket, read_jsonlines, readtext_jsonlines
 
 __author__ = "maudehrmann"
 
 logger = logging.getLogger(__name__)
 
 
-def partitioner(bag, path, nbpart):
-    """Partition a bag into n partitions and write each partition in a file"""
-    grouped_items = bag.groupby(lambda x: np.random.randint(500), npartitions=nbpart)
+def partitioner(bag: Bag,
+                path: str,
+                nb_partitions: int) -> None:
+    """
+    Partition a Dask bag into n partitions and write each to a separate file.
+
+    Args:
+        bag (dask.bag.Bag): The Dask bag to be partitioned.
+        path (str): Directory path where partitioned files will be saved.
+        nb_partitions (int): Number of partitions to create.
+
+    Returns:
+        None: The function writes partitioned files to the specified path.
+    """
+    grouped_items = bag.groupby(lambda x: np.random.randint(500),
+                                npartitions=nb_partitions)
     items = grouped_items.map(lambda x: x[1]).flatten()
     path = os.path.join(path, "*.jsonl.bz2")
     with ProgressBar():
@@ -41,12 +55,12 @@ def partitioner(bag, path, nbpart):
 
 
 def create_even_partitions(
-    bucket,
-    config_newspapers,
-    output_dir,
-    local_fs=False,
-    keep_full=False,
-    nb_partition=500,
+        bucket,
+        config_newspapers,
+        output_dir,
+        local_fs=False,
+        keep_full=False,
+        nb_partition=500,
 ):
     """Convert yearly bz2 archives to even bz2 archives, i.e. partitions.
 
