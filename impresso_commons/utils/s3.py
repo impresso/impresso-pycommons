@@ -385,13 +385,13 @@ def readtext_jsonlines(key_name, bucket_name):
                     k: article_json[k]
                     for k in article_json
                     if k == "id"
-                       or k == "s3v"
-                       or k == "ts"
-                       or k == "ft"
-                       or k == "tp"
-                       or k == "pp"
-                       or k == "lg"
-                       or k == "t"
+                    or k == "s3v"
+                    or k == "ts"
+                    or k == "ft"
+                    or k == "tp"
+                    or k == "pp"
+                    or k == "lg"
+                    or k == "t"
                 }
                 yield json.dumps(article_reduced)
 
@@ -452,7 +452,7 @@ def fixed_s3fs_glob(path: str, boto3_bucket=None):
     """
     if boto3_bucket is None:
         if path.startswith("s3://"):
-            path = path[len("s3://"):]
+            path = path[len("s3://") :]
         bucket_name = path.split("/")[0]
         base_path = "/".join(path.split("/")[1:])  # Remove bucket name
         boto3_bucket = get_boto3_bucket(bucket_name)
@@ -480,7 +480,7 @@ def s3_glob_with_size(path: str, boto3_bucket=None):
 
     Args:
         path (str): The S3 path with a wildcard (*) to match files.
-                    Example: 's3://bucket_name/path/to/files/*.txt'.
+                    Example: `s3://bucket_name/path/to/files/*.txt`.
         boto3_bucket (boto3.Bucket, optional): An optional boto3 Bucket object.
                                                If not provided, it will be
                                                created from the path.
@@ -491,7 +491,7 @@ def s3_glob_with_size(path: str, boto3_bucket=None):
     """
     if boto3_bucket is None:
         if path.startswith("s3://"):
-            path = path[len("s3://"):]
+            path = path[len("s3://") :]
         bucket_name = path.split("/")[0]
         base_path = "/".join(path.split("/")[1:])  # Remove bucket name
         boto3_bucket = get_boto3_bucket(bucket_name)
@@ -502,10 +502,7 @@ def s3_glob_with_size(path: str, boto3_bucket=None):
     base_path, suffix_path = base_path.split("*")
 
     filenames = [
-        (
-            "s3://" + os.path.join(bucket_name, o.key),
-            round(bytes_to(o.size, "m"), 6)
-        )
+        ("s3://" + os.path.join(bucket_name, o.key), round(bytes_to(o.size, "m"), 6))
         for o in boto3_bucket.objects.filter(Prefix=base_path)
         if o.key.endswith(suffix_path)
     ]
@@ -514,7 +511,7 @@ def s3_glob_with_size(path: str, boto3_bucket=None):
 
 
 def alternative_read_text(
-        s3_key: str, s3_credentials: dict, line_by_line: bool = True
+    s3_key: str, s3_credentials: dict, line_by_line: bool = True
 ) -> Union[list[str], str]:
     """Read from S3 a line-separated text file (e.g. `*.jsonl.bz2`).
 
@@ -543,7 +540,7 @@ def alternative_read_text(
     return text
 
 
-def list_s3_directories(bucket_name, prefix=''):
+def list_s3_directories(bucket_name, prefix=""):
     """
     Retrieve the 'directory' names (media titles) in an S3 bucket after a
     given path prefix.
@@ -559,15 +556,12 @@ def list_s3_directories(bucket_name, prefix=''):
     """
     logger.info(f"Listing 'folders'' of '{bucket_name}' under prefix '{prefix}'")
     s3 = get_s3_client()
-    result = s3.list_objects_v2(
-        Bucket=bucket_name, Prefix=prefix, Delimiter='/'
-    )
+    result = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix, Delimiter="/")
 
     directories = []
-    if 'CommonPrefixes' in result:
+    if "CommonPrefixes" in result:
         directories = [
-            prefix['Prefix'][:-1].split("/")[-1]
-            for prefix in result['CommonPrefixes']
+            prefix["Prefix"][:-1].split("/")[-1] for prefix in result["CommonPrefixes"]
         ]
     logger.info(f"Returning {len(directories)} directories.")
     return directories
